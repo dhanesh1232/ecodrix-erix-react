@@ -1,6 +1,6 @@
 {
   "name": "@ecodrix/erix-react",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Complete Ecodrix React SDK — RichText Editor, CRM, Analytics, WhatsApp, Marketing, and Meetings — all in one embeddable package.",
   "author": "ECODrIx Team <contact@ecodrix.com>",
   "license": "MIT",
