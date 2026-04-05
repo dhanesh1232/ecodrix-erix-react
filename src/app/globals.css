@@ -1,0 +1,98 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --erix-background: 0 0% 100%;
+    --erix-foreground: 222.2 84% 4.9%;
+    --erix-card: 0 0% 100%;
+    --erix-card-foreground: 222.2 84% 4.9%;
+    --erix-popover: 0 0% 100%;
+    --erix-popover-foreground: 222.2 84% 4.9%;
+    --erix-primary: 221.2 83.2% 53.3%;
+    --erix-primary-foreground: 210 40% 98%;
+    --erix-secondary: 210 40% 96.1%;
+    --erix-secondary-foreground: 222.2 47.4% 11.2%;
+    --erix-muted: 210 40% 96.1%;
+    --erix-muted-foreground: 215.4 16.3% 46.9%;
+    --erix-accent: 210 40% 96.1%;
+    --erix-accent-foreground: 222.2 47.4% 11.2%;
+    --erix-destructive: 0 84.2% 60.2%;
+    --erix-destructive-foreground: 210 40% 98%;
+    --erix-border: 214.3 31.8% 91.4%;
+    --erix-input: 214.3 31.8% 91.4%;
+    --erix-ring: 221.2 83.2% 53.3%;
+    --erix-radius: 0.5rem;
+  }
+
+  .dark {
+    --erix-background: 222.2 84% 4.9%;
+    --erix-foreground: 210 40% 98%;
+    --erix-card: 222.2 84% 4.9%;
+    --erix-card-foreground: 210 40% 98%;
+    --erix-popover: 222.2 84% 4.9%;
+    --erix-popover-foreground: 210 40% 98%;
+    --erix-primary: 217.2 91.2% 59.8%;
+    --erix-primary-foreground: 222.2 47.4% 11.2%;
+    --erix-secondary: 217.2 32.6% 17.5%;
+    --erix-secondary-foreground: 210 40% 98%;
+    --erix-muted: 217.2 32.6% 17.5%;
+    --erix-muted-foreground: 215 20.2% 65.1%;
+    --erix-accent: 217.2 32.6% 17.5%;
+    --erix-accent-foreground: 210 40% 98%;
+    --erix-destructive: 0 62.8% 30.6%;
+    --erix-destructive-foreground: 210 40% 98%;
+    --erix-border: 217.2 32.6% 17.5%;
+    --erix-input: 217.2 32.6% 17.5%;
+    --erix-ring: 224.3 76.3% 48%;
+  }
+}
+
+@layer base {
+  * {
+    border-color: hsl(var(--erix-border));
+  }
+  body {
+    background-color: hsl(var(--erix-background));
+    color: hsl(var(--erix-foreground));
+  }
+}
+
+html,
+body {
+  height: 100%;
+}
+
+/* Scrollbar styling */
+* {
+  scrollbar-width: none;
+  scrollbar-color: transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 0px;
+  height: 0px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 4px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: transparent;
+  border-radius: 4px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: transparent;
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
