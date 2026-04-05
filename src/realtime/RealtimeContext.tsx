@@ -7,7 +7,7 @@ import { useEventBus } from "@/events/EventBusContext";
 
 type ConnectionStatus = "connecting" | "connected" | "disconnected" | "error";
 
-interface RealtimeContextValue {
+export interface RealtimeContextValue {
   status: ConnectionStatus;
   /** Whether the socket is currently connected. */
   isConnected: boolean;

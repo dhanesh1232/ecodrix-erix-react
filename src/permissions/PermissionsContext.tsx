@@ -4,7 +4,7 @@ import * as React from "react";
 import { type ErixPermission, type ErixRolePreset, ROLE_PERMISSION_MAP } from "./types";
 
 // ── Context ───────────────────────────────────────────────────────────────────
-interface PermissionsContextValue {
+export interface PermissionsContextValue {
   permissions: Set<ErixPermission>;
   role:        ErixRolePreset;
   /** Check a single required permission. */
