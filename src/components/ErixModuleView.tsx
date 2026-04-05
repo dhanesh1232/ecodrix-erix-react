@@ -22,11 +22,14 @@ const AnalyticsRouter = React.lazy(() => import("./router/AnalyticsRouter").then
 const WhatsAppRouter  = React.lazy(() => import("./router/WhatsAppRouter").then((m) => ({ default: m.WhatsAppRouter })));
 const MeetingsRouter  = React.lazy(() => import("./router/MeetingsRouter").then((m) => ({ default: m.MeetingsRouter })));
 
+const NotificationsRouter = React.lazy(() => import("./router/NotificationsRouter").then((m) => ({ default: m.NotificationsRouter })));
+
 const MODULE_ROUTERS = {
   crm:       CrmRouter,
   analytics: AnalyticsRouter,
   whatsapp:  WhatsAppRouter,
   meetings:  MeetingsRouter,
+  notifications: NotificationsRouter,
 } as const;
 
 // ── Module skeleton loader ────────────────────────────────────────────────────

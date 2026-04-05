@@ -7,6 +7,7 @@ import { ErixToastProvider } from "@/toast/ToastContext";
 import { ErixToaster } from "@/toast/ErixToaster";
 import { ErixEventBusProvider } from "@/events/EventBusContext";
 import { ErixRealtimeProvider } from "@/realtime/RealtimeContext";
+import { NotificationsProvider } from "@/notifications/NotificationsContext";
 import type { ErixModule, ErixPlatformConfig, ClientHealth } from "@/types/platform";
 
 // ─── Context Shape ─────────────────────────────────────────────────────────────
@@ -110,7 +111,9 @@ export function ErixProvider({ config, children }: ErixProviderProps) {
       <ErixToastProvider>
         <ErixCtx.Provider value={value}>
           <ErixRealtimeProvider>
-            {children}
+            <NotificationsProvider>
+              {children}
+            </NotificationsProvider>
           </ErixRealtimeProvider>
           <ErixToaster />
         </ErixCtx.Provider>

@@ -16,27 +16,40 @@ function escapeCsv(value: unknown): string {
 
 function toCSV(rows: Record<string, unknown>[], headers: string[]): string {
   const header = headers.map(escapeCsv).join(",");
-  const body   = rows.map((row) => headers.map((h) => escapeCsv(row[h])).join(","));
+  const body = rows.map((row) =>
+    headers.map((h) => escapeCsv(row[h])).join(","),
+  );
   return [header, ...body].join("\n");
 }
 
 function downloadFile(content: string, filename: string, mime: string) {
   const blob = new Blob([content], { type: mime });
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement("a");
-  a.href = url; a.download = filename; a.click();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
   URL.revokeObjectURL(url);
 }
 
 const LEAD_CSV_HEADERS = [
-  "_id", "firstName", "lastName", "phone", "email",
-  "status", "source", "score", "pipelineId", "stageId",
-  "assignedTo", "createdAt",
+  "_id",
+  "firstName",
+  "lastName",
+  "phone",
+  "email",
+  "status",
+  "source",
+  "score",
+  "pipelineId",
+  "stageId",
+  "assignedTo",
+  "createdAt",
 ];
 
 export interface UseLeadsExportReturn {
-  exporting:  boolean;
-  exportCSV:  (filters?: LeadListFilters) => Promise<void>;
+  exporting: boolean;
+  exportCSV: (filters?: LeadListFilters) => Promise<void>;
   exportJSON: (filters?: LeadListFilters) => Promise<void>;
 }
 
@@ -54,44 +67,69 @@ export interface UseLeadsExportReturn {
  * ```
  */
 export function useLeadsExport(): UseLeadsExportReturn {
-  const sdk   = useErixClient();
+  const sdk = useErixClient();
   const toast = useErixToast();
   const [exporting, setExporting] = React.useState(false);
 
-  const collect = React.useCallback(async (filters?: LeadListFilters): Promise<any[]> => {
-    const all: any[] = [];
-    for await (const lead of sdk.crm.leads.listAutoPaging(filters as any)) {
-      all.push(lead);
-    }
-    return all;
-  }, [sdk]);
+  const collect = React.useCallback(
+    async (filters?: LeadListFilters): Promise<any[]> => {
+      const all: any[] = [];
+      for await (const lead of sdk.crm.leads.listAutoPaging(filters as any)) {
+        all.push(lead);
+      }
+      return all;
+    },
+    [sdk],
+  );
 
-  const exportCSV = React.useCallback(async (filters?: LeadListFilters) => {
-    setExporting(true);
-    try {
-      await toast.promise(
-        (async () => {
-          const leads = await collect(filters);
-          const csv   = toCSV(leads, LEAD_CSV_HEADERS);
-          downloadFile(csv, `erix-leads-${Date.now()}.csv`, "text/csv");
-        })(),
-        { loading: "Exporting leads…", success: "Leads exported!", error: (e) => e.message },
-      );
-    } finally { setExporting(false); }
-  }, [collect, toast]);
+  const exportCSV = React.useCallback(
+    async (filters?: LeadListFilters) => {
+      setExporting(true);
+      try {
+        await toast.promise(
+          (async () => {
+            const leads = await collect(filters);
+            const csv = toCSV(leads, LEAD_CSV_HEADERS);
+            downloadFile(csv, `erix-leads-${Date.now()}.csv`, "text/csv");
+          })(),
+          {
+            loading: "Exporting leads…",
+            success: "Leads exported!",
+            error: (e) => e.message,
+          },
+        );
+      } finally {
+        setExporting(false);
+      }
+    },
+    [collect, toast],
+  );
 
-  const exportJSON = React.useCallback(async (filters?: LeadListFilters) => {
-    setExporting(true);
-    try {
-      await toast.promise(
-        (async () => {
-          const leads = await collect(filters);
-          downloadFile(JSON.stringify(leads, null, 2), `erix-leads-${Date.now()}.json`, "application/json");
-        })(),
-        { loading: "Exporting leads…", success: "Leads exported!", error: (e) => e.message },
-      );
-    } finally { setExporting(false); }
-  }, [collect, toast]);
+  const exportJSON = React.useCallback(
+    async (filters?: LeadListFilters) => {
+      setExporting(true);
+      try {
+        await toast.promise(
+          (async () => {
+            const leads = await collect(filters);
+            downloadFile(
+              JSON.stringify(leads, null, 2),
+              `erix-leads-${Date.now()}.json`,
+              "application/json",
+            );
+          })(),
+          {
+            loading: "Exporting leads…",
+            success: "Leads exported!",
+            error: (e) => e.message,
+          },
+        );
+      } finally {
+        setExporting(false);
+      }
+    },
+    [collect, toast],
+  );
 
   return { exporting, exportCSV, exportJSON };
 }

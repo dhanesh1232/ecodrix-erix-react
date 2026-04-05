@@ -107,6 +107,18 @@ export type { ErixRouterProviderProps } from "./routing/RouterContext";
 export { ErixLink } from "./routing/ErixLink";
 export type { ErixLinkProps } from "./routing/ErixLink";
 
+// ============================================================================
+// NOTIFICATIONS MODULE
+// ============================================================================
+export { useErixNotifications } from "./notifications/NotificationsContext";
+export type { NotificationsContextValue } from "./notifications/NotificationsContext";
+export { ErixNotifications } from "./notifications/ErixNotifications";
+export type {
+  ErixNotification,
+  ErixNotificationType,
+  ErixNotificationStatus,
+} from "./notifications/types";
+
 // ─── Routing Hooks ────────────────────────────────────────────────────────────
 export {
   useErixNavigate, // navigate(path, replace?) — absolute URL navigation
