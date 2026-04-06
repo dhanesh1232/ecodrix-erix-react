@@ -27,31 +27,59 @@ export function useAnalyticsOverview(opts: UseAnalyticsOptions = {}) {
   const { range = "30d", from, to } = opts;
   const [data, setData]       = React.useState<OverviewKPIs | null>(null);
   const [loading, setLoading] = React.useState(false);
+  const [error, setError]     = React.useState<string | null>(null);
 
   React.useEffect(() => {
+    const ctrl = new AbortController();
     setLoading(true);
-    sdk.crm.analytics.overview(rangeParams(range, from, to) as any)
-      .then((res: any) => setData(res?.data ?? null))
-      .finally(() => setLoading(false));
+    setError(null);
+    sdk.crm.analytics
+      .overview(rangeParams(range, from, to) as any)
+      .then((res: any) => {
+        if (ctrl.signal.aborted) return;
+        setData(res?.data ?? null);
+      })
+      .catch((e: Error) => {
+        if (ctrl.signal.aborted) return;
+        setError(e.message);
+      })
+      .finally(() => {
+        if (!ctrl.signal.aborted) setLoading(false);
+      });
+    return () => ctrl.abort();
   }, [sdk, range, from, to]);
 
-  return { data, loading };
+  return { data, loading, error };
 }
 
 export function useAnalyticsFunnel(pipelineId: string | null) {
   const sdk = useErixClient();
   const [data, setData]       = React.useState<FunnelStage[]>([]);
   const [loading, setLoading] = React.useState(false);
+  const [error, setError]     = React.useState<string | null>(null);
 
   React.useEffect(() => {
     if (!pipelineId) return;
+    const ctrl = new AbortController();
     setLoading(true);
-    sdk.crm.analytics.funnel({ pipelineId } as any)
-      .then((res: any) => setData(res?.data ?? []))
-      .finally(() => setLoading(false));
+    setError(null);
+    sdk.crm.analytics
+      .funnel({ pipelineId } as any)
+      .then((res: any) => {
+        if (ctrl.signal.aborted) return;
+        setData(res?.data ?? []);
+      })
+      .catch((e: Error) => {
+        if (ctrl.signal.aborted) return;
+        setError(e.message);
+      })
+      .finally(() => {
+        if (!ctrl.signal.aborted) setLoading(false);
+      });
+    return () => ctrl.abort();
   }, [sdk, pipelineId]);
 
-  return { data, loading };
+  return { data, loading, error };
 }
 
 export function useAnalyticsSources(opts: UseAnalyticsOptions = {}) {
@@ -59,15 +87,29 @@ export function useAnalyticsSources(opts: UseAnalyticsOptions = {}) {
   const { range = "30d", from, to } = opts;
   const [data, setData]       = React.useState<SourceBreakdown[]>([]);
   const [loading, setLoading] = React.useState(false);
+  const [error, setError]     = React.useState<string | null>(null);
 
   React.useEffect(() => {
+    const ctrl = new AbortController();
     setLoading(true);
-    sdk.crm.analytics.sources(rangeParams(range, from, to) as any)
-      .then((res: any) => setData(res?.data ?? []))
-      .finally(() => setLoading(false));
+    setError(null);
+    sdk.crm.analytics
+      .sources(rangeParams(range, from, to) as any)
+      .then((res: any) => {
+        if (ctrl.signal.aborted) return;
+        setData(res?.data ?? []);
+      })
+      .catch((e: Error) => {
+        if (ctrl.signal.aborted) return;
+        setError(e.message);
+      })
+      .finally(() => {
+        if (!ctrl.signal.aborted) setLoading(false);
+      });
+    return () => ctrl.abort();
   }, [sdk, range, from, to]);
 
-  return { data, loading };
+  return { data, loading, error };
 }
 
 export function useAnalyticsTeam(opts: UseAnalyticsOptions = {}) {
@@ -75,15 +117,29 @@ export function useAnalyticsTeam(opts: UseAnalyticsOptions = {}) {
   const { range = "30d", from, to } = opts;
   const [data, setData]       = React.useState<TeamMember[]>([]);
   const [loading, setLoading] = React.useState(false);
+  const [error, setError]     = React.useState<string | null>(null);
 
   React.useEffect(() => {
+    const ctrl = new AbortController();
     setLoading(true);
-    sdk.crm.analytics.team(rangeParams(range, from, to) as any)
-      .then((res: any) => setData(res?.data ?? []))
-      .finally(() => setLoading(false));
+    setError(null);
+    sdk.crm.analytics
+      .team(rangeParams(range, from, to) as any)
+      .then((res: any) => {
+        if (ctrl.signal.aborted) return;
+        setData(res?.data ?? []);
+      })
+      .catch((e: Error) => {
+        if (ctrl.signal.aborted) return;
+        setError(e.message);
+      })
+      .finally(() => {
+        if (!ctrl.signal.aborted) setLoading(false);
+      });
+    return () => ctrl.abort();
   }, [sdk, range, from, to]);
 
-  return { data, loading };
+  return { data, loading, error };
 }
 
 export function useWhatsAppAnalytics(opts: UseAnalyticsOptions = {}) {
@@ -91,16 +147,29 @@ export function useWhatsAppAnalytics(opts: UseAnalyticsOptions = {}) {
   const { range = "30d", from, to } = opts;
   const [data, setData]       = React.useState<WhatsAppAnalytics | null>(null);
   const [loading, setLoading] = React.useState(false);
+  const [error, setError]     = React.useState<string | null>(null);
 
   React.useEffect(() => {
+    const ctrl = new AbortController();
     setLoading(true);
-    // Uses the raw escape-hatch for the WhatsApp analytics endpoint
-    sdk.request("GET", "/api/saas/crm/analytics/whatsapp", undefined, rangeParams(range, from, to))
-      .then((res: any) => setData(res?.data ?? null))
-      .finally(() => setLoading(false));
+    setError(null);
+    sdk
+      .request("GET", "/api/saas/crm/analytics/whatsapp", undefined, rangeParams(range, from, to))
+      .then((res: any) => {
+        if (ctrl.signal.aborted) return;
+        setData(res?.data ?? null);
+      })
+      .catch((e: Error) => {
+        if (ctrl.signal.aborted) return;
+        setError(e.message);
+      })
+      .finally(() => {
+        if (!ctrl.signal.aborted) setLoading(false);
+      });
+    return () => ctrl.abort();
   }, [sdk, range, from, to]);
 
-  return { data, loading };
+  return { data, loading, error };
 }
 
 export function useAnalyticsSummary(opts: UseAnalyticsOptions = {}) {
@@ -108,13 +177,27 @@ export function useAnalyticsSummary(opts: UseAnalyticsOptions = {}) {
   const { range = "30d", from, to } = opts;
   const [data, setData]       = React.useState<any>(null);
   const [loading, setLoading] = React.useState(false);
+  const [error, setError]     = React.useState<string | null>(null);
 
   React.useEffect(() => {
+    const ctrl = new AbortController();
     setLoading(true);
-    sdk.crm.analytics.summary(rangeParams(range, from, to) as any)
-      .then((res: any) => setData(res?.data ?? null))
-      .finally(() => setLoading(false));
+    setError(null);
+    sdk.crm.analytics
+      .summary(rangeParams(range, from, to) as any)
+      .then((res: any) => {
+        if (ctrl.signal.aborted) return;
+        setData(res?.data ?? null);
+      })
+      .catch((e: Error) => {
+        if (ctrl.signal.aborted) return;
+        setError(e.message);
+      })
+      .finally(() => {
+        if (!ctrl.signal.aborted) setLoading(false);
+      });
+    return () => ctrl.abort();
   }, [sdk, range, from, to]);
 
-  return { data, loading };
+  return { data, loading, error };
 }

@@ -39,8 +39,21 @@ function buildNavCommands(
 }
 
 // ── Main component ────────────────────────────────────────────────────────────
-export function ErixCommandPalette({ routes = {}, commands: extraCommands = [] }: ErixCommandPaletteProps) {
-  const [open, setOpen]       = React.useState(false);
+export function ErixCommandPalette({ 
+  routes = {}, 
+  commands: extraCommands = [],
+  open: controlledOpen,
+  onOpenChange: setControlledOpen
+}: ErixCommandPaletteProps & { open?: boolean; onOpenChange?: (open: boolean) => void }) {
+  const [internalOpen, setInternalOpen] = React.useState(false);
+  
+  const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
+  const setOpen = React.useCallback((val: boolean | ((o: boolean) => boolean)) => {
+    const next = typeof val === 'function' ? val(open) : val;
+    if (setControlledOpen) setControlledOpen(next);
+    else setInternalOpen(next);
+  }, [controlledOpen, open, setControlledOpen]);
+
   const [query, setQuery]     = React.useState("");
   const [leads, setLeads]     = React.useState<CommandItem[]>([]);
   const [searching, setSearching] = React.useState(false);

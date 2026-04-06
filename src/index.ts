@@ -8,7 +8,7 @@ import "./app/globals.css";
 export { ErixProvider, useErix, useErixClient } from "./context/ErixProvider";
 export type { ErixProviderProps } from "./context/ErixProvider";
 
-// ─── Editor (existing) ─────────────────────────────────────────────────────────
+// ─── Editor ────────────────────────────────────────────────────────────────────
 export type { ErixEditorProps } from "./components/richtext/editor";
 export { ErixEditor, RichtextEditor } from "./components/richtext/editor";
 export { AiMenu } from "./components/richtext/menus/AiMenu";
@@ -43,10 +43,12 @@ export { LeadCard } from "./components/crm/LeadCard";
 export { AnalyticsDashboard } from "./components/analytics/AnalyticsDashboard";
 export { StatCard } from "./components/analytics/StatCard";
 
-// ─── WhatsApp Components ─────────────────────────────────────────────────────
+// ─── WhatsApp Components ──────────────────────────────────────────────────────
 export { WhatsAppInbox } from "./components/whatsapp/WhatsAppInbox";
 export { MessageBubble } from "./components/whatsapp/MessageBubble";
 export { TemplateSelector } from "./components/whatsapp/TemplateSelector";
+export { WhatsAppBroadcast } from "./components/whatsapp/WhatsAppBroadcast";
+export type { WhatsAppBroadcastProps } from "./components/whatsapp/WhatsAppBroadcast";
 
 // ─── Meetings Components ──────────────────────────────────────────────────────
 export { MeetingList } from "./components/meet/MeetingList";
@@ -70,6 +72,11 @@ export {
   useWhatsAppAnalytics,
   useAnalyticsSummary,
 } from "./hooks/crm/useAnalytics";
+export {
+  useLeadActivities,
+  useLeadNotes,
+} from "./hooks/crm/useLeadActivity";
+export { useAutomations } from "./hooks/crm/useAutomations";
 
 // ─── WhatsApp Hooks ───────────────────────────────────────────────────────────
 export {
@@ -77,6 +84,7 @@ export {
   useMessages,
 } from "./hooks/whatsapp/useConversations";
 export { useTemplates, useTemplate } from "./hooks/whatsapp/useTemplates";
+export { useMarketingCampaigns } from "./hooks/whatsapp/useMarketingCampaigns";
 
 // ─── Meetings Hooks ───────────────────────────────────────────────────────────
 export { useMeetings } from "./hooks/meet/useMeetings";
@@ -84,20 +92,9 @@ export { useMeetings } from "./hooks/meet/useMeetings";
 // ─── Types ────────────────────────────────────────────────────────────────────
 export * from "./types/erix";
 export * from "./types/platform";
+export type { ErixLead, ErixPaginatedResult, ExtractCustomFields } from "./types/custom-fields";
 
 // ─── Module Router ────────────────────────────────────────────────────────────
-// The primary way to add URL-based module routing to any React app.
-// No dependency on react-router — uses window.history + popstate.
-//
-// Usage (all-in-one):
-//   <ErixModuleRouter routes={{ crm: "/admin/leads", analytics: "/admin/stats" }} />
-//
-// Usage (composable — consumer owns the shell):
-//   <ErixRouterProvider routes={...}>
-//     <MySidebar />        {/* uses useErixNavigate / useIsActive  */}
-//     <ErixModuleView />   {/* the content "outlet"                */}
-//   </ErixRouterProvider>
-//
 export { ErixModuleRouter } from "./components/ErixModuleRouter";
 export type { ErixModuleRouterProps } from "./components/ErixModuleRouter";
 export { ErixModuleView } from "./components/ErixModuleView";
@@ -107,25 +104,13 @@ export type { ErixRouterProviderProps } from "./routing/RouterContext";
 export { ErixLink } from "./routing/ErixLink";
 export type { ErixLinkProps } from "./routing/ErixLink";
 
-// ============================================================================
-// NOTIFICATIONS MODULE
-// ============================================================================
-export { useErixNotifications } from "./notifications/NotificationsContext";
-export type { NotificationsContextValue } from "./notifications/NotificationsContext";
-export { ErixNotifications } from "./notifications/ErixNotifications";
-export type {
-  ErixNotification,
-  ErixNotificationType,
-  ErixNotificationStatus,
-} from "./notifications/types";
-
 // ─── Routing Hooks ────────────────────────────────────────────────────────────
 export {
-  useErixNavigate, // navigate(path, replace?) — absolute URL navigation
-  useModuleNavigate, // navigateTo(module, subPath?) — navigate within a module
-  useErixRoute, // { module, prefix, subPath, params, pathname }
-  useErixBack, // () => history.back()
-  useIsActive, // useIsActive("/admin/leads") → boolean
+  useErixNavigate,
+  useModuleNavigate,
+  useErixRoute,
+  useErixBack,
+  useIsActive,
 } from "./routing/RouterContext";
 
 // ─── Routing Types ─────────────────────────────────────────────────────────
@@ -135,8 +120,16 @@ export type {
   ResolvedRoute,
 } from "./routing/types";
 
-// ═══════════════════════════════════════════════════════════════════════════════
+// ─── Router Adapters ──────────────────────────────────────────────────────────
+export { windowAdapter } from "./routing/adapters/window";
+export { makeNextAdapter } from "./routing/adapters/next";
+export { makeReactRouterAdapter } from "./routing/adapters/react-router";
+export type { RouterAdapter } from "./routing/adapters/types";
+
+// ─── Error Boundary ──────────────────────────────────────────────────────────
 export { ErixErrorBoundary } from "./components/ErixErrorBoundary";
+
+// ─── Toast ────────────────────────────────────────────────────────────────────
 export { ErixToastProvider, useToastContext } from "./toast/ToastContext";
 export { ErixToaster } from "./toast/ErixToaster";
 export { useErixToast } from "./toast/useErixToast";
@@ -147,63 +140,64 @@ export type {
   ErixToastAction,
 } from "./toast/types";
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// SPRINT 2 — Core UX
-// ═══════════════════════════════════════════════════════════════════════════════
+// ─── Notifications ────────────────────────────────────────────────────────────
+export { useErixNotifications } from "./notifications/NotificationsContext";
+export type { NotificationsContextValue } from "./notifications/NotificationsContext";
+export { ErixNotifications } from "./notifications/ErixNotifications";
+export type {
+  ErixNotification,
+  ErixNotificationType,
+  ErixNotificationStatus,
+} from "./notifications/types";
+
+// ─── Optimistic Mutations ─────────────────────────────────────────────────────
 export { optimistic } from "./lib/optimistic";
+
+// ─── RBAC / Permissions ───────────────────────────────────────────────────────
 export { ErixPermissionsProvider } from "./permissions/PermissionsContext";
 export type { ErixPermissionsProviderProps } from "./permissions/PermissionsContext";
 export { ErixGuard, ErixAccessDenied } from "./permissions/ErixGuard";
 export type { ErixGuardProps } from "./permissions/ErixGuard";
 export { useErixPermission } from "./permissions/useErixPermission";
-export type { ErixPermission, ErixRolePreset } from "./permissions/types";
+export type { ErixPermission as ErixPermissionString, ErixRolePreset } from "./permissions/types";
 export { ROLE_PERMISSION_MAP } from "./permissions/types";
+
+// ─── Event Bus ────────────────────────────────────────────────────────────────
 export { ErixEventBusProvider } from "./events/EventBusContext";
 export { useErixEvent } from "./events/useErixEvent";
 export { useErixEmit } from "./events/useErixEmit";
 export type { ErixEventMap, ErixEventName } from "./events/types";
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// SPRINT 3 — Real-time & Offline
-// ═══════════════════════════════════════════════════════════════════════════════
+// ─── Real-time ────────────────────────────────────────────────────────────────
 export { ErixRealtimeProvider } from "./realtime/RealtimeContext";
 export { useErixRealtime } from "./realtime/useErixRealtime";
 export { useErixChannel } from "./realtime/useErixChannel";
+
+// ─── Offline Queue ────────────────────────────────────────────────────────────
 export { useErixQueue } from "./offline/useErixQueue";
 export type { QueuedOp, UseErixQueueReturn } from "./offline/useErixQueue";
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// SPRINT 4 — DX & Power
-// ═══════════════════════════════════════════════════════════════════════════════
-export { windowAdapter } from "./routing/adapters/window";
-export { makeNextAdapter } from "./routing/adapters/next";
-export { makeReactRouterAdapter } from "./routing/adapters/react-router";
-export type { RouterAdapter } from "./routing/adapters/types";
-export type {
-  ErixLead,
-  ErixPaginatedResult,
-  ExtractCustomFields,
-} from "./types/custom-fields";
-export { ErixDevtools } from "./devtools/ErixDevtools";
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// SPRINT 5 — Power Features
-// ═══════════════════════════════════════════════════════════════════════════════
+// ─── Command Palette ─────────────────────────────────────────────────────────
 export { ErixCommandPalette } from "./command-palette/ErixCommandPalette";
 export type {
   CommandItem,
   ErixCommandPaletteProps,
 } from "./command-palette/ErixCommandPalette";
+
+// ─── Export / Download ────────────────────────────────────────────────────────
 export { useLeadsExport } from "./export/useLeadsExport";
 export type { UseLeadsExportReturn } from "./export/useLeadsExport";
+
+// ─── i18n ─────────────────────────────────────────────────────────────────────
 export { ErixI18nProvider } from "./i18n/I18nContext";
 export type { ErixI18nProviderProps } from "./i18n/I18nContext";
 export { useErixI18n } from "./i18n/useErixI18n";
 export type { ErixLocale } from "./i18n/types";
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// SPRINT 6 — Platform
-// ═══════════════════════════════════════════════════════════════════════════════
+// ─── Devtools ─────────────────────────────────────────────────────────────────
+export { ErixDevtools } from "./devtools/ErixDevtools";
+
+// ─── AI ───────────────────────────────────────────────────────────────────────
 export {
   useLeadScore,
   useSmartReplies,
@@ -212,5 +206,3 @@ export {
 export type { SmartReplySuggestion } from "./ai/useErixAi";
 export { LeadScoreBadge } from "./ai/LeadScoreBadge";
 export { SmartReplySuggestions } from "./ai/SmartReplySuggestions";
-export { WhatsAppBroadcast } from "./components/whatsapp/WhatsAppBroadcast";
-export type { WhatsAppBroadcastProps } from "./components/whatsapp/WhatsAppBroadcast";

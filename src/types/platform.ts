@@ -10,6 +10,12 @@ export type ErixModule =
   | "marketing"
   | "meetings";
 
+import type { ErixPermission, ErixRolePreset } from "../permissions/types";
+
+export type { ErixPermission, ErixRolePreset };
+
+export type ErixLocale = "en" | "ar" | "es" | "fr" | "hi" | "pt";
+
 export interface ErixPlatformConfig {
   /** Ecodrix API key */
   apiKey: string;
@@ -26,6 +32,24 @@ export interface ErixPlatformConfig {
     logoUrl?: string;
     appName?: string;
   };
+  /**
+   * RBAC role preset.
+   * Defaults to "admin" if permissions are not provided, or "custom" if they are.
+   */
+  role?: ErixRolePreset;
+  /**
+   * RBAC permission strings granted to the current user.
+   * When provided, ErixGuard and useErixPermission work without a separate
+   * ErixPermissionsProvider wrapper.
+   * Supports wildcards: "crm.*" → all CRM permissions.
+   */
+  permissions?: ErixPermission[];
+
+  /**
+   * UI locale for built-in Erix strings.
+   * Defaults to "en". Passes through to ErixI18nProvider automatically.
+   */
+  locale?: ErixLocale;
 }
 
 // ─── CRM Types ──────────────────────────────────────────────────────────────
@@ -54,6 +78,7 @@ export interface Lead {
   score?: number;
   tags?: string[];
   assignedTo?: string;
+  value?: number;
   createdAt: string;
   updatedAt: string;
   metadata?: {
@@ -89,6 +114,22 @@ export interface KanbanColumn {
 export interface KanbanBoard {
   pipeline: Pipeline;
   columns: KanbanColumn[];
+}
+
+export interface PipelineForecast {
+  /** Total value of all active leads in the pipeline */
+  revenue: number;
+  /** Probability-weighted expected revenue */
+  expected: number;
+  /** Revenue already won */
+  wonRevenue: number;
+  stages: Array<{
+    stageId: string;
+    stageName: string;
+    count: number;
+    value: number;
+    probability: number;
+  }>;
 }
 
 export interface LeadActivity {
@@ -221,11 +262,14 @@ export interface Broadcast {
   _id: string;
   name: string;
   templateId: string;
-  status: "processing" | "completed" | "failed";
+  templateName?: string;
+  status: "draft" | "scheduled" | "processing" | "completed" | "failed";
   totalRecipients: number;
   sentCount: number;
   failedCount: number;
+  scheduledAt?: string;
   createdAt: string;
+  updatedAt: string;
 }
 
 // ─── Meetings Types ──────────────────────────────────────────────────────────
@@ -275,6 +319,7 @@ export interface AutomationAction {
 export interface AutomationRule {
   _id: string;
   name: string;
+  description?: string;
   trigger: AutomationTrigger;
   triggerConfig?: Record<string, unknown>;
   condition?: {
@@ -284,6 +329,8 @@ export interface AutomationRule {
   };
   actions: AutomationAction[];
   isActive: boolean;
+  runCount?: number;
+  lastRunAt?: string;
   createdAt: string;
   updatedAt: string;
 }
