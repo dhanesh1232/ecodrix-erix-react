@@ -39,25 +39,25 @@ function ConvRow({
       onClick={onClick}
       onKeyDown={(e) => e.key === "Enter" && onClick()}
       className={cn(
-        "flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 transition-all",
-        active ? "bg-primary/10 border border-primary/20" : "hover:bg-muted/60",
+        "erix-flex erix-cursor-pointer erix-items-center erix-gap-3 erix-rounded-xl px-3 py-2.5 transition-all",
+        active ? "erix-bg-primary/10 erix-border erix-border-primary/20" : "hover:erix-bg-muted/60",
       )}
     >
       {/* Avatar */}
-      <div className="relative shrink-0">
-        <div className="flex size-10 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-indigo-500 text-xs font-semibold text-white">
+      <div className="erix-relative erix-shrink-0">
+        <div className="erix-flex erix-size-10 erix-items-center erix-justify-center erix-rounded-full erix-bg-gradient-to-br erix-from-violet-500 erix-to-indigo-500 erix-text-xs font-semibold erix-text-white">
           {initials}
         </div>
         {conv.unreadCount > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 flex size-4 items-center justify-center rounded-full bg-emerald-500 text-[9px] font-bold text-white">
+          <span className="erix-absolute -top-0.5 -right-0.5 erix-flex erix-size-4 erix-items-center erix-justify-center erix-rounded-full erix-bg-emerald-500 erix-text-[9px] font-bold erix-text-white">
             {conv.unreadCount > 9 ? "9+" : conv.unreadCount}
           </span>
         )}
       </div>
       {/* Info */}
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center justify-between gap-1">
-          <p className="truncate text-sm font-medium text-foreground">
+      <div className="min-w-0 erix-flex-1">
+        <div className="erix-flex erix-items-center erix-justify-between erix-gap-1">
+          <p className="erix-truncate erix-text-sm font-medium erix-text-foreground">
             {conv.userName ?? conv.phone}
           </p>
           <ErixBadge
@@ -68,16 +68,16 @@ function ConvRow({
             {conv.status}
           </ErixBadge>
         </div>
-        <p className="truncate text-xs text-muted-foreground">{conv.phone}</p>
+        <p className="erix-truncate erix-text-xs erix-text-muted-foreground">{conv.phone}</p>
       </div>
       {/* Delete on hover */}
       {hover && (
         <button
           type="button"
           onClick={(e) => { e.stopPropagation(); onDelete(); }}
-          className="shrink-0 rounded-md p-1 text-muted-foreground hover:text-red-400 hover:bg-red-500/10"
+          className="erix-shrink-0 erix-rounded-md erix-p-1 erix-text-muted-foreground hover:erix-text-red-400 hover:erix-bg-red-500/10"
         >
-          <Trash2 className="size-3.5" />
+          <Trash2 className="erix-size-3.5" />
         </button>
       )}
     </div>
@@ -108,20 +108,20 @@ function ChatPanel({ conversationId }: { conversationId: string }) {
   };
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="erix-flex erix-h-full erix-flex-col">
       {/* Message list */}
-      <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2">
+      <div className="erix-flex-1 erix-overflow-y-auto px-4 py-3 space-y-2">
         {hasMore && (
           <button
             type="button"
             onClick={loadBefore}
-            className="w-full rounded-lg py-1.5 text-xs text-muted-foreground hover:bg-muted transition-colors"
+            className="erix-w-full erix-rounded-lg py-1.5 erix-text-xs erix-text-muted-foreground hover:erix-bg-muted transition-colors"
           >
             Load older messages
           </button>
         )}
         {loading && messages.length === 0 ? (
-          <div className="flex h-full items-center justify-center">
+          <div className="erix-flex erix-h-full erix-items-center erix-justify-center">
             <ErixSpinner />
           </div>
         ) : (
@@ -131,8 +131,8 @@ function ChatPanel({ conversationId }: { conversationId: string }) {
       </div>
 
       {/* Composer */}
-      <div className="border-t border-border p-3">
-        <div className="flex items-end gap-2 rounded-xl border border-border bg-muted/40 px-3 py-2">
+      <div className="erix-border-t erix-border-border erix-p-3">
+        <div className="erix-flex erix-items-end erix-gap-2 erix-rounded-xl erix-border erix-border-border erix-bg-muted/40 px-3 py-2">
           <textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
@@ -144,13 +144,13 @@ function ChatPanel({ conversationId }: { conversationId: string }) {
             }}
             placeholder="Type a message…"
             rows={1}
-            className="flex-1 resize-none bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
+            className="erix-flex-1 erix-resize-none erix-bg-transparent erix-text-sm erix-text-foreground placeholder:erix-text-muted-foreground focus:erix-outline-none"
           />
-          <div className="flex shrink-0 items-center gap-1.5 pb-0.5">
+          <div className="erix-flex erix-shrink-0 erix-items-center erix-gap-1.5 pb-0.5">
             <button
               type="button"
               onClick={() => setTemplateOpen(true)}
-              className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted transition-colors border border-border"
+              className="erix-rounded-lg px-2.5 py-1.5 erix-text-xs font-medium erix-text-muted-foreground hover:erix-bg-muted transition-colors erix-border erix-border-border"
             >
               Template
             </button>
@@ -158,9 +158,9 @@ function ChatPanel({ conversationId }: { conversationId: string }) {
               type="button"
               disabled={!text.trim() || sending}
               onClick={() => void handleSend()}
-              className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-40"
+              className="erix-flex erix-size-8 erix-items-center erix-justify-center erix-rounded-lg erix-bg-primary erix-text-primary-foreground transition-opacity hover:erix-opacity-90 disabled:erix-opacity-40"
             >
-              {sending ? <ErixSpinner size="sm" className="text-white" /> : "↑"}
+              {sending ? <ErixSpinner size="sm" className="erix-text-white" /> : "↑"}
             </button>
           </div>
         </div>
@@ -207,42 +207,42 @@ export function WhatsAppInbox({ onLeadOpen }: WhatsAppInboxProps) {
   }
 
   return (
-    <div className="flex h-full overflow-hidden rounded-2xl border border-border bg-card">
+    <div className="erix-flex erix-h-full erix-overflow-hidden erix-rounded-2xl erix-border erix-border-border erix-bg-card">
       {/* Left — Conversation list */}
-      <div className="flex w-[300px] shrink-0 flex-col border-r border-border">
+      <div className="erix-flex erix-w-[300px] erix-shrink-0 erix-flex-col erix-border-r erix-border-border">
         {/* Header */}
-        <div className="flex items-center gap-2 border-b border-border px-3 py-3">
-          <MessageSquare className="size-4 text-primary" />
-          <span className="flex-1 text-sm font-semibold">Inbox</span>
-          <button type="button" onClick={refetch} className="rounded-md p-1.5 text-muted-foreground hover:bg-muted">
-            <RefreshCw className="size-3.5" />
+        <div className="erix-flex erix-items-center erix-gap-2 erix-border-b erix-border-border px-3 py-3">
+          <MessageSquare className="erix-size-4 erix-text-primary" />
+          <span className="erix-flex-1 erix-text-sm font-semibold">Inbox</span>
+          <button type="button" onClick={refetch} className="erix-rounded-md erix-p-1.5 erix-text-muted-foreground hover:erix-bg-muted">
+            <RefreshCw className="erix-size-3.5" />
           </button>
         </div>
         {/* Search */}
         <div className="px-3 py-2">
-          <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/40 px-2.5 py-1.5">
-            <Search className="size-3.5 shrink-0 text-muted-foreground" />
+          <div className="erix-flex erix-items-center erix-gap-2 erix-rounded-lg erix-border erix-border-border erix-bg-muted/40 px-2.5 py-1.5">
+            <Search className="erix-size-3.5 erix-shrink-0 erix-text-muted-foreground" />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search conversations…"
-              className="flex-1 bg-transparent text-xs text-foreground placeholder:text-muted-foreground focus:outline-none"
+              className="erix-flex-1 erix-bg-transparent erix-text-xs erix-text-foreground placeholder:erix-text-muted-foreground focus:erix-outline-none"
             />
             {search && (
               <button type="button" onClick={() => setSearch("")}>
-                <X className="size-3 text-muted-foreground" />
+                <X className="erix-size-3 erix-text-muted-foreground" />
               </button>
             )}
           </div>
         </div>
         {/* List */}
-        <div className="flex-1 overflow-y-auto px-2 space-y-0.5 pb-2">
+        <div className="erix-flex-1 erix-overflow-y-auto px-2 space-y-0.5 pb-2">
           {loading && conversations.length === 0 ? (
-            <div className="flex h-32 items-center justify-center">
+            <div className="erix-flex erix-h-32 erix-items-center erix-justify-center">
               <ErixSpinner />
             </div>
           ) : filtered.length === 0 ? (
-            <div className="py-10 text-center text-xs text-muted-foreground">No conversations</div>
+            <div className="py-10 erix-text-center erix-text-xs erix-text-muted-foreground">No conversations</div>
           ) : (
             filtered.map((conv) => (
               <ConvRow
@@ -258,23 +258,23 @@ export function WhatsAppInbox({ onLeadOpen }: WhatsAppInboxProps) {
       </div>
 
       {/* Center — Chat window */}
-      <div className="flex flex-1 flex-col overflow-hidden">
+      <div className="erix-flex erix-flex-1 erix-flex-col erix-overflow-hidden">
         {active ? (
           <>
             {/* Chat header */}
-            <div className="flex items-center gap-3 border-b border-border px-4 py-3">
-              <div className="flex size-8 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-indigo-500 text-xs font-semibold text-white">
+            <div className="erix-flex erix-items-center erix-gap-3 erix-border-b erix-border-border px-4 py-3">
+              <div className="erix-flex erix-size-8 erix-items-center erix-justify-center erix-rounded-full erix-bg-gradient-to-br erix-from-violet-500 erix-to-indigo-500 erix-text-xs font-semibold erix-text-white">
                 {(active.userName ?? active.phone)[0]?.toUpperCase()}
               </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold">{active.userName ?? active.phone}</p>
-                <p className="text-xs text-muted-foreground">{active.phone}</p>
+              <div className="min-w-0 erix-flex-1">
+                <p className="erix-text-sm font-semibold">{active.userName ?? active.phone}</p>
+                <p className="erix-text-xs erix-text-muted-foreground">{active.phone}</p>
               </div>
               {active.leadId && (
                 <button
                   type="button"
                   onClick={() => onLeadOpen?.(active.leadId!)}
-                  className="rounded-lg border border-border px-2.5 py-1 text-xs text-muted-foreground hover:bg-muted transition-colors"
+                  className="erix-rounded-lg erix-border erix-border-border px-2.5 py-1 erix-text-xs erix-text-muted-foreground hover:erix-bg-muted transition-colors"
                 >
                   View Lead
                 </button>
@@ -283,9 +283,9 @@ export function WhatsAppInbox({ onLeadOpen }: WhatsAppInboxProps) {
             <ChatPanel conversationId={active._id} />
           </>
         ) : (
-          <div className="flex flex-1 flex-col items-center justify-center gap-3 text-muted-foreground">
-            <MessageSquare className="size-12 opacity-20" />
-            <p className="text-sm">Select a conversation to start chatting</p>
+          <div className="erix-flex erix-flex-1 erix-flex-col erix-items-center erix-justify-center erix-gap-3 erix-text-muted-foreground">
+            <MessageSquare className="erix-size-12 erix-opacity-20" />
+            <p className="erix-text-sm">Select a conversation to start chatting</p>
           </div>
         )}
       </div>

@@ -6,7 +6,8 @@
 import type { ErixModuleName, ErixRouteConfig, ResolvedRoute } from "./types";
 
 /** Strip trailing slash, keep root "/" intact. */
-export function normalizePrefix(prefix: string): string {
+export function normalizePrefix(prefix: any): string {
+  if (typeof prefix !== "string") return "/";
   return prefix.replace(/\/+$/, "") || "/";
 }
 
@@ -82,7 +83,7 @@ export function resolveRoute(
   ][];
 
   for (const [moduleName, prefix] of entries) {
-    if (!prefix) continue;
+    if (!prefix || typeof prefix !== "string") continue;
     const { matched, subPath } = matchPrefix(pathname, prefix);
     if (matched) {
       return {

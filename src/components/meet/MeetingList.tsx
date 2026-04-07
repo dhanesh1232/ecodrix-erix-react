@@ -25,29 +25,29 @@ function MeetingRow({ meeting, onReschedule, onCancel }: {
   const duration = Math.round((end.getTime() - start.getTime()) / 60000);
 
   return (
-    <div className="flex items-center gap-4 rounded-xl border border-border bg-card p-4 transition-shadow hover:shadow-md hover:shadow-black/10">
+    <div className="erix-flex erix-items-center erix-gap-4 erix-rounded-xl erix-border erix-border-border erix-bg-card erix-p-4 transition-shadow hover:erix-shadow-md hover:erix-shadow-black/10">
       {/* Date block */}
-      <div className="flex shrink-0 flex-col items-center rounded-xl bg-muted/60 px-3 py-2.5 text-center">
-        <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+      <div className="erix-flex erix-shrink-0 erix-flex-col erix-items-center erix-rounded-xl erix-bg-muted/60 px-3 py-2.5 erix-text-center">
+        <span className="erix-text-[10px] font-semibold erix-uppercase erix-tracking-wider erix-text-muted-foreground">
           {start.toLocaleDateString("en", { month: "short" })}
         </span>
-        <span className="text-2xl font-bold leading-none text-foreground">{start.getDate()}</span>
-        <span className="text-[10px] text-muted-foreground">{start.toLocaleDateString("en", { weekday: "short" })}</span>
+        <span className="erix-text-2xl font-bold erix-leading-none erix-text-foreground">{start.getDate()}</span>
+        <span className="erix-text-[10px] erix-text-muted-foreground">{start.toLocaleDateString("en", { weekday: "short" })}</span>
       </div>
 
       {/* Info */}
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-2">
-          <p className="truncate text-sm font-semibold text-foreground">{meeting.participantName}</p>
+      <div className="min-w-0 erix-flex-1">
+        <div className="erix-flex erix-items-center erix-gap-2">
+          <p className="erix-truncate erix-text-sm font-semibold erix-text-foreground">{meeting.participantName}</p>
           <ErixBadge variant={statusVariant[meeting.status]} size="sm" dot>{meeting.status}</ErixBadge>
         </div>
-        <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-          <span className="flex items-center gap-1">
-            <Phone className="size-3" />
+        <div className="mt-1 erix-flex erix-flex-wrap erix-items-center erix-gap-x-3 erix-gap-y-1 erix-text-xs erix-text-muted-foreground">
+          <span className="erix-flex erix-items-center erix-gap-1">
+            <Phone className="erix-size-3" />
             {meeting.participantPhone}
           </span>
-          <span className="flex items-center gap-1">
-            <Clock className="size-3" />
+          <span className="erix-flex erix-items-center erix-gap-1">
+            <Clock className="erix-size-3" />
             {start.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
             {" – "}
             {end.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
@@ -57,17 +57,17 @@ function MeetingRow({ meeting, onReschedule, onCancel }: {
       </div>
 
       {/* Actions */}
-      <div className="flex shrink-0 items-center gap-2">
+      <div className="erix-flex erix-shrink-0 erix-items-center erix-gap-2">
         {meeting.meetLink && (
           <a
             href={meeting.meetLink}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1.5 rounded-lg bg-blue-500/15 px-3 py-1.5 text-xs font-medium text-blue-400 transition-colors hover:bg-blue-500/25"
+            className="erix-flex erix-items-center erix-gap-1.5 erix-rounded-lg erix-bg-blue-500/15 px-3 py-1.5 erix-text-xs font-medium erix-text-blue-400 transition-colors hover:erix-bg-blue-500/25"
           >
-            <Video className="size-3.5" />
+            <Video className="erix-size-3.5" />
             Join
-            <ExternalLink className="size-3" />
+            <ExternalLink className="erix-size-3" />
           </a>
         )}
         {meeting.status === "scheduled" && (
@@ -76,7 +76,7 @@ function MeetingRow({ meeting, onReschedule, onCancel }: {
               <button
                 type="button"
                 onClick={() => onReschedule(meeting._id)}
-                className="rounded-lg border border-border px-2.5 py-1.5 text-xs text-muted-foreground hover:bg-muted transition-colors"
+                className="erix-rounded-lg erix-border erix-border-border px-2.5 py-1.5 erix-text-xs erix-text-muted-foreground hover:erix-bg-muted transition-colors"
               >
                 Reschedule
               </button>
@@ -85,7 +85,7 @@ function MeetingRow({ meeting, onReschedule, onCancel }: {
               <button
                 type="button"
                 onClick={() => onCancel(meeting._id)}
-                className="rounded-lg border border-red-500/20 px-2.5 py-1.5 text-xs text-red-400 hover:bg-red-500/10 transition-colors"
+                className="erix-rounded-lg erix-border erix-border-red-500/20 px-2.5 py-1.5 erix-text-xs erix-text-red-400 hover:erix-bg-red-500/10 transition-colors"
               >
                 Cancel
               </button>
@@ -101,35 +101,35 @@ export function MeetingList({ leadId, onScheduleNew }: { leadId?: string; onSche
   const { meetings, loading, updateStatus } = useMeetings({ leadId });
 
   return (
-    <div className="flex flex-col gap-4 p-6">
-      <div className="flex items-center justify-between">
+    <div className="erix-flex erix-flex-col erix-gap-4 erix-p-6">
+      <div className="erix-flex erix-items-center erix-justify-between">
         <div>
-          <h2 className="text-xl font-bold tracking-tight">Meetings</h2>
-          <p className="text-sm text-muted-foreground">{meetings.length} meeting{meetings.length !== 1 ? "s" : ""}</p>
+          <h2 className="erix-text-xl font-bold erix-tracking-tight">Meetings</h2>
+          <p className="erix-text-sm erix-text-muted-foreground">{meetings.length} meeting{meetings.length !== 1 ? "s" : ""}</p>
         </div>
         {onScheduleNew && (
           <button
             type="button"
             onClick={onScheduleNew}
-            className="flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 transition-opacity"
+            className="erix-flex erix-items-center erix-gap-1.5 erix-rounded-xl erix-bg-primary px-4 py-2 erix-text-sm font-semibold erix-text-primary-foreground hover:erix-opacity-90 transition-opacity"
           >
-            <Plus className="size-4" />
+            <Plus className="erix-size-4" />
             Schedule Meeting
           </button>
         )}
       </div>
 
       {loading ? (
-        <div className="flex h-48 items-center justify-center"><ErixSpinner size="lg" /></div>
+        <div className="erix-flex erix-h-48 erix-items-center erix-justify-center"><ErixSpinner size="lg" /></div>
       ) : meetings.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-border py-16">
-          <Calendar className="size-10 text-muted-foreground opacity-30" />
-          <p className="text-sm text-muted-foreground">No meetings yet</p>
+        <div className="erix-flex erix-flex-col erix-items-center erix-gap-3 erix-rounded-2xl erix-border erix-border-dashed erix-border-border py-16">
+          <Calendar className="erix-size-10 erix-text-muted-foreground erix-opacity-30" />
+          <p className="erix-text-sm erix-text-muted-foreground">No meetings yet</p>
           {onScheduleNew && (
             <button
               type="button"
               onClick={onScheduleNew}
-              className="rounded-xl bg-muted px-4 py-2 text-sm text-muted-foreground hover:bg-muted/80"
+              className="erix-rounded-xl erix-bg-muted px-4 py-2 erix-text-sm erix-text-muted-foreground hover:erix-bg-muted/80"
             >
               Schedule your first meeting
             </button>

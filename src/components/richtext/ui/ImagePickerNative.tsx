@@ -72,10 +72,10 @@ const getDisplayName = (src: ImageFormat) => {
 
 // ─── Skeleton ──────────────────────────────────────────────────────────────
 
-const GallerySkeleton = ({ mode }: { mode: "grid" | "list" }) => (
+const GallerySkeleton = ({ mode }: { mode: "erix-grid" | "list" }) => (
   <div
     className={cn(
-      mode === "grid"
+      mode === "erix-grid"
         ? "erix-grid erix-grid-cols-3 erix-gap-3"
         : "erix-space-y-2",
     )}
@@ -85,7 +85,7 @@ const GallerySkeleton = ({ mode }: { mode: "grid" | "list" }) => (
         key={i}
         className={cn(
           "erix-bg-muted erix-animate-pulse erix-rounded-lg",
-          mode === "grid" ? "erix-aspect-square" : "erix-h-12 erix-w-full",
+          mode === "erix-grid" ? "erix-aspect-square" : "erix-h-12 erix-w-full",
         )}
       />
     ))}
@@ -321,7 +321,7 @@ export const ImagePickerNative: React.FC<{ children?: React.ReactNode }> = ({
                     className={cn(
                       "erix-p-1",
                       buttonRadius,
-                      viewMode === "grid"
+                      viewMode === "erix-grid"
                         ? "erix-bg-background erix-shadow-sm"
                         : "erix-text-muted-foreground",
                     )}
@@ -359,14 +359,14 @@ export const ImagePickerNative: React.FC<{ children?: React.ReactNode }> = ({
                     <p className="erix-text-sm erix-font-bold">
                       Library is empty
                     </p>
-                    <p className="erix-text-xs erix-text-muted-foreground erix-mt-1 max-w-[200px]">
+                    <p className="erix-text-xs erix-text-muted-foreground erix-mt-1 erix-max-w-[200px]">
                       Upload files to start managing your assets.
                     </p>
                   </div>
                 ) : (
                   <div
                     className={cn(
-                      viewMode === "grid"
+                      viewMode === "erix-grid"
                         ? "erix-grid erix-grid-cols-3 erix-gap-4"
                         : "erix-flex erix-flex-col erix-gap-2",
                     )}
@@ -383,7 +383,7 @@ export const ImagePickerNative: React.FC<{ children?: React.ReactNode }> = ({
                           selectedImage?.key === img.key
                             ? "erix-border-primary erix-ring-2 erix-ring-primary/20"
                             : "erix-border-border hover:erix-border-primary/50",
-                          viewMode === "grid"
+                          viewMode === "erix-grid"
                             ? "erix-aspect-square"
                             : "erix-flex erix-items-center erix-p-2 erix-gap-3",
                           buttonRadius,
@@ -392,7 +392,7 @@ export const ImagePickerNative: React.FC<{ children?: React.ReactNode }> = ({
                         <div
                           className={cn(
                             "erix-bg-muted erix-overflow-hidden",
-                            viewMode === "grid"
+                            viewMode === "erix-grid"
                               ? "erix-w-full erix-h-full"
                               : "erix-w-10 erix-h-10 erix-shrink-0",
                             buttonRadius,
@@ -410,7 +410,7 @@ export const ImagePickerNative: React.FC<{ children?: React.ReactNode }> = ({
                             <p className="erix-text-xs erix-font-bold erix-truncate">
                               {getDisplayName(img)}
                             </p>
-                            <p className="erix-text-[10px] erix-text-muted-foreground uppercase">
+                            <p className="erix-text-[10px] erix-text-muted-foreground erix-uppercase">
                               {formatBytes(img.size)} •{" "}
                               {img.type?.split("/")[1] || "IMG"}
                             </p>
@@ -428,7 +428,7 @@ export const ImagePickerNative: React.FC<{ children?: React.ReactNode }> = ({
                             e.stopPropagation();
                             deleteImage(img);
                           }}
-                          className="erix-absolute erix-top-2 erix-right-2 erix-p-1.5 erix-bg-background/80 erix-backdrop-blur erix-text-destructive erix-opacity-0 group-hover:erix-opacity-100 erix-transition-opacity hover:erix-bg-destructive hover:erix-text-white rounded-md"
+                          className="erix-absolute erix-top-2 erix-right-2 erix-p-1.5 erix-bg-background/80 erix-backdrop-blur erix-text-destructive erix-opacity-0 group-hover:erix-opacity-100 erix-transition-opacity hover:erix-bg-destructive hover:erix-text-white erix-rounded-md"
                         >
                           <Trash2 size={12} />
                         </button>
@@ -582,7 +582,7 @@ export const ImagePickerNative: React.FC<{ children?: React.ReactNode }> = ({
                       <p className="erix-text-[10px] erix-font-bold erix-truncate">
                         {getDisplayName(selectedImage)}
                       </p>
-                      <p className="erix-text-[9px] erix-text-muted-foreground uppercase">
+                      <p className="erix-text-[9px] erix-text-muted-foreground erix-uppercase">
                         {formatBytes(selectedImage.size)} •{" "}
                         {selectedImage.type || "image"}
                       </p>

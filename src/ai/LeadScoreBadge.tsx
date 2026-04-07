@@ -33,7 +33,7 @@ export function LeadScoreBadge({
       <span
         className={className}
         style={{
-          display: "inline-flex",
+          display: "erix-inline-flex",
           alignItems: "center",
           gap: 4,
           fontSize: 12,
@@ -60,7 +60,7 @@ export function LeadScoreBadge({
     <span
       className={className}
       style={{
-        display: "inline-flex",
+        display: "erix-inline-flex",
         alignItems: "center",
         gap: 4,
         background: `${SCORE_COLOR(score)}20`,

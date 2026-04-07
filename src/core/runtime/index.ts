@@ -455,10 +455,10 @@ export function erixRuntimeInit() {
   function insertTaskList() {
     restoreRange();
     const ul = document.createElement("ul");
-    ul.className = "erix-task-list";
+    ul.className="erix-task-list";
     ul.setAttribute("data-erix-task-list", "true");
     const li = document.createElement("li");
-    li.className = "erix-task-item";
+    li.className="erix-task-item";
     const cb = document.createElement("input");
     cb.type = "checkbox";
     cb.contentEditable = "false";
@@ -489,15 +489,15 @@ export function erixRuntimeInit() {
   ) {
     restoreRange();
     const callout = document.createElement("div");
-    callout.className = "erix-callout";
+    callout.className="erix-callout";
     callout.setAttribute("data-erix-type", "callout");
     callout.style.cssText = `background:${bgColor};border-color:${borderColor};`;
     const emojiEl = document.createElement("span");
-    emojiEl.className = "erix-callout-emoji";
+    emojiEl.className="erix-callout-emoji";
     emojiEl.contentEditable = "false";
     emojiEl.textContent = emoji;
     const content = document.createElement("div");
-    content.className = "erix-callout-content";
+    content.className="erix-callout-content";
     const p = document.createElement("p");
     p.innerHTML = "<br>";
     content.appendChild(p);
@@ -514,13 +514,13 @@ export function erixRuntimeInit() {
   function insertToggle() {
     restoreRange();
     const toggle = document.createElement("div");
-    toggle.className = "erix-toggle";
+    toggle.className="erix-toggle";
     toggle.setAttribute("data-erix-type", "toggle");
     const trigger = document.createElement("div");
-    trigger.className = "erix-toggle-trigger";
+    trigger.className="erix-toggle-trigger";
     trigger.contentEditable = "false";
     const arrow = document.createElement("span");
-    arrow.className = "erix-toggle-arrow";
+    arrow.className="erix-toggle-arrow";
     arrow.textContent = "▶";
     const label = document.createElement("span");
     label.contentEditable = "true";
@@ -528,7 +528,7 @@ export function erixRuntimeInit() {
     trigger.appendChild(arrow);
     trigger.appendChild(label);
     const content = document.createElement("div");
-    content.className = "erix-toggle-content";
+    content.className="erix-toggle-content";
     const p = document.createElement("p");
     p.innerHTML = "<br>";
     content.appendChild(p);
@@ -546,7 +546,7 @@ export function erixRuntimeInit() {
   function insertTable(rows = 3, cols = 3) {
     restoreRange();
     const wrapper = document.createElement("div");
-    wrapper.className = "erix-table-wrapper";
+    wrapper.className="erix-table-wrapper";
     const table = document.createElement("table");
     table.style.width = "100%";
     for (let r = 0; r < rows; r++) {
@@ -680,11 +680,11 @@ export function erixRuntimeInit() {
   function insertColumns(cols = 2) {
     restoreRange();
     const layout = document.createElement("div");
-    layout.className = "erix-columns";
+    layout.className="erix-columns";
     layout.setAttribute("data-cols", String(cols));
     for (let i = 0; i < cols; i++) {
       const col = document.createElement("div");
-      col.className = "erix-column";
+      col.className="erix-column";
       const p = document.createElement("p");
       p.innerHTML = "<br>";
       col.appendChild(p);
@@ -718,7 +718,7 @@ export function erixRuntimeInit() {
       embedUrl = `https://player.vimeo.com/video/${vimeoMatch[1]}`;
 
     const wrapper = document.createElement("div");
-    wrapper.className = "erix-video-embed";
+    wrapper.className="erix-video-embed";
     wrapper.setAttribute("data-erix-type", "video");
     wrapper.setAttribute("data-src", url);
     const iframe = document.createElement("iframe");

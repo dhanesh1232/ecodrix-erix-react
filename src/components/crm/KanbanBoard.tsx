@@ -84,21 +84,21 @@ function KanbanColumn({
   onAddLead?: (stageId: string) => void;
 }) {
   return (
-    <div className="flex w-[280px] shrink-0 flex-col rounded-2xl border border-border bg-muted/30 p-3">
+    <div className="erix-flex erix-w-[280px] erix-shrink-0 erix-flex-col erix-rounded-2xl erix-border erix-border-border erix-bg-muted/30 erix-p-3">
       {/* Column header */}
-      <div className="mb-3 flex items-center justify-between">
-        <div className="flex items-center gap-2">
+      <div className="mb-3 erix-flex erix-items-center erix-justify-between">
+        <div className="erix-flex erix-items-center erix-gap-2">
           {stage.color && (
             <span
-              className="size-3 rounded-full shrink-0"
+              className="erix-size-3 erix-rounded-full erix-shrink-0"
               style={{ background: stage.color }}
             />
           )}
-          <span className="text-sm font-semibold text-foreground">
+          <span className="erix-text-sm font-semibold erix-text-foreground">
             {stage.name}
           </span>
         </div>
-        <div className="flex items-center gap-1.5">
+        <div className="erix-flex erix-items-center erix-gap-1.5">
           <ErixBadge variant="ghost" size="sm">
             {total}
           </ErixBadge>
@@ -106,9 +106,9 @@ function KanbanColumn({
             <button
               type="button"
               onClick={() => onAddLead(stage._id)}
-              className="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+              className="erix-rounded-md erix-p-1 erix-text-muted-foreground hover:erix-bg-muted hover:erix-text-foreground transition-colors"
             >
-              <Plus className="size-3.5" />
+              <Plus className="erix-size-3.5" />
             </button>
           )}
         </div>
@@ -119,7 +119,7 @@ function KanbanColumn({
         items={leads.map((l) => l._id)}
         strategy={verticalListSortingStrategy}
       >
-        <div className="flex flex-col gap-2 overflow-y-auto">
+        <div className="erix-flex erix-flex-col erix-gap-2 erix-overflow-y-auto">
           {leads.map((lead) => (
             <SortableLeadCard
               key={lead._id}
@@ -130,8 +130,8 @@ function KanbanColumn({
             />
           ))}
           {leads.length === 0 && (
-            <div className="flex flex-col items-center gap-1 rounded-xl border border-dashed border-border py-8 text-center">
-              <p className="text-xs text-muted-foreground">No leads</p>
+            <div className="erix-flex erix-flex-col erix-items-center erix-gap-1 erix-rounded-xl erix-border erix-border-dashed erix-border-border py-8 erix-text-center">
+              <p className="erix-text-xs erix-text-muted-foreground">No leads</p>
             </div>
           )}
         </div>
@@ -162,7 +162,7 @@ export function KanbanBoard({
 
   if (loading) {
     return (
-      <div className="flex h-64 items-center justify-center">
+      <div className="erix-flex erix-h-64 erix-items-center erix-justify-center">
         <ErixSpinner size="lg" />
       </div>
     );
@@ -198,7 +198,7 @@ export function KanbanBoard({
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
-      <div className="flex gap-4 overflow-x-auto pb-4 px-6">
+      <div className="erix-flex erix-gap-4 erix-overflow-x-auto pb-4 px-6">
         {board.columns.map((col) => (
           <KanbanColumn
             key={col.stage._id}
@@ -214,7 +214,7 @@ export function KanbanBoard({
       </div>
       <DragOverlay dropAnimation={null}>
         {draggingLead && (
-          <div className="w-[280px]">
+          <div className="erix-w-[280px]">
             <LeadCard lead={draggingLead} isDragging />
           </div>
         )}

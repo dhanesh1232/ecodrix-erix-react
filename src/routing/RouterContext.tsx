@@ -56,15 +56,20 @@ const RouterContext = React.createContext<RouterContextValue | null>(null);
 export interface ErixRouterProviderProps {
   /** Route config: module name → URL prefix in the consumer's app */
   routes: ErixRouteConfig;
+  /** Optional initial pathname (useful for SSR/Next.js hydration) */
+  initialPathname?: string;
   children: React.ReactNode;
 }
 
 export const ErixRouterProvider: React.FC<ErixRouterProviderProps> = ({
   routes,
+  initialPathname,
   children,
 }) => {
-  const getPathname = () =>
-    typeof window !== "undefined" ? window.location.pathname : "/";
+  const getPathname = () => {
+    if (initialPathname) return initialPathname;
+    return typeof window !== "undefined" ? window.location.pathname : "/";
+  };
 
   const [pathname, setPathname] = React.useState<string>(getPathname);
 

@@ -21,30 +21,44 @@ export interface NotificationsContextValue {
   refresh: () => Promise<void>;
 }
 
-const NotificationsCtx = React.createContext<NotificationsContextValue | null>(null);
+const NotificationsCtx = React.createContext<NotificationsContextValue | null>(
+  null,
+);
 
 export function useErixNotifications(): NotificationsContextValue {
   const ctx = React.useContext(NotificationsCtx);
-  if (!ctx) throw new Error("useErixNotifications must be used inside <ErixProvider>");
+  if (!ctx)
+    throw new Error("useErixNotifications must be used inside <ErixProvider>");
   return ctx;
 }
 
 const POLL_INTERVAL_MS = 60_000;
 
-export function NotificationsProvider({ children }: { children: React.ReactNode }) {
+export function NotificationsProvider({
+  children,
+  disabled = false,
+}: {
+  children: React.ReactNode;
+  disabled?: boolean;
+}) {
   const sdk = useErixClient();
 
-  const [notifications, setNotifications] = React.useState<ErixNotification[]>([]);
-  const [loading, setLoading] = React.useState(true);
+  const [notifications, setNotifications] = React.useState<ErixNotification[]>(
+    [],
+  );
+  const [loading, setLoading] = React.useState(!disabled);
   const [error, setError] = React.useState<Error | null>(null);
 
   // ── Fetch from correct endpoint via typed SDK method ─────────────────────
   const fetchNotifications = React.useCallback(async () => {
+    if (disabled) return;
     try {
       setLoading(true);
       setError(null);
       // Uses ecod.notifications.listAlerts() → GET /api/crm/notifications
-      const res = await sdk.notifications.listAlerts<{ data: ErixNotification[] }>();
+      const res = await sdk.notifications.listAlerts<{
+        data: ErixNotification[];
+      }>();
       // Backend returns { success: true, data: [...] }
       const data = (res as any)?.data ?? res;
       if (Array.isArray(data)) {
@@ -60,7 +74,9 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
     }
   }, [sdk]);
 
-  React.useEffect(() => { void fetchNotifications(); }, [fetchNotifications]);
+  React.useEffect(() => {
+    void fetchNotifications();
+  }, [fetchNotifications]);
 
   // Polling fallback when socket is disconnected
   React.useEffect(() => {
@@ -71,6 +87,7 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
   // ── Real-time socket listeners ────────────────────────────────────────────
   // Backend emits "notification:new", "notification:dismissed", "notification:resolved"
   React.useEffect(() => {
+    if (disabled) return;
     const onNew = (data: unknown) => {
       const notif = data as ErixNotification;
       const normalized = { ...notif, id: (notif as any)._id ?? notif.id };
@@ -83,7 +100,9 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
 
     const onDismissed = (data: { id: string }) => {
       setNotifications((prev) =>
-        prev.map((n) => n.id === data.id ? { ...n, status: "dismissed" as const } : n),
+        prev.map((n) =>
+          n.id === data.id ? { ...n, status: "dismissed" as const } : n,
+        ),
       );
     };
 
@@ -95,7 +114,9 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
 
     const onResolved = (data: { id: string }) => {
       setNotifications((prev) =>
-        prev.map((n) => n.id === data.id ? { ...n, status: "resolved" as const } : n),
+        prev.map((n) =>
+          n.id === data.id ? { ...n, status: "resolved" as const } : n,
+        ),
       );
     };
 
@@ -113,19 +134,24 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
   }, [sdk]);
 
   // ── Mutations — use typed SDK methods ─────────────────────────────────────
-  const dismiss = React.useCallback(async (id: string) => {
-    // Optimistic
-    setNotifications((prev) =>
-      prev.map((n) => n.id === id ? { ...n, status: "dismissed" as const } : n),
-    );
-    try {
-      // PATCH /api/crm/notifications/:id/dismiss
-      await sdk.notifications.dismissAlert(id);
-    } catch (err) {
-      console.error("[ErixNotifications] dismiss failed:", err);
-      void fetchNotifications();
-    }
-  }, [sdk, fetchNotifications]);
+  const dismiss = React.useCallback(
+    async (id: string) => {
+      // Optimistic
+      setNotifications((prev) =>
+        prev.map((n) =>
+          n.id === id ? { ...n, status: "dismissed" as const } : n,
+        ),
+      );
+      try {
+        // PATCH /api/crm/notifications/:id/dismiss
+        await sdk.notifications.dismissAlert(id);
+      } catch (err) {
+        console.error("[ErixNotifications] dismiss failed:", err);
+        void fetchNotifications();
+      }
+    },
+    [sdk, fetchNotifications],
+  );
 
   const dismissAll = React.useCallback(async () => {
     setNotifications((prev) =>
@@ -140,15 +166,18 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
     }
   }, [sdk, fetchNotifications]);
 
-  const retry = React.useCallback(async (id: string) => {
-    try {
-      // POST /api/crm/notifications/:id/retry
-      await sdk.notifications.retryAction(id);
-      // Status update comes back via socket "notification:resolved"
-    } catch (err) {
-      console.error("[ErixNotifications] retry failed:", err);
-    }
-  }, [sdk]);
+  const retry = React.useCallback(
+    async (id: string) => {
+      try {
+        // POST /api/crm/notifications/:id/retry
+        await sdk.notifications.retryAction(id);
+        // Status update comes back via socket "notification:resolved"
+      } catch (err) {
+        console.error("[ErixNotifications] retry failed:", err);
+      }
+    },
+    [sdk],
+  );
 
   // ── Derived ───────────────────────────────────────────────────────────────
   const unreadCount = React.useMemo(
@@ -157,9 +186,31 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
   );
 
   const value = React.useMemo<NotificationsContextValue>(
-    () => ({ notifications, unreadCount, loading, error, dismiss, dismissAll, retry, refresh: fetchNotifications }),
-    [notifications, unreadCount, loading, error, dismiss, dismissAll, retry, fetchNotifications],
+    () => ({
+      notifications,
+      unreadCount,
+      loading,
+      error,
+      dismiss,
+      dismissAll,
+      retry,
+      refresh: fetchNotifications,
+    }),
+    [
+      notifications,
+      unreadCount,
+      loading,
+      error,
+      dismiss,
+      dismissAll,
+      retry,
+      fetchNotifications,
+    ],
   );
 
-  return <NotificationsCtx.Provider value={value}>{children}</NotificationsCtx.Provider>;
+  return (
+    <NotificationsCtx.Provider value={value}>
+      {children}
+    </NotificationsCtx.Provider>
+  );
 }

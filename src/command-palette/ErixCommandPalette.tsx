@@ -5,8 +5,11 @@
 import * as React from "react";
 import { createPortal } from "react-dom";
 import { Search, ArrowRight, User, BarChart2, MessageSquare, Calendar, Loader2 } from "lucide-react";
+import { Slot } from "@radix-ui/react-slot";
 import { useErixNavigate } from "@/routing/RouterContext";
 import { useErixClient } from "@/context/ErixProvider";
+import { useErixEvent } from "@/events/useErixEvent";
+import { useErixEmit } from "@/events/useErixEmit";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 export interface CommandItem {
@@ -24,6 +27,33 @@ export interface ErixCommandPaletteProps {
   /** Additional custom commands */
   commands?: CommandItem[];
 }
+
+export interface ErixCommandPaletteTriggerProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  asChild?: boolean;
+}
+
+/** 
+ * Radix-style trigger for the command palette.
+ * Sends 'cmd_palette.toggle' to the bus.
+ */
+export const ErixCommandPaletteTrigger = React.forwardRef<HTMLButtonElement, ErixCommandPaletteTriggerProps>(
+  ({ asChild, onClick, ...props }, ref) => {
+    const emit = useErixEmit();
+    const Comp = asChild ? Slot : "button";
+
+    return (
+      <Comp
+        ref={ref}
+        {...props}
+        onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+          onClick?.(e);
+          emit("cmd_palette.toggle", undefined);
+        }}
+      />
+    );
+  }
+);
+ErixCommandPaletteTrigger.displayName = "ErixCommandPaletteTrigger";
 
 // ── Nav commands factory ──────────────────────────────────────────────────────
 function buildNavCommands(
@@ -53,6 +83,11 @@ export function ErixCommandPalette({
     if (setControlledOpen) setControlledOpen(next);
     else setInternalOpen(next);
   }, [controlledOpen, open, setControlledOpen]);
+
+  // Handle bus events
+  useErixEvent("cmd_palette.toggle", () => setOpen((o) => !o));
+  useErixEvent("cmd_palette.open",   () => setOpen(true));
+  useErixEvent("cmd_palette.close",  () => setOpen(false));
 
   const [query, setQuery]     = React.useState("");
   const [leads, setLeads]     = React.useState<CommandItem[]>([]);
@@ -136,16 +171,16 @@ export function ErixCommandPalette({
 
   return createPortal(
     <div
-      style={{ position: "fixed", inset: 0, zIndex: 9999, background: "rgba(0,0,0,.5)", display: "flex", alignItems: "flex-start", justifyContent: "center", paddingTop: 120 }}
+      style={{ position: "fixed", inset: 0, zIndex: 9999, background: "rgba(0,0,0,.5)", display: "erix-flex", alignItems: "erix-flex-start", justifyContent: "center", paddingTop: 120 }}
       onClick={() => setOpen(false)}
     >
       <div
-        style={{ background: "#0f172a", borderRadius: 12, width: "100%", maxWidth: 560, overflow: "hidden", boxShadow: "0 20px 60px rgba(0,0,0,.6)", color: "#e2e8f0" }}
+        style={{ background: "#0f172a", borderRadius: 12, width: "100%", maxWidth: 560, overflow: "erix-hidden", boxShadow: "0 20px 60px rgba(0,0,0,.6)", color: "#e2e8f0" }}
         onClick={(e) => e.stopPropagation()}
         onKeyDown={handleKey}
       >
         {/* Search input */}
-        <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 16px", borderBottom: "1px solid #1e293b" }}>
+        <div style={{ display: "erix-flex", alignItems: "center", gap: 10, padding: "12px 16px", borderBottom: "1px solid #1e293b" }}>
           {searching ? <Loader2 size={16} style={{ animation: "spin 1s linear infinite" }} /> : <Search size={16} style={{ color: "#64748b" }} />}
           <input
             ref={inputRef}
@@ -164,7 +199,7 @@ export function ErixCommandPalette({
           )}
           {grouped.map(([group, items]) => (
             <div key={group}>
-              <div style={{ fontSize: 10, color: "#64748b", padding: "8px 8px 4px", textTransform: "uppercase", letterSpacing: 1 }}>{group}</div>
+              <div style={{ fontSize: 10, color: "#64748b", padding: "8px 8px 4px", textTransform: "erix-uppercase", letterSpacing: 1 }}>{group}</div>
               {items.map((cmd) => {
                 const idx = flat.indexOf(cmd);
                 return (
@@ -173,7 +208,7 @@ export function ErixCommandPalette({
                     type="button"
                     onClick={cmd.onSelect}
                     style={{
-                      display: "flex", alignItems: "center", gap: 10, width: "100%",
+                      display: "erix-flex", alignItems: "center", gap: 10, width: "100%",
                       padding: "8px 10px", borderRadius: 6, border: "none", cursor: "pointer",
                       background: active === idx ? "#1e293b" : "transparent",
                       color: "#e2e8f0", textAlign: "left",

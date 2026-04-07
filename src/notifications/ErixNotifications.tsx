@@ -98,7 +98,7 @@ export function ErixNotifications() {
                   return (
                     <div
                       key={n.id}
-                      className="erix-flex erix-items-start erix-bg-primary/5 erix-transition-colors group hover:erix-bg-muted/40"
+                      className="erix-flex erix-items-start erix-bg-primary/5 erix-transition-colors erix-group hover:erix-bg-muted/40"
                     >
                       <button
                         onClick={() => handleNotificationClick(n)}

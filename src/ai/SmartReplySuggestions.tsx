@@ -35,15 +35,15 @@ export function SmartReplySuggestions({ conversationId, lastMessage, onSelect }:
   if (!loading && suggestions.length === 0) return null;
 
   return (
-    <div style={{ display: "flex", gap: 6, flexWrap: "wrap", padding: "6px 0" }}>
+    <div style={{ display: "erix-flex", gap: 6, flexWrap: "wrap", padding: "6px 0" }}>
       {loading ? (
-        <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 12, color: "#94a3b8" }}>
+        <span style={{ display: "erix-flex", alignItems: "center", gap: 4, fontSize: 12, color: "#94a3b8" }}>
           <Loader2 size={12} style={{ animation: "spin 1s linear infinite" }} />
           Thinking…
         </span>
       ) : (
         <>
-          <span style={{ color: "#6366f1", display: "flex", alignItems: "center", gap: 3, fontSize: 11 }}>
+          <span style={{ color: "#6366f1", display: "erix-flex", alignItems: "center", gap: 3, fontSize: 11 }}>
             <Sparkles size={11} /> AI suggests:
           </span>
           {suggestions.map((s) => (

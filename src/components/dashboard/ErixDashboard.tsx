@@ -70,12 +70,12 @@ const ALL_NAV_ITEMS: NavItem[] = [
 // ─── Health dot ───────────────────────────────────────────────────────────────
 function HealthDot() {
   const { health, healthLoading } = useErix();
-  if (healthLoading) return <Circle className="size-3 animate-pulse text-muted-foreground" />;
-  if (!health) return <AlertCircle className="size-3 text-red-400" />;
+  if (healthLoading) return <Circle className="erix-size-3 erix-animate-pulse erix-text-muted-foreground" />;
+  if (!health) return <AlertCircle className="erix-size-3 erix-text-red-400" />;
   const allOk = Object.values(health.services).every((s) => s !== "not_configured");
   return allOk
-    ? <CheckCircle2 className="size-3 text-emerald-400" />
-    : <AlertCircle className="size-3 text-amber-400" />;
+    ? <CheckCircle2 className="erix-size-3 erix-text-emerald-400" />
+    : <AlertCircle className="erix-size-3 erix-text-amber-400" />;
 }
 
 // ─── Header ───────────────────────────────────────────────────────────────────
@@ -102,47 +102,47 @@ function DashboardHeader({
   };
 
   return (
-    <header className="flex h-14 shrink-0 items-center gap-3 border-b border-border bg-card/80 px-4 backdrop-blur-sm">
+    <header className="erix-flex erix-h-14 erix-shrink-0 erix-items-center erix-gap-3 erix-border-b erix-border-border erix-bg-card/80 px-4 backdrop-blur-sm">
       <button
         type="button"
         onClick={toggle}
-        className="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+        className="erix-rounded-lg erix-p-2 erix-text-muted-foreground hover:erix-bg-muted hover:erix-text-foreground transition-colors"
         title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
       >
-        {collapsed ? <ChevronRight className="size-4" /> : <ChevronLeft className="size-4" />}
+        {collapsed ? <ChevronRight className="erix-size-4" /> : <ChevronLeft className="erix-size-4" />}
       </button>
 
-      <div className="min-w-0 flex-1">
-        <h1 className="truncate text-sm font-semibold text-foreground">{activeLabel}</h1>
-        <p className="text-xs text-muted-foreground">{config.clientCode}</p>
+      <div className="min-w-0 erix-flex-1">
+        <h1 className="erix-truncate erix-text-sm font-semibold erix-text-foreground">{activeLabel}</h1>
+        <p className="erix-text-xs erix-text-muted-foreground">{config.clientCode}</p>
       </div>
 
       {/* Search trigger */}
       <button
         type="button"
         onClick={onSearchOpen}
-        className="flex items-center gap-2 rounded-lg border border-border bg-muted/40 px-3 py-1.5 text-xs text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+        className="erix-flex erix-items-center erix-gap-2 erix-rounded-lg erix-border erix-border-border erix-bg-muted/40 px-3 py-1.5 erix-text-xs erix-text-muted-foreground hover:erix-bg-muted hover:erix-text-foreground transition-colors"
         title="Search (⌘K)"
       >
-        <Search className="size-3.5" />
-        <span className="hidden sm:inline">Search</span>
-        <kbd className="hidden sm:inline rounded bg-muted px-1 font-mono text-[10px]">⌘K</kbd>
+        <Search className="erix-size-3.5" />
+        <span className="erix-hidden sm:erix-inline">Search</span>
+        <kbd className="erix-hidden sm:erix-inline erix-rounded erix-bg-muted px-1 font-mono erix-text-[10px]">⌘K</kbd>
       </button>
 
       {/* Health badge */}
       {health && (
-        <div className="hidden md:flex items-center gap-2 rounded-lg border border-border bg-muted/40 px-3 py-1.5">
+        <div className="erix-hidden md:erix-flex erix-items-center erix-gap-2 erix-rounded-lg erix-border erix-border-border erix-bg-muted/40 px-3 py-1.5">
           <HealthDot />
-          <div className="flex items-center gap-1.5 text-xs">
+          <div className="erix-flex erix-items-center erix-gap-1.5 erix-text-xs">
             {Object.entries(health.services).map(([svc, status]) => (
-              <span key={svc} className={cn("capitalize", status === "not_configured" ? "text-amber-400" : "text-emerald-400")}>
+              <span key={svc} className={cn("erix-capitalize", status === "not_configured" ? "erix-text-amber-400" : "erix-text-emerald-400")}>
                 {svc === "whatsapp" ? "WA" : svc === "googleMeet" ? "GCal" : svc}
               </span>
             ))}
           </div>
           {health.queueDepth > 0 && (
-            <span className="flex items-center gap-1 text-xs text-amber-400">
-              <Zap className="size-3" />
+            <span className="erix-flex erix-items-center erix-gap-1 erix-text-xs erix-text-amber-400">
+              <Zap className="erix-size-3" />
               {health.queueDepth}
             </span>
           )}
@@ -153,14 +153,14 @@ function DashboardHeader({
       <button
         type="button"
         onClick={handleRefresh}
-        className="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+        className="erix-rounded-lg erix-p-2 erix-text-muted-foreground hover:erix-bg-muted hover:erix-text-foreground transition-colors"
         title="Refresh platform status"
       >
-        <RefreshCw className="size-4" />
+        <RefreshCw className="erix-size-4" />
       </button>
 
       {/* Avatar */}
-      <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary to-violet-500 text-xs font-bold text-white">
+      <div className="erix-flex erix-size-8 erix-shrink-0 erix-items-center erix-justify-center erix-rounded-full erix-bg-gradient-to-br erix-from-primary erix-to-violet-500 erix-text-xs font-bold erix-text-white">
         {(config.branding?.appName ?? config.clientCode)[0]?.toUpperCase()}
       </div>
     </header>
@@ -186,26 +186,26 @@ function Sidebar({
   return (
     <aside
       className={cn(
-        "flex shrink-0 flex-col border-r border-border bg-card transition-all duration-300",
-        collapsed ? "w-16" : "w-56",
+        "erix-flex erix-shrink-0 erix-flex-col erix-border-r erix-border-border erix-bg-card transition-all erix-duration-300",
+        collapsed ? "erix-w-16" : "erix-w-56",
       )}
     >
       {/* Logo */}
-      <div className={cn("flex h-14 items-center border-b border-border px-4 gap-2", collapsed && "justify-center")}>
+      <div className={cn("erix-flex erix-h-14 erix-items-center erix-border-b erix-border-border px-4 erix-gap-2", collapsed && "erix-justify-center")}>
         {logoUrl ? (
-          <img src={logoUrl} alt={appName} className="size-7 rounded-lg object-contain" />
+          <img src={logoUrl} alt={appName} className="erix-size-7 erix-rounded-lg erix-object-contain" />
         ) : (
-          <div className="flex size-7 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-violet-500 text-xs font-bold text-white">
+          <div className="erix-flex erix-size-7 erix-items-center erix-justify-center erix-rounded-lg erix-bg-gradient-to-br erix-from-primary erix-to-violet-500 erix-text-xs font-bold erix-text-white">
             {appName[0]?.toUpperCase()}
           </div>
         )}
         {!collapsed && (
-          <span className="truncate text-sm font-bold tracking-tight text-foreground">{appName}</span>
+          <span className="erix-truncate erix-text-sm font-bold erix-tracking-tight erix-text-foreground">{appName}</span>
         )}
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 overflow-y-auto p-2 space-y-0.5">
+      <nav className="erix-flex-1 erix-overflow-y-auto erix-p-2 space-y-0.5">
         {items.map((item) => {
           const Icon = item.icon;
           const isActive = active === item.id;
@@ -216,17 +216,17 @@ function Sidebar({
               onClick={() => setActive(item.id)}
               title={collapsed ? item.label : undefined}
               className={cn(
-                "flex w-full items-center rounded-xl px-2.5 py-2 text-sm transition-all",
-                collapsed ? "justify-center" : "gap-3",
+                "erix-flex erix-w-full erix-items-center erix-rounded-xl px-2.5 py-2 erix-text-sm transition-all",
+                collapsed ? "erix-justify-center" : "erix-gap-3",
                 isActive
-                  ? "bg-primary/10 text-primary font-semibold border border-primary/20"
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                  ? "erix-bg-primary/10 erix-text-primary font-semibold erix-border erix-border-primary/20"
+                  : "erix-text-muted-foreground hover:erix-bg-muted hover:erix-text-foreground",
               )}
             >
-              <Icon className="size-4 shrink-0" />
-              {!collapsed && <span className="truncate">{item.label}</span>}
+              <Icon className="erix-size-4 erix-shrink-0" />
+              {!collapsed && <span className="erix-truncate">{item.label}</span>}
               {!collapsed && item.badge !== undefined && (
-                <span className="ml-auto rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-bold text-primary-foreground">
+                <span className="ml-auto erix-rounded-full erix-bg-primary px-1.5 py-0.5 erix-text-[10px] font-bold erix-text-primary-foreground">
                   {item.badge}
                 </span>
               )}
@@ -237,10 +237,10 @@ function Sidebar({
 
       {/* Footer */}
       {!collapsed && (
-        <div className="border-t border-border p-3">
-          <p className="text-[10px] text-muted-foreground text-center">
+        <div className="erix-border-t erix-border-border erix-p-3">
+          <p className="erix-text-[10px] erix-text-muted-foreground erix-text-center">
             Powered by{" "}
-            <a href="https://ecodrix.com" target="_blank" rel="noopener noreferrer" className="hover:underline">
+            <a href="https://ecodrix.com" target="_blank" rel="noopener noreferrer" className="hover:erix-underline">
               Ecodrix
             </a>
           </p>
@@ -254,23 +254,23 @@ function Sidebar({
 function Overview({ onNavigate }: { onNavigate: (v: ActiveView) => void }) {
   const { health, config } = useErix();
   return (
-    <div className="flex flex-col gap-6 p-6">
+    <div className="erix-flex erix-flex-col erix-gap-6 erix-p-6">
       <div>
-        <h2 className="text-2xl font-bold">Welcome back 👋</h2>
-        <p className="text-muted-foreground text-sm mt-1">
+        <h2 className="erix-text-2xl font-bold">Welcome back 👋</h2>
+        <p className="erix-text-muted-foreground erix-text-sm mt-1">
           {config.branding?.appName ?? config.clientCode} — platform overview
         </p>
       </div>
 
       {health && (
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className="erix-grid erix-gap-4 sm:erix-grid-cols-3">
           {Object.entries(health.services).map(([svc, status]) => (
-            <div key={svc} className="rounded-2xl border border-border bg-card p-4">
-              <div className="flex items-center gap-2">
-                <div className={cn("size-2 rounded-full", status === "connected" || status === "configured" ? "bg-emerald-400" : "bg-amber-400")} />
-                <p className="text-sm font-medium capitalize">{svc === "googleMeet" ? "Google Meet" : svc}</p>
+            <div key={svc} className="erix-rounded-2xl erix-border erix-border-border erix-bg-card erix-p-4">
+              <div className="erix-flex erix-items-center erix-gap-2">
+                <div className={cn("erix-size-2 erix-rounded-full", status === "connected" || status === "configured" ? "erix-bg-emerald-400" : "erix-bg-amber-400")} />
+                <p className="erix-text-sm font-medium erix-capitalize">{svc === "googleMeet" ? "Google Meet" : svc}</p>
               </div>
-              <p className={cn("mt-1 text-xs capitalize", status === "not_configured" ? "text-amber-400" : "text-emerald-400")}>
+              <p className={cn("mt-1 erix-text-xs erix-capitalize", status === "not_configured" ? "erix-text-amber-400" : "erix-text-emerald-400")}>
                 {status.replace(/_/g, " ")}
               </p>
             </div>
@@ -279,7 +279,7 @@ function Overview({ onNavigate }: { onNavigate: (v: ActiveView) => void }) {
       )}
 
       {/* Quick actions */}
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="erix-grid erix-gap-3 sm:erix-grid-cols-2 lg:erix-grid-cols-4">
         {(["crm", "analytics", "whatsapp", "meetings"] as ActiveView[]).map((view) => {
           const item = ALL_NAV_ITEMS.find((n) => n.id === view)!;
           const Icon = item.icon;
@@ -288,26 +288,26 @@ function Overview({ onNavigate }: { onNavigate: (v: ActiveView) => void }) {
               key={view}
               type="button"
               onClick={() => onNavigate(view)}
-              className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-4 text-left hover:bg-muted/30 hover:border-primary/20 transition-all group"
+              className="erix-flex erix-flex-col erix-gap-3 erix-rounded-2xl erix-border erix-border-border erix-bg-card erix-p-4 erix-text-left hover:erix-bg-muted/30 hover:erix-border-primary/20 transition-all erix-group"
             >
-              <div className="flex size-9 items-center justify-center rounded-xl bg-primary/10 text-primary group-hover:bg-primary/20 transition-colors">
-                <Icon className="size-4" />
+              <div className="erix-flex erix-size-9 erix-items-center erix-justify-center erix-rounded-xl erix-bg-primary/10 erix-text-primary group-hover:erix-bg-primary/20 transition-colors">
+                <Icon className="erix-size-4" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-foreground">{item.label}</p>
-                <p className="text-xs text-muted-foreground mt-0.5">Open module →</p>
+                <p className="erix-text-sm font-semibold erix-text-foreground">{item.label}</p>
+                <p className="erix-text-xs erix-text-muted-foreground mt-0.5">Open module →</p>
               </div>
             </button>
           );
         })}
       </div>
 
-      <div className="rounded-2xl border border-border bg-gradient-to-br from-primary/10 to-violet-500/10 p-6">
-        <div className="flex items-center gap-3">
-          <Activity className="size-5 text-primary" />
+      <div className="erix-rounded-2xl erix-border erix-border-border erix-bg-gradient-to-br erix-from-primary/10 erix-to-violet-500/10 erix-p-6">
+        <div className="erix-flex erix-items-center erix-gap-3">
+          <Activity className="erix-size-5 erix-text-primary" />
           <div>
-            <p className="text-sm font-semibold">Platform Active</p>
-            <p className="text-xs text-muted-foreground">
+            <p className="erix-text-sm font-semibold">Platform Active</p>
+            <p className="erix-text-xs erix-text-muted-foreground">
               {health?.activeAutomations ?? 0} automations · {health?.queueDepth ?? 0} pending jobs
             </p>
           </div>
@@ -320,10 +320,10 @@ function Overview({ onNavigate }: { onNavigate: (v: ActiveView) => void }) {
 // ─── Loading fallback ─────────────────────────────────────────────────────────
 function ModuleLoader() {
   return (
-    <div className="flex flex-1 items-center justify-center">
-      <div className="flex flex-col items-center gap-3">
-        <div className="size-10 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-        <p className="text-sm text-muted-foreground">Loading…</p>
+    <div className="erix-flex erix-flex-1 erix-items-center erix-justify-center">
+      <div className="erix-flex erix-flex-col erix-items-center erix-gap-3">
+        <div className="erix-size-10 erix-animate-spin erix-rounded-full erix-border-2 erix-border-primary erix-border-t-transparent" />
+        <p className="erix-text-sm erix-text-muted-foreground">Loading…</p>
       </div>
     </div>
   );
@@ -392,10 +392,10 @@ export function ErixDashboard({
       {active === "analytics" && <AnalyticsDashboard pipelineId={pipelineId} />}
       {active === "whatsapp" && <WhatsAppInbox onLeadOpen={onLeadOpen} />}
       {active === "marketing" && (
-        <div className="flex flex-col gap-6 p-6">
+        <div className="erix-flex erix-flex-col erix-gap-6 erix-p-6">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight">Marketing</h2>
-            <p className="text-sm text-muted-foreground mt-1">
+            <h2 className="erix-text-2xl font-bold erix-tracking-tight">Marketing</h2>
+            <p className="erix-text-sm erix-text-muted-foreground mt-1">
               Send WhatsApp broadcast campaigns to your lead segments
             </p>
           </div>
@@ -404,12 +404,12 @@ export function ErixDashboard({
       )}
       {active === "meetings" && <MeetingList />}
       {active === "editor" && (
-        <div className="flex h-full items-center justify-center text-muted-foreground">
-          <div className="text-center">
-            <FileText className="mx-auto size-10 mb-3 opacity-30" />
-            <p className="text-sm font-medium">Rich Text Editor</p>
-            <p className="text-xs opacity-60 mt-1">
-              Use <code className="rounded bg-muted px-1 text-xs">&lt;ErixEditor /&gt;</code> directly in your layout
+        <div className="erix-flex erix-h-full erix-items-center erix-justify-center erix-text-muted-foreground">
+          <div className="erix-text-center">
+            <FileText className="mx-auto erix-size-10 mb-3 erix-opacity-30" />
+            <p className="erix-text-sm font-medium">Rich Text Editor</p>
+            <p className="erix-text-xs erix-opacity-60 mt-1">
+              Use <code className="erix-rounded erix-bg-muted px-1 erix-text-xs">&lt;ErixEditor /&gt;</code> directly in your layout
             </p>
           </div>
         </div>
@@ -420,7 +420,7 @@ export function ErixDashboard({
   return (
     <div
       className={cn(
-        "flex overflow-hidden rounded-2xl border border-border bg-background font-sans antialiased",
+        "erix-flex erix-overflow-hidden erix-rounded-2xl erix-border erix-border-border erix-bg-background font-sans erix-antialiased",
         "data-[erix-platform-theme=dark]:dark",
         className,
       )}
@@ -432,14 +432,14 @@ export function ErixDashboard({
         setActive={setActive}
         items={visibleItems}
       />
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+      <div className="erix-flex min-w-0 erix-flex-1 erix-flex-col erix-overflow-hidden">
         <DashboardHeader
           collapsed={collapsed}
           toggle={() => setCollapsed((c) => !c)}
           activeLabel={activeItem?.label ?? "Overview"}
           onSearchOpen={() => setPaletteOpen(true)}
         />
-        <main className="flex-1 overflow-auto bg-background">
+        <main className="erix-flex-1 erix-overflow-auto erix-bg-background">
           {renderPanel()}
         </main>
       </div>

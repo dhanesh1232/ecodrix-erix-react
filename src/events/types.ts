@@ -17,6 +17,11 @@ export interface ErixEventMap {
   "meet.scheduled":  { meeting: any };
   "meet.cancelled":  { meetingId: string };
   "meet.rescheduled":{ meetingId: string; startTime: string; endTime: string };
+  // Command Palette
+  "cmd_palette.toggle":   void | undefined;
+  "cmd_palette.open":     void | undefined;
+  "cmd_palette.close":    void | undefined;
+
   // Generic / escape-hatch
   [key: string]: unknown;
 }

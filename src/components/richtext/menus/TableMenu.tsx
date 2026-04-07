@@ -125,13 +125,13 @@ export const TableMenu: React.FC = () => {
     <div
       ref={menuRef}
       className={cn(
-        "absolute z-50 flex items-center space-x-1 p-1 will-change-transform",
-        "bg-erix-bg border border-erix-border",
+        "erix-absolute erix-z-50 erix-flex erix-items-center space-x-1 erix-p-1 will-change-transform",
+        "erix-bg-erix-bg erix-border erix-border-erix-border",
         shadowClass,
-        "transition-all duration-200 ease-out",
+        "transition-all erix-duration-200 erix-ease-out",
         visible
-          ? "opacity-100 translate-y-0 scale-100"
-          : "opacity-0 scale-95 pointer-events-none",
+          ? "erix-opacity-100 translate-y-0 erix-scale-100"
+          : "erix-opacity-0 erix-scale-95 pointer-events-none",
         bubbleSide === "top" ? "translate-y-2" : "-translate-y-2",
         // Position slightly above the normal bubble menu if both are active, or just offset it
         "mt-8",
@@ -149,7 +149,7 @@ export const TableMenu: React.FC = () => {
         if (btn.separator) {
           return (
             // biome-ignore lint/suspicious/noArrayIndexKey: Static separator elements
-            <div key={`sep-${i}`} className="w-px h-4 bg-erix-border mx-1" />
+            <div key={`sep-${i}`} className="erix-w-px erix-h-4 erix-bg-erix-border mx-1" />
           );
         }
 
@@ -164,11 +164,11 @@ export const TableMenu: React.FC = () => {
             }}
             title={btn.label}
             className={cn(
-              "p-1.5 transition-colors flex items-center justify-center",
+              "erix-p-1.5 transition-colors erix-flex erix-items-center erix-justify-center",
               btn.danger
-                ? "text-red-500 hover:bg-red-50"
-                : "text-erix-fg hover:bg-erix-border/50",
-              "hover:text-erix-primary focus:outline-none",
+                ? "erix-text-red-500 hover:erix-bg-red-50"
+                : "erix-text-erix-fg hover:erix-bg-erix-border/50",
+              "hover:erix-text-erix-primary focus:erix-outline-none",
             )}
             style={{
               borderRadius: `var(--erix-radius-${buttonRadius})`,

@@ -16,19 +16,19 @@ interface StatCardProps {
 }
 
 const colorMap = {
-  default: "from-white/5 to-white/0 border-border",
+  default: "erix-from-white/5 to-white/0 border-border",
   emerald: "from-emerald-500/10 to-emerald-500/0 border-emerald-500/20",
-  blue: "from-blue-500/10 to-blue-500/0 border-blue-500/20",
+  blue: "erix-from-blue-500/10 to-blue-500/0 border-blue-500/20",
   violet: "from-violet-500/10 to-violet-500/0 border-violet-500/20",
   amber: "from-amber-500/10 to-amber-500/0 border-amber-500/20",
 };
 
 const iconBg = {
-  default: "bg-muted text-muted-foreground",
-  emerald: "bg-emerald-500/15 text-emerald-400",
-  blue: "bg-blue-500/15 text-blue-400",
-  violet: "bg-violet-500/15 text-violet-400",
-  amber: "bg-amber-500/15 text-amber-400",
+  default: "erix-bg-muted text-muted-foreground",
+  emerald: "erix-bg-emerald-500/15 text-emerald-400",
+  blue: "erix-bg-blue-500/15 text-blue-400",
+  violet: "erix-bg-violet-500/15 text-violet-400",
+  amber: "erix-bg-amber-500/15 text-amber-400",
 };
 
 export function StatCard({ label, value, sub, trend, icon, className, loading, color = "default" }: StatCardProps) {
@@ -39,23 +39,23 @@ export function StatCard({ label, value, sub, trend, icon, className, loading, c
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-2xl border bg-gradient-to-br p-5 transition-shadow hover:shadow-lg hover:shadow-black/20",
+        "erix-relative erix-overflow-hidden erix-rounded-2xl erix-border erix-bg-gradient-to-br erix-p-5 transition-shadow hover:erix-shadow-lg hover:erix-shadow-black/20",
         colorMap[color],
         className,
       )}
     >
-      <div className="flex items-start justify-between gap-3">
+      <div className="erix-flex erix-items-start erix-justify-between erix-gap-3">
         <div className="min-w-0">
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider truncate">{label}</p>
+          <p className="erix-text-xs font-medium erix-text-muted-foreground erix-uppercase erix-tracking-wider erix-truncate">{label}</p>
           {loading ? (
-            <div className="mt-2 h-8 w-24 animate-pulse rounded bg-muted" />
+            <div className="mt-2 erix-h-8 erix-w-24 erix-animate-pulse erix-rounded erix-bg-muted" />
           ) : (
-            <p className="mt-1 text-3xl font-bold tracking-tight text-foreground">{value}</p>
+            <p className="mt-1 erix-text-3xl font-bold erix-tracking-tight erix-text-foreground">{value}</p>
           )}
-          {sub && <p className="mt-1 text-xs text-muted-foreground">{sub}</p>}
+          {sub && <p className="mt-1 erix-text-xs erix-text-muted-foreground">{sub}</p>}
         </div>
         {icon && (
-          <div className={cn("shrink-0 rounded-xl p-2.5", iconBg[color])}>
+          <div className={cn("erix-shrink-0 erix-rounded-xl erix-p-2.5", iconBg[color])}>
             {icon}
           </div>
         )}
@@ -64,16 +64,16 @@ export function StatCard({ label, value, sub, trend, icon, className, loading, c
       {trend !== undefined && (
         <div
           className={cn(
-            "mt-3 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium",
-            trendPositive && "bg-emerald-500/15 text-emerald-400",
-            trendNegative && "bg-red-500/15 text-red-400",
-            !trendPositive && !trendNegative && "bg-muted text-muted-foreground",
+            "mt-3 erix-inline-flex erix-items-center erix-gap-1 erix-rounded-full px-2 py-0.5 erix-text-xs font-medium",
+            trendPositive && "erix-bg-emerald-500/15 erix-text-emerald-400",
+            trendNegative && "erix-bg-red-500/15 erix-text-red-400",
+            !trendPositive && !trendNegative && "erix-bg-muted erix-text-muted-foreground",
           )}
         >
-          <TrendIcon className="size-3" />
+          <TrendIcon className="erix-size-3" />
           {trendPositive && "+"}
           {trend.toFixed(1)}%
-          <span className="ml-0.5 text-muted-foreground">vs last period</span>
+          <span className="ml-0.5 erix-text-muted-foreground">vs last period</span>
         </div>
       )}
     </div>

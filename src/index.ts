@@ -178,10 +178,11 @@ export { useErixQueue } from "./offline/useErixQueue";
 export type { QueuedOp, UseErixQueueReturn } from "./offline/useErixQueue";
 
 // ─── Command Palette ─────────────────────────────────────────────────────────
-export { ErixCommandPalette } from "./command-palette/ErixCommandPalette";
+export { ErixCommandPalette, ErixCommandPaletteTrigger } from "./command-palette/ErixCommandPalette";
 export type {
   CommandItem,
   ErixCommandPaletteProps,
+  ErixCommandPaletteTriggerProps,
 } from "./command-palette/ErixCommandPalette";
 
 // ─── Export / Download ────────────────────────────────────────────────────────

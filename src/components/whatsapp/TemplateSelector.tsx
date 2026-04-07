@@ -30,35 +30,35 @@ export function TemplateSelector({ onSelect, onClose }: TemplateSelectorProps) {
   }, [varCount]);
 
   return (
-    <div className="absolute inset-x-0 bottom-full z-50 mb-2 mx-3 overflow-hidden rounded-2xl border border-border bg-card shadow-xl shadow-black/20">
+    <div className="erix-absolute erix-inset-x-0 erix-bottom-full erix-z-50 mb-2 mx-3 erix-overflow-hidden erix-rounded-2xl erix-border erix-border-border erix-bg-card erix-shadow-xl erix-shadow-black/20">
       {/* Header */}
-      <div className="flex items-center gap-2 border-b border-border px-3 py-2.5">
-        <Search className="size-3.5 shrink-0 text-muted-foreground" />
+      <div className="erix-flex erix-items-center erix-gap-2 erix-border-b erix-border-border px-3 py-2.5">
+        <Search className="erix-size-3.5 erix-shrink-0 erix-text-muted-foreground" />
         <input
           autoFocus
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search templates…"
-          className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
+          className="erix-flex-1 erix-bg-transparent erix-text-sm erix-text-foreground placeholder:erix-text-muted-foreground focus:erix-outline-none"
         />
         <button
           type="button"
           onClick={onClose}
-          className="rounded-md p-1 hover:bg-muted"
+          className="erix-rounded-md erix-p-1 hover:erix-bg-muted"
         >
-          <X className="size-4 text-muted-foreground" />
+          <X className="erix-size-4 erix-text-muted-foreground" />
         </button>
       </div>
 
-      <div className="flex max-h-72">
+      <div className="erix-flex max-h-72">
         {/* List */}
-        <div className="w-1/2 overflow-y-auto border-r border-border p-1.5">
+        <div className="erix-w-1/2 erix-overflow-y-auto erix-border-r erix-border-border erix-p-1.5">
           {loading ? (
-            <div className="flex h-20 items-center justify-center">
+            <div className="erix-flex erix-h-20 erix-items-center erix-justify-center">
               <ErixSpinner />
             </div>
           ) : filtered.length === 0 ? (
-            <p className="py-4 text-center text-xs text-muted-foreground">
+            <p className="py-4 erix-text-center erix-text-xs erix-text-muted-foreground">
               No approved templates
             </p>
           ) : (
@@ -70,17 +70,17 @@ export function TemplateSelector({ onSelect, onClose }: TemplateSelectorProps) {
                 className={`flex w-full items-start gap-2 rounded-lg px-3 py-2 text-left transition-colors ${
                   selected === t.name
                     ? "bg-primary/10 border border-primary/20"
-                    : "hover:bg-muted"
+                    : "hover:erix-bg-muted"
                 }`}
               >
                 {selected === t.name && (
-                  <CheckCircle2 className="mt-0.5 size-3.5 shrink-0 text-primary" />
+                  <CheckCircle2 className="mt-0.5 erix-size-3.5 erix-shrink-0 erix-text-primary" />
                 )}
                 <div className="min-w-0">
-                  <p className="truncate text-xs font-semibold text-foreground">
+                  <p className="erix-truncate erix-text-xs font-semibold erix-text-foreground">
                     {t.name}
                   </p>
-                  <div className="mt-0.5 flex gap-1">
+                  <div className="mt-0.5 erix-flex erix-gap-1">
                     <ErixBadge variant="info" size="sm">
                       {t.language}
                     </ErixBadge>
@@ -95,20 +95,20 @@ export function TemplateSelector({ onSelect, onClose }: TemplateSelectorProps) {
         </div>
 
         {/* Preview / Variables */}
-        <div className="flex w-1/2 flex-col p-3">
+        <div className="erix-flex erix-w-1/2 erix-flex-col erix-p-3">
           {selectedTemplate ? (
             <>
-              <p className="mb-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              <p className="mb-2 erix-text-xs font-semibold erix-text-muted-foreground erix-uppercase erix-tracking-wider">
                 Preview
               </p>
               {/* WhatsApp-style bubble */}
-              <div className="rounded-xl rounded-tl-none border border-border bg-muted/40 px-3 py-2.5 text-xs leading-relaxed text-foreground">
+              <div className="erix-rounded-xl erix-rounded-tl-none erix-border erix-border-border erix-bg-muted/40 px-3 py-2.5 erix-text-xs erix-leading-relaxed erix-text-foreground">
                 {selectedTemplate.bodyText ?? selectedTemplate.name}
               </div>
               {/* Variable inputs */}
               {varCount > 0 && (
                 <div className="mt-3 space-y-2">
-                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  <p className="erix-text-xs font-semibold erix-text-muted-foreground erix-uppercase erix-tracking-wider">
                     Variables
                   </p>
                   {variables.map((v, i) => (
@@ -121,7 +121,7 @@ export function TemplateSelector({ onSelect, onClose }: TemplateSelectorProps) {
                         setVariables(next);
                       }}
                       placeholder={`{{${i + 1}}}`}
-                      className="w-full rounded-lg border border-border bg-muted/40 px-2.5 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary"
+                      className="erix-w-full erix-rounded-lg erix-border erix-border-border erix-bg-muted/40 px-2.5 py-1.5 erix-text-xs erix-text-foreground placeholder:erix-text-muted-foreground focus:erix-outline-none focus:erix-border-primary"
                     />
                   ))}
                 </div>
@@ -135,13 +135,13 @@ export function TemplateSelector({ onSelect, onClose }: TemplateSelectorProps) {
                     varCount > 0 ? variables : undefined,
                   )
                 }
-                className="mt-auto w-full rounded-xl bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-40"
+                className="mt-auto erix-w-full erix-rounded-xl erix-bg-primary px-3 py-2 erix-text-xs font-semibold erix-text-primary-foreground transition-opacity hover:erix-opacity-90 disabled:erix-opacity-40"
               >
                 Send Template
               </button>
             </>
           ) : (
-            <p className="my-auto text-center text-xs text-muted-foreground">
+            <p className="my-auto erix-text-center erix-text-xs erix-text-muted-foreground">
               Select a template to preview
             </p>
           )}

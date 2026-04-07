@@ -50,6 +50,12 @@ export interface ErixPlatformConfig {
    * Defaults to "en". Passes through to ErixI18nProvider automatically.
    */
   locale?: ErixLocale;
+
+  /**
+   * Completely disable notifications subsystem.
+   * If true, no API calls or socket listeners for notifications will be created.
+   */
+  disableNotifications?: boolean;
 }
 
 // ─── CRM Types ──────────────────────────────────────────────────────────────

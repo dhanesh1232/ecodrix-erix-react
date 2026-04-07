@@ -30,8 +30,8 @@ export function ErixBadge({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full font-medium",
-        size === "sm" ? "px-2 py-0.5 text-xs" : "px-3 py-1 text-sm",
+        "erix-inline-flex erix-items-center erix-gap-1.5 erix-rounded-full font-medium",
+        size === "sm" ? "px-2 py-0.5 erix-text-xs" : "px-3 py-1 erix-text-sm",
         variants[variant],
         className,
       )}
@@ -40,12 +40,12 @@ export function ErixBadge({
       {dot && (
         <span
           className={cn(
-            "size-1.5 rounded-full",
-            variant === "success" && "bg-emerald-400",
-            variant === "warning" && "bg-amber-400",
-            variant === "danger" && "bg-red-400",
-            variant === "info" && "bg-blue-400",
-            variant === "default" && "bg-muted-foreground",
+            "erix-size-1.5 erix-rounded-full",
+            variant === "success" && "erix-bg-emerald-400",
+            variant === "warning" && "erix-bg-amber-400",
+            variant === "danger" && "erix-bg-red-400",
+            variant === "info" && "erix-bg-blue-400",
+            variant === "default" && "erix-bg-muted-foreground",
           )}
         />
       )}

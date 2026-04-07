@@ -93,8 +93,8 @@ export const ImageResizer: React.FC = () => {
   return ReactDOM.createPortal(
     <div
       className={cn(
-        "absolute z-40 border-2 border-erix-primary",
-        resizing ? "border-solid" : "border-dashed",
+        "erix-absolute erix-z-40 erix-border-2 erix-border-erix-primary",
+        resizing ? "erix-border-solid" : "erix-border-dashed",
       )}
       style={{
         left: rect.x,
@@ -104,22 +104,22 @@ export const ImageResizer: React.FC = () => {
         pointerEvents: resizing ? "auto" : "none",
       }}
     >
-      <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
+      <div className="erix-absolute erix-top-0 erix-left-0 erix-w-full erix-h-full pointer-events-none">
         {/* Handles */}
         <div
-          className="absolute -right-1.5 -bottom-1.5 w-3 h-3 bg-erix-primary border border-white cursor-nwse-resize rounded-full pointer-events-auto shadow-sm"
+          className="erix-absolute -right-1.5 -bottom-1.5 erix-w-3 erix-h-3 erix-bg-erix-primary erix-border erix-border-white erix-cursor-nwse-resize erix-rounded-full pointer-events-auto erix-shadow-sm"
           onPointerDown={(e) => handlePointerDown(e, "se")}
         />
         <div
-          className="absolute -left-1.5 -bottom-1.5 w-3 h-3 bg-erix-primary border border-white cursor-nesw-resize rounded-full pointer-events-auto shadow-sm"
+          className="erix-absolute -left-1.5 -bottom-1.5 erix-w-3 erix-h-3 erix-bg-erix-primary erix-border erix-border-white erix-cursor-nesw-resize erix-rounded-full pointer-events-auto erix-shadow-sm"
           onPointerDown={(e) => handlePointerDown(e, "sw")}
         />
         <div
-          className="absolute -right-1.5 -top-1.5 w-3 h-3 bg-erix-primary border border-white cursor-nesw-resize rounded-full pointer-events-auto shadow-sm"
+          className="erix-absolute -right-1.5 -top-1.5 erix-w-3 erix-h-3 erix-bg-erix-primary erix-border erix-border-white erix-cursor-nesw-resize erix-rounded-full pointer-events-auto erix-shadow-sm"
           onPointerDown={(e) => handlePointerDown(e, "ne")}
         />
         <div
-          className="absolute -left-1.5 -top-1.5 w-3 h-3 bg-erix-primary border border-white cursor-nwse-resize rounded-full pointer-events-auto shadow-sm"
+          className="erix-absolute -left-1.5 -top-1.5 erix-w-3 erix-h-3 erix-bg-erix-primary erix-border erix-border-white erix-cursor-nwse-resize erix-rounded-full pointer-events-auto erix-shadow-sm"
           onPointerDown={(e) => handlePointerDown(e, "nw")}
         />
       </div>

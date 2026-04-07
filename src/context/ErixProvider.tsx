@@ -124,7 +124,7 @@ export function ErixProvider({ config, children }: ErixProviderProps) {
           <ErixToastProvider>
             <ErixCtx.Provider value={value}>
               <ErixRealtimeProvider>
-                <NotificationsProvider>
+                <NotificationsProvider disabled={config.disableNotifications}>
                   {children}
                 </NotificationsProvider>
               </ErixRealtimeProvider>

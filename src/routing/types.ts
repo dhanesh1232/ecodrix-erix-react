@@ -31,6 +31,7 @@ export interface ErixRouteConfig {
   meetings?: string;
   richtext?: string;
   notifications?: string;
+  [key: string]: string | undefined;
 }
 
 /**

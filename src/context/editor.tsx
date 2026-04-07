@@ -479,19 +479,19 @@ export const ErixEditorProvider: React.FC<ErixEditorProviderProps> = ({
   const shadow = style?.shadow ?? "none";
 
   const radiusMap: Record<string, string> = {
-    none: "rounded-none",
-    sm: "rounded-sm",
-    md: "rounded-md",
-    lg: "rounded-lg",
-    xl: "rounded-xl",
-    "2xl": "rounded-2xl",
+    none: "erix-rounded-none",
+    sm: "erix-rounded-sm",
+    md: "erix-rounded-md",
+    lg: "erix-rounded-lg",
+    xl: "erix-rounded-xl",
+    "2xl": "erix-rounded-2xl",
   };
   const shadowMap: Record<string, string> = {
     none: "",
-    sm: "shadow-sm",
-    md: "shadow-md",
-    lg: "shadow-lg",
-    xl: "shadow-xl",
+    sm: "erix-shadow-sm",
+    md: "erix-shadow-md",
+    lg: "erix-shadow-lg",
+    xl: "erix-shadow-xl",
   };
 
   // Toolbar height to subtract from iframe (42px default)
