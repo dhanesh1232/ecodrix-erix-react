@@ -1,31 +1,31 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { XIcon } from "lucide-react"
-import { Dialog as SheetPrimitive } from "radix-ui"
+import * as React from "react";
+import { XIcon } from "lucide-react";
+import { Dialog as SheetPrimitive } from "radix-ui";
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
 
 function Sheet({ ...props }: React.ComponentProps<typeof SheetPrimitive.Root>) {
-  return <SheetPrimitive.Root data-slot="sheet" {...props} />
+  return <SheetPrimitive.Root data-slot="sheet" {...props} />;
 }
 
 function SheetTrigger({
   ...props
 }: React.ComponentProps<typeof SheetPrimitive.Trigger>) {
-  return <SheetPrimitive.Trigger data-slot="sheet-trigger" {...props} />
+  return <SheetPrimitive.Trigger data-slot="sheet-trigger" {...props} />;
 }
 
 function SheetClose({
   ...props
 }: React.ComponentProps<typeof SheetPrimitive.Close>) {
-  return <SheetPrimitive.Close data-slot="sheet-close" {...props} />
+  return <SheetPrimitive.Close data-slot="sheet-close" {...props} />;
 }
 
 function SheetPortal({
   ...props
 }: React.ComponentProps<typeof SheetPrimitive.Portal>) {
-  return <SheetPrimitive.Portal data-slot="sheet-portal" {...props} />
+  return <SheetPrimitive.Portal data-slot="sheet-portal" {...props} />;
 }
 
 function SheetOverlay({
@@ -37,11 +37,11 @@ function SheetOverlay({
       data-slot="sheet-overlay"
       className={cn(
         "erix-fixed erix-inset-0 erix-z-50 erix-bg-black/50 data-[state=closed]:erix-animate-out data-[state=closed]:erix-fade-out-0 data-[state=open]:erix-animate-in data-[state=open]:erix-fade-in-0",
-        className
+        className,
       )}
       {...props}
     />
-  )
+  );
 }
 
 function SheetContent({
@@ -51,8 +51,8 @@ function SheetContent({
   showCloseButton = true,
   ...props
 }: React.ComponentProps<typeof SheetPrimitive.Content> & {
-  side?: "top" | "right" | "bottom" | "left"
-  showCloseButton?: boolean
+  side?: "top" | "right" | "bottom" | "left";
+  showCloseButton?: boolean;
 }) {
   return (
     <SheetPortal>
@@ -61,15 +61,15 @@ function SheetContent({
         data-slot="sheet-content"
         className={cn(
           "erix-fixed erix-z-50 erix-flex erix-flex-col erix-gap-4 erix-bg-background erix-shadow-lg erix-transition erix-ease-in-out data-[state=closed]:erix-animate-out data-[state=closed]:erix-duration-300 data-[state=open]:erix-animate-in data-[state=open]:erix-duration-500",
-          side === "erix-right" &&
+          side === "right" &&
             "erix-inset-y-0 erix-right-0 erix-h-full erix-w-3/4 erix-border-l data-[state=closed]:erix-slide-out-to-right data-[state=open]:erix-slide-in-from-right sm:erix-max-w-sm",
-          side === "erix-left" &&
+          side === "left" &&
             "erix-inset-y-0 erix-left-0 erix-h-full erix-w-3/4 erix-border-r data-[state=closed]:erix-slide-out-to-left data-[state=open]:erix-slide-in-from-left sm:erix-max-w-sm",
-          side === "erix-top" &&
+          side === "top" &&
             "erix-inset-x-0 erix-top-0 erix-h-auto erix-border-b data-[state=closed]:erix-slide-out-to-top data-[state=open]:erix-slide-in-from-top",
-          side === "erix-bottom" &&
+          side === "bottom" &&
             "erix-inset-x-0 erix-bottom-0 erix-h-auto erix-border-t data-[state=closed]:erix-slide-out-to-bottom data-[state=open]:erix-slide-in-from-bottom",
-          className
+          className,
         )}
         {...props}
       >
@@ -82,7 +82,7 @@ function SheetContent({
         )}
       </SheetPrimitive.Content>
     </SheetPortal>
-  )
+  );
 }
 
 function SheetHeader({ className, ...props }: React.ComponentProps<"div">) {
@@ -92,17 +92,20 @@ function SheetHeader({ className, ...props }: React.ComponentProps<"div">) {
       className={cn("erix-flex erix-flex-col erix-gap-1.5 erix-p-4", className)}
       {...props}
     />
-  )
+  );
 }
 
 function SheetFooter({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="sheet-footer"
-      className={cn("erix-mt-auto erix-flex erix-flex-col erix-gap-2 erix-p-4", className)}
+      className={cn(
+        "erix-mt-auto erix-flex erix-flex-col erix-gap-2 erix-p-4",
+        className,
+      )}
       {...props}
     />
-  )
+  );
 }
 
 function SheetTitle({
@@ -115,7 +118,7 @@ function SheetTitle({
       className={cn("erix-font-semibold erix-text-foreground", className)}
       {...props}
     />
-  )
+  );
 }
 
 function SheetDescription({
@@ -128,7 +131,7 @@ function SheetDescription({
       className={cn("erix-text-sm erix-text-muted-foreground", className)}
       {...props}
     />
-  )
+  );
 }
 
 export {
@@ -140,4 +143,4 @@ export {
   SheetFooter,
   SheetTitle,
   SheetDescription,
-}
+};

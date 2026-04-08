@@ -20,7 +20,15 @@ const TypeColor: Record<ErixNotificationType, string> = {
   info: "erix-text-primary",
 };
 
-export function ErixNotifications() {
+export interface ErixNotificationsProps {
+  /**
+   * Optional custom URL to navigate to for the full notifications page.
+   * If provided, clicking "View all" will use this absolute path.
+   */
+  notificationsUrl?: string;
+}
+
+export function ErixNotifications({ notificationsUrl }: ErixNotificationsProps) {
   const { notifications, unreadCount, dismissAll, dismiss, retry } = useErixNotifications();
   const { routes, navigateTo } = useErixRouter();
   const [open, setOpen] = React.useState(false);
@@ -59,7 +67,7 @@ export function ErixNotifications() {
         <Popover.Content
           align="end"
           sideOffset={8}
-          className="erix-z-50 erix-w-[340px] erix-rounded-xl erix-border erix-bg-background erix-shadow-xl erix-outline-none erix-flex erix-flex-col erix-overflow-hidden"
+          className="erix-z-[100] erix-w-[340px] erix-rounded-xl erix-border erix-bg-background erix-shadow-xl erix-outline-none erix-flex erix-flex-col erix-overflow-hidden"
         >
           {/* Header */}
           <div className="erix-px-4 erix-py-3 erix-border-b erix-flex erix-items-center erix-justify-between erix-bg-muted/30">
@@ -151,10 +159,17 @@ export function ErixNotifications() {
           </div>
 
           {/* Footer */}
-          {hasNotificationsRoute && displayNotifications.length > 0 && (
+          {(hasNotificationsRoute || notificationsUrl) && (
             <div className="erix-p-2 erix-border-t erix-bg-muted/30">
               <button
-                onClick={() => { navigateTo("notifications"); setOpen(false); }}
+                onClick={() => {
+                  if (notificationsUrl) {
+                    window.location.href = notificationsUrl;
+                  } else {
+                    navigateTo("notifications");
+                  }
+                  setOpen(false);
+                }}
                 className="erix-w-full erix-py-1.5 erix-text-center erix-text-xs erix-font-medium erix-text-primary hover:erix-bg-muted erix-rounded erix-transition-colors"
               >
                 View all notifications →

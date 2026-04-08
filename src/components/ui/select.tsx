@@ -76,7 +76,7 @@ const SelectContent = React.forwardRef<
       ref={ref}
       className={cn(
         "erix-relative erix-z-50 erix-max-h-96 erix-min-w-[8rem] erix-overflow-hidden erix-rounded-md erix-border erix-bg-popover erix-text-popover-foreground erix-shadow-md data-[state=open]:erix-animate-in data-[state=closed]:erix-animate-out data-[state=closed]:erix-fade-out-0 data-[state=open]:erix-fade-in-0 data-[state=closed]:erix-zoom-out-95 data-[state=open]:erix-zoom-in-95 data-[side=bottom]:erix-slide-in-from-top-2 data-[side=left]:erix-slide-in-from-right-2 data-[side=right]:erix-slide-in-from-left-2 data-[side=top]:erix-slide-in-from-bottom-2",
-        position === "erix-popper" &&
+        position === "popper" &&
           "data-[side=bottom]:erix-translate-y-1 data-[side=left]:erix--erix-translate-x-1 data-[side=right]:erix-translate-x-1 data-[side=top]:erix--erix-translate-y-1",
         className,
       )}
@@ -87,7 +87,7 @@ const SelectContent = React.forwardRef<
       <SelectPrimitive.Viewport
         className={cn(
           "erix-p-1",
-          position === "erix-popper" &&
+          position === "popper" &&
             "erix-h-[var(--radix-select-trigger-height)] erix-w-full erix-min-w-[var(--radix-select-trigger-width)]",
         )}
       >
@@ -143,7 +143,10 @@ const SelectSeparator = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <SelectPrimitive.Separator
     ref={ref}
-    className={cn("erix--erix-mx-1 erix-my-1 erix-h-px erix-bg-muted", className)}
+    className={cn(
+      "erix--erix-mx-1 erix-my-1 erix-h-px erix-bg-muted",
+      className,
+    )}
     {...props}
   />
 ));

@@ -134,7 +134,7 @@ export function InboxSidebar({
       });
 
       if (!result.success) {
-        throw new Error(result.error || "Failed to create chat");
+        throw new Error((result as any).error || "Failed to create chat");
       }
       const data = result.data?.data || result.data;
 
@@ -155,10 +155,13 @@ export function InboxSidebar({
 
     setIsDeleting(true);
     try {
-      const result = await sdk.whatsapp.conversations.bulkDelete<any>(selectedIds);
+      const result =
+        await sdk.whatsapp.conversations.bulkDelete<any>(selectedIds);
 
       if (!result.success) {
-        throw new Error(result.error || "Failed to delete conversations");
+        throw new Error(
+          (result as any).error || "Failed to delete conversations",
+        );
       }
 
       toast.success(`${selectedIds.length} conversations deleted`);
@@ -288,6 +291,13 @@ export function InboxSidebar({
                 key={chat.id || chat._id}
                 role="button"
                 tabIndex={0}
+                draggable
+                onDragStart={(e: React.DragEvent) => {
+                  e.dataTransfer.setData(
+                    "conversationId",
+                    String(chat.id || chat._id),
+                  );
+                }}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault();
@@ -356,7 +366,7 @@ export function InboxSidebar({
                           className={cn(
                             "erix-h-10 erix-w-10 erix-border",
                             colors.bg
-                              .split("")
+                              .split(" ")
                               .find((c) => c.startsWith("erix-border-")),
                           )}
                         >
@@ -493,7 +503,7 @@ export function InboxSidebar({
             <DialogFooter className="erix-pt-4">
               <Button
                 type="button"
-                variant="erix-outline"
+                variant="outline"
                 onClick={() => setIsNewChatOpen?.(false)}
                 className="erix-px-6 erix-cursor-pointer"
               >
@@ -540,7 +550,7 @@ export function InboxSidebar({
           </div>
           <DialogFooter>
             <Button
-              variant="erix-outline"
+              variant="outline"
               onClick={() => setIsDeleteDialogOpen(false)}
               disabled={isDeleting}
               pointer

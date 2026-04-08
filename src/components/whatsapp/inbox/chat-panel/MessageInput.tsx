@@ -1,34 +1,29 @@
 "use client";
 
-import React, { useRef, useState, useEffect, lazy, Suspense } from "react";
 import type { EmojiClickData } from "emoji-picker-react";
 import { AnimatePresence, motion } from "framer-motion";
+import dynamic from "next/dynamic";
+import { useRef, useState, useEffect } from "react";
 import {
   Smile,
-  Paperclip,
-  FileText,
+  Plus,
+  SendHorizontal,
+  Mic,
+  X,
   Image as ImageIcon,
-  Video as VideoIcon,
-  Volume2,
-  Search,
-  Loader2,
-  Check,
-  Link as LinkIcon,
+  Video,
+  FileText,
+  Camera,
   Layout,
   Type,
-  Send,
-  Mic,
-  StopCircle,
-  Trash2,
-  X,
-  RefreshCw,
-  Play,
-  Reply as ReplyIcon,
-  Eye,
+  Link as LinkIcon,
   Phone,
+  Check,
+  Eye,
+  Loader2,
+  Trash2,
+  Paperclip,
 } from "lucide-react";
-import { useErixClient } from "../../../../context/ErixProvider";
-import { useErixToast } from "../../../../toast/useErixToast";
 import { Button } from "../../../ui/button";
 import { Input } from "../../../ui/input";
 import { Label } from "../../../ui/label";
@@ -41,10 +36,19 @@ import {
   SheetHeader,
   SheetTitle,
 } from "../../../ui/sheet";
+import { useErixClient } from "../../../../context/ErixProvider";
+import { useErixToast } from "../../../../toast/useErixToast";
 import { cn } from "../../../../lib/utils";
 
-// Lazy loading for Emoji Picker to stay framework agnostic and light
-const EmojiPicker = lazy(() => import("emoji-picker-react"));
+// Dynamic loading for Emoji Picker
+const EmojiPicker = dynamic(() => import("emoji-picker-react"), {
+  ssr: false,
+  loading: () => (
+    <div className="erix-flex erix-items-center erix-justify-center erix-p-8">
+      <Loader2 className="erix-text-muted-foreground erix-h-8 erix-w-8 erix-animate-spin" />
+    </div>
+  ),
+});
 
 interface MessageInputProps {
   chat: any;
@@ -72,7 +76,7 @@ export function MessageInput({
   isSending,
   setIsSending,
 }: MessageInputProps) {
-  const client = useErixClient();
+  const sdk = useErixClient();
   const toast = useErixToast();
   const [messageInput, setMessageInput] = useState("");
   const [media, setMedia] = useState<
@@ -129,7 +133,9 @@ export function MessageInput({
           const file = new File(
             [audioBlob],
             `voice-message-${Date.now()}.webm`,
-            { type: "audio/webm" },
+            {
+              type: "audio/webm",
+            },
           );
 
           const newItem = {
@@ -194,10 +200,11 @@ export function MessageInput({
     if (templates.length > 0) return;
     setIsLoadingTemplates(true);
     try {
-      const result = await client.whatsapp.templates.list();
-      setTemplates(
-        Array.isArray(result) ? result : (result as any)?.data || [],
-      );
+      const result = await sdk.whatsapp.templates.list<any>();
+      if (!result.success)
+        throw new Error(result.error || "Failed to fetch templates");
+      const data = result.data?.data || result.data || [];
+      setTemplates(data);
     } catch (error) {
       console.error(error);
       toast.error("Failed to load templates");
@@ -224,16 +231,19 @@ export function MessageInput({
       setMessageInput("");
     }
 
-    // Smart Resolve Variables if lead exists
     const leadId = chat?.leadId || chat?.lead?.id || chat?.lead?._id;
     if (leadId && template.variablesCount > 0) {
       setIsResolvingVariables(true);
       try {
-        const result = await client.whatsapp.templates.preview(template.name, {
-          lead: leadId,
-        });
-        if (result && (result as any).variables) {
-          const resolved = (result as any).variables;
+        const result = await sdk.whatsapp.templates.preview<any>(
+          template.name,
+          {
+            lead: { leadId },
+          },
+        );
+
+        if (result.success && result.data?.variables) {
+          const resolved = result.data.variables;
           setTemplateVariables((prev) => {
             const next = [...prev];
             resolved.forEach((v: any) => {
@@ -266,10 +276,19 @@ export function MessageInput({
 
     try {
       if (selectedTemplate.headerType !== "NONE" && templateMedia) {
-        const result =
-          await client.whatsapp.messages.upload<any>(templateMedia);
-        finalMediaUrl = result.data?.url || (result as any)?.url!;
-        finalMediaType = result.data?.type || (result as any)?.type!;
+        const formData = new FormData();
+        formData.append("file", templateMedia);
+
+        const result = await sdk.whatsapp.upload<any>(
+          formData,
+          templateMedia.name,
+        );
+
+        if (!result.success)
+          throw new Error(result.error || "Failed to upload template media");
+        const data = result.data?.data || result.data;
+        finalMediaUrl = data.url;
+        finalMediaType = data.type;
       }
 
       setSelectedTemplate(null);
@@ -301,7 +320,6 @@ export function MessageInput({
     e.preventDefault();
     if ((!messageInput.trim() && media.length === 0) || isSending) return;
 
-    // WhatsApp 24-hour window check
     const lastUserMsg = chat?.lastUserMessageAt
       ? new Date(chat.lastUserMessageAt).getTime()
       : 0;
@@ -311,7 +329,7 @@ export function MessageInput({
 
     if (hoursDiff > 24) {
       toast.warning(
-        "This message might fail if it is not a pre-approved template.",
+        "24-hour active window has passed since the last user message.",
       );
     }
 
@@ -369,8 +387,17 @@ export function MessageInput({
     url: string;
   }) => {
     try {
-      const result = await client.whatsapp.messages.upload<any>(item.filename);
-      const data = result.data || result;
+      const formData = new FormData();
+      formData.append("file", item.filename);
+
+      const result = await sdk.whatsapp.upload<any>(
+        formData,
+        item.filename.name,
+      );
+
+      if (!result.success) throw new Error(result.error || "Upload failed");
+      const data = result.data?.data || result.data;
+
       setMedia((prev) =>
         prev.map((m) =>
           m.id === item.id
@@ -390,31 +417,24 @@ export function MessageInput({
       toast.error(`Failed to upload ${item.filename.name}`);
       setMedia((prev) =>
         prev.map((m) =>
-          m.id === item.id ? { ...m, isUploading: false, error: true } : m,
+          m.id === item.id
+            ? {
+                ...m,
+                isUploading: false,
+                error: true,
+              }
+            : m,
         ),
       );
     }
-  };
-
-  const handleRetryUpload = (id: string) => {
-    const item = media.find((m) => m.id === id);
-    if (!item) return;
-
-    setMedia((prev) =>
-      prev.map((m) =>
-        m.id === id ? { ...m, isUploading: true, error: false } : m,
-      ),
-    );
-
-    internalUploadFile(item);
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
-    if (media.length + files.length > 30) {
-      toast.error("Media files are exceeded (max 30)");
+    if (media.length + files.length > 10) {
+      toast.error("Media files limit exceeded (max 10)");
       if (fileInputRef.current) fileInputRef.current.value = "";
       return;
     }
@@ -460,6 +480,14 @@ export function MessageInput({
     }
   };
 
+  // Keyboard shortcut for templates
+  useEffect(() => {
+    if (messageInput === "/") {
+      setIsTemplateOpen(true);
+      fetchTemplates();
+    }
+  }, [messageInput]);
+
   return (
     <div className="erix-border-border erix-bg-[#f0f2f5] erix-relative erix-z-40 erix-border-t erix-p-3">
       <input
@@ -476,21 +504,22 @@ export function MessageInput({
         onOpenChange={(open) => !open && setSelectedTemplate(null)}
       >
         <SheetContent className="erix-w-full erix-gap-0 sm:erix-max-w-md">
-          <SheetHeader className="erix-bg-background erix-sticky erix-top-0 erix-z-4 erix-border-b erix-px-2 [.border-b]:erix-pb-4">
+          <SheetHeader className="erix-bg-background erix-sticky erix-top-0 erix-z-4 erix-border-b erix-px-2 [.erix-border-b]:erix-pb-4">
             <SheetTitle className="erix-flex erix-items-center erix-gap-2">
-              Send Template Message
+              Send Template Message{" "}
+              <Eye className="erix-h-4 erix-w-4 erix-text-muted-foreground" />
             </SheetTitle>
           </SheetHeader>
           {selectedTemplate && (
             <div className="erix-overflow-y-auto erix-p-2">
-              <div className="erix-bg-muted/30 erix-relative erix-space-y-2 erix-p-4 erix-ring-1 erix-ring-black/3">
+              <div className="erix-bg-muted/30 erix-relative erix-space-y-2 erix-p-4 erix-ring-1 erix-ring-black/5 erix-rounded-lg erix-mb-6">
                 <div className="erix-flex erix-items-center erix-justify-between">
                   <span className="erix-text-muted-foreground erix-text-[10px] erix-font-bold erix-tracking-widest erix-uppercase">
                     Template Preview
                   </span>
                   <div className="erix-bg-primary/10 erix-text-primary erix-flex erix-items-center erix-gap-1 erix-rounded-full erix-px-2 erix-py-0.5 erix-text-[10px] erix-font-bold">
                     <Check className="erix-h-3 erix-w-3" />
-                    APPROVE
+                    APPROVED
                   </div>
                 </div>
 
@@ -507,7 +536,9 @@ export function MessageInput({
                             return (
                               <motion.span
                                 key={`${i}-${value}`}
-                                animate={{ scale: value ? [1, 1.1, 1] : 1 }}
+                                animate={{
+                                  scale: value ? [1, 1.05, 1] : 1,
+                                }}
                                 className="erix-bg-primary/15 erix-text-primary erix-border-primary/20 erix-mx-0.5 erix-inline-flex erix-h-max erix-items-center erix-rounded erix-border erix-px-1 erix-text-[11px] erix-font-bold"
                               >
                                 {value || part}
@@ -523,12 +554,12 @@ export function MessageInput({
                         <ImageIcon className="erix-h-4 erix-w-4 erix-text-primary" />
                       )}
                       {selectedTemplate.headerType === "VIDEO" && (
-                        <VideoIcon className="erix-h-4 erix-w-4 erix-text-purple-500" />
+                        <Video className="erix-h-4 erix-w-4 erix-text-purple-500" />
                       )}
                       {selectedTemplate.headerType === "DOCUMENT" && (
                         <FileText className="erix-h-4 erix-w-4 erix-text-orange-500" />
                       )}
-                      Header {selectedTemplate.headerType?.toLowerCase()} will
+                      Header {selectedTemplate.headerType.toLowerCase()} will
                       appear here
                     </div>
                   ))}
@@ -544,7 +575,9 @@ export function MessageInput({
                         return (
                           <motion.span
                             key={`${i}-${value}`}
-                            animate={{ scale: value ? [1, 1.1, 1] : 1 }}
+                            animate={{
+                              scale: value ? [1, 1.05, 1] : 1,
+                            }}
                             className="erix-bg-primary/15 erix-text-primary erix-border-primary/20 erix-mx-0.5 erix-inline-flex erix-h-max erix-items-center erix-rounded erix-border erix-px-1 erix-text-[11px] erix-font-bold"
                           >
                             {value || part}
@@ -554,31 +587,6 @@ export function MessageInput({
                       return part;
                     })}
                 </div>
-
-                {selectedTemplate.footerText && (
-                  <p className="erix-text-muted-foreground/60 erix-text-[11px] erix-italic">
-                    {selectedTemplate.footerText}
-                  </p>
-                )}
-
-                {selectedTemplate.buttons?.length > 0 && (
-                  <div className="erix-mt-2 erix-flex erix-flex-col erix-gap-1.5 erix-border-t erix-border-dashed erix-pt-2">
-                    {selectedTemplate.buttons.map((btn: any, idx: number) => (
-                      <div
-                        key={idx}
-                        className="erix-bg-background erix-group hover:erix-bg-muted/50 erix-flex erix-items-center erix-justify-center erix-gap-2 erix-rounded-lg erix-border erix-py-2 erix-text-xs erix-font-semibold erix-text-primary-dark erix-transition-colors"
-                      >
-                        {btn.type === "URL" && (
-                          <LinkIcon className="erix-h-3 erix-w-3 erix-opacity-70" />
-                        )}
-                        {btn.type === "PHONE_NUMBER" && (
-                          <Phone className="erix-h-3 erix-w-3 erix-opacity-70" />
-                        )}
-                        {btn.text}
-                      </div>
-                    ))}
-                  </div>
-                )}
               </div>
 
               <div className="erix-space-y-4 erix-pt-2">
@@ -586,7 +594,7 @@ export function MessageInput({
                   <div className="erix-flex erix-items-center erix-gap-2 erix-rounded-lg erix-bg-primary/5 erix-p-3 erix-border erix-border-primary/10 erix-animate-pulse">
                     <Loader2 className="erix-h-4 erix-w-4 erix-animate-spin erix-text-primary" />
                     <span className="erix-text-xs erix-font-bold erix-text-primary">
-                      Autofilling variables from lead info...
+                      Autofilling variables...
                     </span>
                   </div>
                 )}
@@ -627,7 +635,7 @@ export function MessageInput({
                           Variable {i + 1}
                         </Label>
                         <Input
-                          placeholder="Value"
+                          placeholder="Enter value"
                           value={templateVariables[i] || ""}
                           onChange={(e) => {
                             const newVars = [...templateVariables];
@@ -640,362 +648,336 @@ export function MessageInput({
                   </div>
                 )}
               </div>
-              <SheetFooter className="erix-gap-2 erix-border-t sm:erix-space-x-0">
-                <div className="erix-grid erix-grid-cols-2 erix-flex-1 erix-w-full erix-gap-2">
-                  <Button
-                    variant="erix-outline"
-                    size="sm"
-                    onClick={() => setSelectedTemplate(null)}
-                    disabled={isSending}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    size="sm"
-                    onClick={handleSendFinalTemplate}
-                    disabled={isSending}
-                  >
-                    {isSending && (
-                      <Loader2 className="erix-mr-2 erix-h-4 erix-w-4 erix-animate-spin" />
-                    )}
-                    Send
-                  </Button>
-                </div>
-              </SheetFooter>
             </div>
           )}
+          <SheetFooter className="erix-gap-2 erix-border-t erix-p-4 sm:erix-space-x-0">
+            <div className="erix-grid erix-grid-cols-2 erix-flex-1 erix-w-full erix-gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setSelectedTemplate(null)}
+                disabled={isSending}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSendFinalTemplate}
+                disabled={
+                  isSending ||
+                  (selectedTemplate?.headerType !== "NONE" &&
+                    selectedTemplate?.headerType !== "TEXT" &&
+                    !templateMedia)
+                }
+              >
+                {isSending && (
+                  <Loader2 className="erix-mr-2 erix-h-4 erix-w-4 erix-animate-spin" />
+                )}
+                Send Template
+              </Button>
+            </div>
+          </SheetFooter>
         </SheetContent>
       </Sheet>
 
-      <div className="erix-mx-auto erix-flex erix-w-full erix-max-w-7xl erix-flex-col erix-gap-2 erix-overflow-hidden erix-min-w-0">
-        <AnimatePresence>
-          {replyingTo && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              className="erix-w-full erix-overflow-hidden"
-            >
-              <div className="erix-bg-muted/60 erix-border-primary erix-ring-border/50 erix-mb-1 erix-flex erix-w-full erix-items-center erix-gap-2 erix-rounded-lg erix-border-l-4 erix-p-2 erix-px-3 erix-shadow-sm erix-ring-1 erix-backdrop-blur-sm">
-                <div className="erix-min-w-0 erix-flex-1">
-                  <p className="erix-text-primary erix-flex erix-min-w-0 erix-items-center erix-gap-1.5 erix-text-[10px] erix-font-bold erix-uppercase">
-                    <ReplyIcon className="erix-h-3 erix-w-3 erix-shrink-0" />
-                    <span className="erix-truncate erix-flex-1">
-                      Replying to{" "}
-                      {replyingTo.direction === "outbound" ? "You" : chat.name}
+      {/* Replying To Panel */}
+      <AnimatePresence>
+        {replyingTo && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="erix-bg-[#f0f2f5] erix-relative erix-overflow-hidden erix-rounded-t-lg erix-border-b erix-px-4 erix-py-2"
+          >
+            <div className="erix-border-primary erix-bg-background erix-flex erix-items-center erix-justify-between erix-rounded-md erix-border-l-4 erix-p-2 erix-shadow-sm">
+              <div className="erix-min-w-0 erix-flex-1">
+                <p className="erix-text-primary erix-text-[10px] erix-font-bold erix-uppercase">
+                  {replyingTo.fromMe ? "You" : chat.name}
+                </p>
+                <p className="erix-text-muted-foreground erix-truncate erix-text-xs">
+                  {replyingTo.body || replyingTo.caption || "Media message"}
+                </p>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="erix-h-6 erix-w-6"
+                onClick={() => setReplyingTo(null)}
+              >
+                <X className="erix-h-3 erix-w-3" />
+              </Button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Media Preview Row */}
+      <AnimatePresence>
+        {media.length > 0 && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            className="erix-flex erix-gap-2 erix-overflow-x-auto erix-pb-2 erix-pt-1"
+          >
+            {media.map((item, idx) => (
+              <div
+                key={item.id}
+                className="erix-relative erix-h-16 erix-w-16 erix-flex-shrink-0"
+              >
+                {item.type === "image" ? (
+                  <img
+                    src={item.url}
+                    alt="preview"
+                    className="erix-h-full erix-w-full erix-rounded erix-object-cover"
+                  />
+                ) : (
+                  <div className="erix-bg-muted erix-flex erix-h-full erix-w-full erix-flex-col erix-items-center erix-justify-center erix-rounded">
+                    {item.type === "video" ? (
+                      <Video className="erix-h-6 erix-w-6" />
+                    ) : (
+                      <FileText className="erix-h-6 erix-w-6" />
+                    )}
+                    <span className="erix-mt-1 erix-max-w-[50px] erix-truncate erix-text-[8px]">
+                      {item.filename.name}
                     </span>
-                  </p>
-                  <p className="erix-text-muted-foreground erix-truncate erix-text-xs erix-italic">
-                    {replyingTo.text || `Shared ${replyingTo.type}`}
-                  </p>
-                </div>
+                  </div>
+                )}
+                <button
+                  onClick={() => removeMedia(idx)}
+                  className="erix-bg-destructive erix-absolute erix--erix-right-1 erix--erix-top-1 erix-flex erix-h-4 erix-w-4 erix-items-center erix-justify-center erix-rounded-full erix-text-white"
+                >
+                  <X className="erix-h-2 erix-w-2" />
+                </button>
+                {item.isUploading && (
+                  <div className="erix-bg-black/20 erix-absolute erix-inset-0 erix-flex erix-items-center erix-justify-center">
+                    <Loader2 className="erix-h-4 erix-w-4 erix-animate-spin erix-text-white" />
+                  </div>
+                )}
+              </div>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div className="erix-flex erix-items-end erix-gap-2">
+        <div className="erix-flex erix-items-center erix-gap-1">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="erix-text-muted-foreground erix-h-9 erix-w-9"
+              >
+                <Smile className="erix-h-5 erix-w-5" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent
+              side="top"
+              align="start"
+              className="erix-w-auto erix-border-none erix-p-0"
+            >
+              <EmojiPicker onEmojiClick={onEmojiClick} />
+            </PopoverContent>
+          </Popover>
+
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="erix-text-muted-foreground erix-h-9 erix-w-9"
+              >
+                <Plus className="erix-h-5 erix-w-5" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent
+              side="top"
+              align="start"
+              className="erix-w-48 erix-p-1"
+            >
+              <div className="erix-grid erix-grid-cols-1 erix-gap-1">
                 <Button
                   variant="ghost"
-                  size="icon"
-                  className="erix-h-7 erix-w-7 erix-shrink-0 erix-rounded-full"
-                  onClick={() => setReplyingTo(null)}
+                  size="sm"
+                  className="erix-justify-start erix-gap-2 erix-text-xs"
+                  onClick={() => handleFileClick("image/*")}
                 >
-                  <X className="erix-h-4 erix-w-4" />
+                  <ImageIcon className="erix-h-4 erix-w-4 erix-text-primary" />{" "}
+                  Image
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="erix-justify-start erix-gap-2 erix-text-xs"
+                  onClick={() => handleFileClick("video/*")}
+                >
+                  <Video className="erix-h-4 erix-w-4 erix-text-purple-500" />{" "}
+                  Video
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="erix-justify-start erix-gap-2 erix-text-xs"
+                  onClick={() => handleFileClick(".pdf,.doc,.docx,.xls,.xlsx")}
+                >
+                  <FileText className="erix-h-4 erix-w-4 erix-text-orange-500" />{" "}
+                  Document
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="erix-justify-start erix-gap-2 erix-text-xs"
+                  onClick={() => {
+                    setIsTemplateOpen(true);
+                    fetchTemplates();
+                  }}
+                >
+                  <Layout className="erix-h-4 erix-w-4 erix-text-blue-500" />{" "}
+                  Template
                 </Button>
               </div>
-            </motion.div>
-          )}
-
-          {media.length > 0 && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              className="erix-overflow-hidden erix-min-w-0"
-            >
-              <ScrollArea className="erix-bg-muted/40 erix-border-border erix-mb-1 erix-w-full erix-rounded-md erix-border erix-p-1 erix-shadow-inner">
-                <div className="erix-flex erix-w-max erix-space-x-2 erix-p-1">
-                  {media.map((m, i) => (
-                    <div
-                      key={i}
-                      className="erix-group erix-border-border erix-bg-background erix-relative erix-w-10 erix-h-10 lg:erix-h-16 lg:erix-w-16 erix-shrink-0 erix-overflow-hidden erix-rounded-md erix-border erix-shadow-sm"
-                    >
-                      {m.type === "image" ? (
-                        <img
-                          src={m.url}
-                          className="erix-h-full erix-w-full erix-object-cover"
-                        />
-                      ) : (
-                        <div className="erix-bg-muted/20 erix-flex erix-h-full erix-w-full erix-flex-col erix-items-center erix-justify-center erix-p-1">
-                          <FileText className="erix-h-4 erix-w-4 erix-opacity-50" />
-                          <span className="erix-w-full erix-truncate erix-text-[8px] erix-font-medium erix-uppercase">
-                            {m.type}
-                          </span>
-                        </div>
-                      )}
-                      <button
-                        onClick={() => removeMedia(i)}
-                        className="erix-bg-destructive/90 erix-absolute erix-top-0.5 erix-right-0.5 erix-z-20 erix-rounded-full erix-p-0.5 erix-text-white erix-opacity-0 group-hover:erix-opacity-100"
-                      >
-                        <X className="erix-h-2.5 erix-w-2.5" />
-                      </button>
-                      {m.isUploading && (
-                        <div className="erix-absolute erix-inset-0 erix-z-10 erix-flex erix-items-center erix-justify-center erix-bg-black/40 erix-backdrop-blur-[1px]">
-                          <Loader2 className="erix-h-4 erix-w-4 erix-animate-spin erix-text-white" />
-                        </div>
-                      )}
-                      {m.error && !m.isUploading && (
-                        <div className="erix-absolute erix-inset-0 erix-z-10 erix-flex erix-items-center erix-justify-center erix-bg-destructive/20">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="erix-h-6 erix-w-6 erix-text-white hover:erix-bg-white/20"
-                            onClick={() => handleRetryUpload(m.id)}
-                          >
-                            <RefreshCw className="erix-h-3 erix-w-3" />
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-                <ScrollBar orientation="horizontal" className="erix-h-1.5" />
-              </ScrollArea>
-            </motion.div>
-          )}
-        </AnimatePresence>
+            </PopoverContent>
+          </Popover>
+        </div>
 
         <form
           onSubmit={handleSendMessage}
-          className="erix-bg-[#f0f2f5] erix-flex erix-h-12 erix-w-full erix-items-center erix-gap-1.5 erix-min-w-0"
+          className="erix-flex erix-1 erix-min-w-0 erix-items-center erix-gap-2 erix-w-full"
         >
-          <div className="erix-flex erix-items-center">
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="erix-text-muted-foreground hover:erix-text-primary erix-shrink-0"
-                >
-                  <Smile className="erix-h-4 erix-w-4" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent
-                side="top"
-                align="start"
-                className="erix-z-[100] erix-w-auto erix-border-none erix-p-0 erix-shadow-xl"
-              >
-                <Suspense
-                  fallback={
-                    <div className="erix-p-4">
-                      <Loader2 className="erix-animate-spin" />
-                    </div>
-                  }
-                >
-                  <EmojiPicker onEmojiClick={onEmojiClick} />
-                </Suspense>
-              </PopoverContent>
-            </Popover>
-
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="erix-text-[#54656f] hover:erix-bg-black/5 erix-shrink-0"
-                >
-                  <Paperclip className="erix-h-4 erix-w-4 erix-rotate-45" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent
-                side="top"
-                align="start"
-                sideOffset={15}
-                className="erix-w-auto erix-p-2 erix-pb-3 erix-mb-2 erix-rounded-md erix-border-none erix-shadow-md erix-bg-white/95 erix-backdrop-blur-md erix-ring-1 erix-ring-black/5"
-              >
-                <div className="erix-flex erix-flex-col erix-gap-1.5 erix-min-w-[160px]">
-                  <Button
-                    variant="ghost"
-                    onClick={() =>
-                      handleFileClick(
-                        ".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt",
-                      )
-                    }
-                    className="erix-flex erix-items-center erix-justify-start erix-gap-3 erix-px-3 erix-py-6 erix-rounded-md hover:erix-bg-black/5"
-                  >
-                    <div className="erix-flex erix-h-9 erix-w-9 erix-items-center erix-justify-center erix-rounded-full erix-bg-primary erix-text-white">
-                      <FileText className="erix-h-4 erix-w-4" />
-                    </div>
-                    <span className="erix-text-sm erix-font-medium">
-                      Document
-                    </span>
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    onClick={() => handleFileClick("image/*,video/*")}
-                    className="erix-flex erix-items-center erix-justify-start erix-gap-3 erix-px-3 erix-py-6 erix-rounded-md hover:erix-bg-black/5"
-                  >
-                    <div className="erix-flex erix-h-9 erix-w-9 erix-items-center erix-justify-center erix-rounded-full erix-bg-pink-500 erix-text-white">
-                      <ImageIcon className="erix-h-4 erix-w-4" />
-                    </div>
-                    <span className="erix-text-sm erix-font-medium">
-                      Photos & Videos
-                    </span>
-                  </Button>
-                </div>
-              </PopoverContent>
-            </Popover>
-
-            <Popover
-              open={isTemplateOpen}
-              onOpenChange={(open) => {
-                setIsTemplateOpen(open);
-                if (open) fetchTemplates();
-              }}
-            >
-              <PopoverTrigger asChild>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="erix-text-muted-foreground hover:erix-text-primary erix-shrink-0"
-                >
-                  <FileText className="erix-h-4 erix-w-4" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent
-                side="top"
-                align="start"
-                sideOffset={15}
-                alignOffset={-14}
-                className="erix-border-border erix-bg-background/95 erix-z-[100] erix-w-80 erix-overflow-hidden erix-rounded-lg erix-p-0 erix-shadow-md erix-ring-1 erix-ring-black/5 erix-backdrop-blur-xl"
-              >
-                <div className="erix-bg-muted/40 erix-flex erix-flex-col erix-gap-2 erix-border-b erix-p-3">
-                  <div className="erix-relative">
-                    <Search className="erix-text-muted-foreground/60 erix-absolute erix-top-1/2 erix-left-3 erix-h-4 erix-w-4 erix--erix-translate-y-1/2" />
-                    <Input
-                      placeholder="Search templates..."
-                      value={templateSearch}
-                      onChange={(e) => setTemplateSearch(e.target.value)}
-                      className="erix-bg-background erix-h-9 erix-rounded-lg erix-border-none erix-pl-9 erix-text-xs erix-ring-1 erix-ring-border/50"
-                    />
-                  </div>
-                </div>
-                <ScrollArea className="erix-h-[280px]">
-                  {isLoadingTemplates ? (
-                    <div className="erix-flex erix-h-48 erix-flex-col erix-items-center erix-justify-center erix-gap-3 erix-p-4">
-                      <Loader2 className="erix-h-7 erix-w-7 erix-animate-spin erix-text-primary/40" />
-                    </div>
-                  ) : filteredTemplates.length === 0 ? (
-                    <div className="erix-text-muted-foreground erix-flex erix-h-40 erix-flex-col erix-items-center erix-justify-center erix-p-8 erix-text-center erix-text-xs erix-italic erix-opacity-60">
-                      No matching templates found.
-                    </div>
-                  ) : (
-                    <div className="erix-grid erix-gap-1 erix-p-1.5">
-                      {filteredTemplates.map((template, i) => (
-                        <button
-                          key={i}
-                          onClick={() => handleTemplateSelect(template)}
-                          className="hover:erix-bg-primary/5 erix-group erix-flex erix-flex-col erix-items-start erix-gap-1 erix-rounded-md erix-p-2.5 erix-text-left erix-transition-all active:erix-scale-[0.98]"
-                        >
-                          <span className="group-hover:erix-text-primary erix-truncate erix-text-xs erix-font-bold">
-                            {template.name}
-                          </span>
-                          <p className="erix-text-muted-foreground erix-line-clamp-1 erix-text-[10px] erix-opacity-60">
-                            {template.components?.find(
-                              (c: any) => c.type === "BODY",
-                            )?.text || "No preview"}
-                          </p>
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </ScrollArea>
-              </PopoverContent>
-            </Popover>
+          <div className="erix-bg-background erix-relative erix-flex erix-flex-1 erix-items-center erix-rounded-lg erix-px-3 erix-py-1">
+            <Input
+              value={messageInput}
+              onChange={(e) => setMessageInput(e.target.value)}
+              placeholder="Type a message or use / for templates"
+              className="erix-h-9 erix-border-none erix-bg-transparent erix-p-0 erix-shadow-none focus-visible:erix-ring-0"
+              disabled={isRecording}
+            />
           </div>
 
-          <div className="erix-flex-1 erix-relative erix-flex erix-items-center erix-min-w-0">
-            <AnimatePresence mode="wait">
-              {isRecording ? (
-                <motion.div
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  className="erix-bg-white erix-flex erix-h-9 erix-flex-1 erix-items-center erix-justify-between erix-rounded-full erix-px-4 erix-text-sm erix-shadow-sm lg:erix-h-10 erix-border erix-border-primary/10"
+          <AnimatePresence mode="wait">
+            {messageInput.trim() || media.length > 0 ? (
+              <motion.div
+                key="send"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                exit={{ scale: 0 }}
+              >
+                <Button
+                  type="submit"
+                  size="icon"
+                  className="erix-h-9 erix-w-9 erix-rounded-full"
+                  disabled={isSending}
                 >
-                  <div className="erix-flex erix-items-center erix-gap-3">
-                    <motion.div
-                      animate={{ opacity: [1, 0.3, 1] }}
-                      transition={{ duration: 2, repeat: Infinity }}
-                      className="erix-bg-destructive erix-h-2.5 erix-w-2.5 erix-rounded-full"
-                    />
-                    <span className="erix-font-mono erix-text-sm erix-font-medium">
+                  <SendHorizontal className="erix-h-5 erix-w-5" />
+                </Button>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="action"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                exit={{ scale: 0 }}
+              >
+                {isRecording ? (
+                  <div className="erix-flex erix-items-center erix-gap-2">
+                    <span className="erix-text-destructive erix-animate-pulse erix-text-xs erix-font-bold">
                       {formatTime(recordingTime)}
                     </span>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="erix-text-destructive erix-h-9 erix-w-9"
+                      onClick={cancelRecording}
+                    >
+                      <Trash2 className="erix-h-5 erix-w-5" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="erix-bg-primary erix-text-primary-foreground erix-h-9 erix-w-9 erix-rounded-full"
+                      onClick={stopRecording}
+                    >
+                      <SendHorizontal className="erix-h-5 erix-w-5" />
+                    </Button>
                   </div>
+                ) : (
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="erix-text-muted-foreground/60 hover:erix-text-destructive erix-h-8 erix-w-8 erix-rounded-full"
-                    onClick={cancelRecording}
+                    className="erix-text-muted-foreground erix-h-9 erix-w-9"
+                    onClick={startRecording}
                   >
-                    <Trash2 className="erix-h-4 erix-w-4" />
+                    <Mic className="erix-h-5 erix-w-5" />
                   </Button>
-                </motion.div>
-              ) : (
-                <Input
-                  placeholder="Type a message..."
-                  value={messageInput}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    setMessageInput(val);
-                    if (val.startsWith("/")) {
-                      if (!isTemplateOpen) {
-                        setIsTemplateOpen(true);
-                        fetchTemplates();
-                      }
-                    } else if (isTemplateOpen && !val.includes("/")) {
-                      setIsTemplateOpen(false);
-                    }
-                  }}
-                  className="erix-bg-white erix-border-none focus-visible:erix-ring-0 erix-h-9 erix-flex-1 erix-rounded-full erix-px-4 erix-text-sm erix-shadow-sm lg:erix-h-10 placeholder:erix-text-muted-foreground/50"
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey) {
-                      e.preventDefault();
-                      handleSendMessage(e);
-                    }
-                  }}
-                />
-              )}
-            </AnimatePresence>
-          </div>
-
-          <Button
-            type={messageInput.trim() || media.length > 0 ? "submit" : "button"}
-            size="icon"
-            onClick={() => {
-              if (isRecording) stopRecording();
-              else if (!messageInput.trim() && media.length === 0)
-                startRecording();
-            }}
-            className={cn(
-              "erix-h-9 erix-w-9 erix-shrink-0 erix-rounded-full lg:erix-h-10 lg:erix-w-10 erix-shadow-sm erix-transition-all",
-              messageInput.trim() || media.length > 0 || isRecording
-                ? "erix-bg-[#00a884] hover:erix-bg-[#008f6f]"
-                : "erix-bg-transparent hover:erix-bg-black/5 erix-text-muted-foreground",
+                )}
+              </motion.div>
             )}
-            disabled={media.some((m) => m.isUploading || m.error) || isSending}
-          >
-            {isSending ? (
-              <Loader2 className="erix-h-4 erix-w-4 erix-animate-spin" />
-            ) : isRecording ? (
-              <StopCircle className="erix-h-4 erix-w-4 lg:erix-h-5 lg:erix-w-5 erix-text-white erix-fill-current" />
-            ) : messageInput.trim() || media.length > 0 ? (
-              <Send className="erix-h-4 erix-w-4 lg:erix-h-5 lg:erix-w-5 erix-ml-0.5 erix-text-white" />
-            ) : (
-              <Mic className="erix-h-4 erix-w-4 lg:erix-h-5 lg:erix-w-5" />
-            )}
-          </Button>
+          </AnimatePresence>
         </form>
       </div>
+
+      {/* Template Chooser Popover */}
+      <AnimatePresence>
+        {isTemplateOpen && (
+          <div className="erix-absolute erix-bottom-full erix-left-0 erix-w-full erix-p-2">
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 20, opacity: 0 }}
+              className="erix-bg-background erix-border erix-rounded-lg erix-shadow-xl erix-max-h-[300px] erix-flex erix-flex-col"
+            >
+              <div className="erix-border-b erix-p-2">
+                <Input
+                  autoFocus
+                  placeholder="Search templates..."
+                  value={templateSearch}
+                  onChange={(e) => setTemplateSearch(e.target.value)}
+                  className="erix-h-8"
+                />
+              </div>
+              <ScrollArea className="erix-flex-1">
+                <div className="erix-p-1">
+                  {isLoadingTemplates ? (
+                    <div className="erix-p-4 erix-text-center">
+                      <Loader2 className="erix-h-4 erix-w-4 erix-animate-spin erix-mx-auto" />
+                    </div>
+                  ) : filteredTemplates.length === 0 ? (
+                    <div className="erix-p-4 erix-text-center erix-text-xs erix-text-muted-foreground">
+                      No templates found
+                    </div>
+                  ) : (
+                    filteredTemplates.map((t) => (
+                      <button
+                        key={t.id}
+                        onClick={() => handleTemplateSelect(t)}
+                        className="erix-flex erix-w-full erix-flex-col erix-items-start erix-rounded-md erix-p-2 erix-text-left hover:erix-bg-muted"
+                      >
+                        <span className="erix-text-xs erix-font-bold">
+                          {t.name}
+                        </span>
+                        <span className="erix-text-muted-foreground erix-line-clamp-1 erix-text-[10px]">
+                          {t.bodyText}
+                        </span>
+                      </button>
+                    ))
+                  )}
+                </div>
+              </ScrollArea>
+              <div className="erix-bg-muted/50 erix-flex erix-items-center erix-justify-between erix-px-3 erix-py-2 erix-border-t">
+                <span className="erix-text-[10px] erix-font-medium text-muted-foreground">
+                  Quick access templates
+                </span>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="erix-h-5 erix-w-5"
+                  onClick={() => setIsTemplateOpen(false)}
+                >
+                  <X className="erix-h-3 erix-w-3" />
+                </Button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -9,6 +9,9 @@ import {
   Trash2,
   Loader2,
   AlertCircle,
+  Phone,
+  Mail,
+  User,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "../../../ui/avatar";
 import { Button } from "../../../ui/button";
@@ -159,8 +162,7 @@ export function ChatWindow({
       );
       if (!result.success)
         throw new Error(result.error || "Failed to toggle star");
-      const data = result.data?.data || result.data;
-      toast.success(data.isStarred ? "Message starred" : "Message unstarred");
+      toast.success(isStarred ? "Message starred" : "Message unstarred");
     } catch (err: any) {
       toast.error(err.message || "Failed to update star");
     }
@@ -199,63 +201,82 @@ export function ChatWindow({
           >
             <ArrowLeft className="erix-h-5 erix-w-5" />
           </Button>
-          <Avatar className="erix-h-10 erix-w-10">
+          <Avatar className="erix-h-10 erix-w-10 erix-border erix-border-white/20">
             <AvatarImage src={chat.profilePicture} alt={chat.name} />
-            <AvatarFallback className="erix-bg-primary/10 erix-text-primary">
-              {chat.avatar || (chat.name || "U").slice(0, 2).toUpperCase()}
+            <AvatarFallback className="erix-bg-primary/10 erix-text-primary erix-font-bold">
+              {(chat.name || "U").slice(0, 2).toUpperCase()}
             </AvatarFallback>
           </Avatar>
           <div className="erix-flex erix-flex-col erix-justify-center erix-min-w-0">
-            <h2 className="erix-text-sm erix-leading-none erix-font-semibold erix-truncate">
-              {chat.name}
-            </h2>
-            <p className="erix-text-muted-foreground erix-mt-1 erix-text-[10px] erix-leading-none erix-truncate">
+            <div className="erix-flex erix-items-center erix-gap-2">
+              <h2 className="erix-text-sm erix-leading-none erix-font-bold erix-truncate">
+                {chat.name}
+              </h2>
+              {chat.leadId && (
+                <div className="erix-bg-primary/10 erix-text-primary erix-text-[8px] erix-px-1 erix-rounded erix-font-bold erix-uppercase erix-tracking-tighter">
+                  CRM LEAD
+                </div>
+              )}
+            </div>
+            <p className="erix-text-muted-foreground erix-mt-1 erix-text-[10px] erix-leading-none erix-truncate erix-font-medium">
               {chat.phone}
             </p>
           </div>
         </div>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            asChild
-            className="data-[state=open]:erix-bg-accent/40 focus-visible:erix-ring-0 focus-visible:erix-outline-0 erix-ring-0 erix-outline-0"
+        <div className="erix-flex erix-items-center erix-gap-1">
+          <TooltipButton
+             variant="ghost"
+             size="icon"
+             className="erix-text-muted-foreground erix-h-9 erix-w-9"
+             tooltip="Refresh messages"
+             onClick={onRefresh}
           >
-            <TooltipButton
-              variant="ghost"
-              size="icon"
-              className="erix-text-muted-foreground"
-              tooltip="More actions"
-              aria-label={`More actions for ${chat.name}`}
-            >
-              <MoreVertical className="erix-h-4 erix-w-4" />
-            </TooltipButton>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="erix-w-48">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            {!chat.leadId && (
-              <DropdownMenuItem
-                onClick={() => setIsConvertOpen(true)}
-                className="erix-gap-2"
-              >
-                <UserPlus className="erix-h-4 erix-w-4" />
-                <span>Convert to Lead</span>
-              </DropdownMenuItem>
-            )}
-            <DropdownMenuItem onClick={onRefresh} className="erix-gap-2">
-              <RefreshCcw className="erix-h-4 erix-w-4" />
-              <span>Refresh</span>
-            </DropdownMenuItem>
+            <RefreshCcw className="erix-h-4 erix-w-4" />
+          </TooltipButton>
 
-            <DropdownMenuItem
-              onClick={() => setIsDeleteOpen(true)}
-              className="erix-gap-2 erix-text-destructive focus:erix-text-destructive"
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              asChild
+              className="data-[state=open]:erix-bg-accent/40 focus-visible:erix-ring-0 focus-visible:erix-outline-0 erix-ring-0 erix-outline-0"
             >
-              <Trash2 className="erix-h-4 erix-w-4" />
-              <span>Delete Conversation</span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+              <TooltipButton
+                variant="ghost"
+                size="icon"
+                className="erix-text-muted-foreground erix-h-9 erix-w-9"
+                tooltip="More actions"
+              >
+                <MoreVertical className="erix-h-4 erix-w-4" />
+              </TooltipButton>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="erix-w-56">
+              <DropdownMenuLabel>Conversation Actions</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {!chat.leadId && (
+                <DropdownMenuItem
+                  onClick={() => setIsConvertOpen(true)}
+                  className="erix-gap-2"
+                >
+                  <UserPlus className="erix-h-4 erix-w-4" />
+                  <span>Convert to CRM Lead</span>
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuItem onClick={onRefresh} className="erix-gap-2">
+                <RefreshCcw className="erix-h-4 erix-w-4" />
+                <span>Sync with Server</span>
+              </DropdownMenuItem>
+
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => setIsDeleteOpen(true)}
+                className="erix-gap-2 erix-text-destructive focus:erix-text-destructive"
+              >
+                <Trash2 className="erix-h-4 erix-w-4" />
+                <span>Delete Forever</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
 
       {/* Chat Messages */}
@@ -286,110 +307,71 @@ export function ChatWindow({
 
       {/* Dialogs */}
       <Dialog open={isConvertOpen} onOpenChange={setIsConvertOpen}>
-        <DialogContent>
+        <DialogContent className="erix-sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Convert to Lead</DialogTitle>
+            <DialogTitle>CRM Integration</DialogTitle>
           </DialogHeader>
           {isCheckingLead ? (
             <div className="erix-flex erix-h-40 erix-flex-col erix-items-center erix-justify-center erix-gap-3">
               <Loader2 className="erix-h-8 erix-w-8 erix-animate-spin erix-text-primary" />
               <p className="erix-text-sm erix-text-muted-foreground erix-font-medium">
-                Checking for existing lead...
+                Scanning lead database...
               </p>
             </div>
           ) : existingLead ? (
             <div className="erix-space-y-6 erix-py-2">
               <div className="erix-rounded-lg erix-bg-amber-50 erix-border erix-border-amber-200 erix-p-4 erix-space-y-2">
-                <div className="erix-flex erix-items-center erix-gap-2 erix-text-amber-800 erix-font-semibold erix-text-sm">
+                <div className="erix-flex erix-items-center erix-gap-2 erix-text-amber-800 erix-font-bold erix-text-sm">
                   <AlertCircle className="erix-h-4 erix-w-4" />
-                  Lead Already Exists
+                  Exact Match Found
                 </div>
                 <p className="erix-text-xs erix-text-amber-700 erix-leading-relaxed">
-                  A lead with the phone number{" "}
-                  <span className="erix-font-bold">{chat.phone}</span> is
-                  already registered in your CRM.
+                  The number <span className="erix-font-bold">{chat.phone}</span> belongs to an existing lead.
                 </p>
               </div>
 
-              <div className="erix-space-y-3">
-                <div className="erix-flex erix-items-center erix-gap-3 erix-p-3 erix-rounded-md erix-border erix-border-border erix-bg-muted/30">
-                  <div className="erix-h-10 erix-w-10 erix-rounded-full erix-bg-primary/10 erix-text-primary erix-flex erix-items-center erix-justify-center erix-font-bold erix-text-sm">
-                    {(existingLead.firstName?.[0] || "") +
-                      (existingLead.lastName?.[0] || "")}
-                  </div>
-                  <div>
-                    <h4 className="erix-text-sm erix-font-bold erix-text-foreground">
-                      {existingLead.firstName} {existingLead.lastName}
-                    </h4>
-                    <p className="erix-text-xs erix-text-muted-foreground">
-                      {existingLead.email || "No email provided"}
-                    </p>
-                  </div>
+              <div className="erix-flex erix-items-center erix-gap-3 erix-p-4 erix-rounded-xl erix-border erix-bg-muted/50">
+                <Avatar className="erix-h-12 erix-w-12">
+                   <AvatarFallback className="erix-bg-primary/20 erix-text-primary erix-font-bold text-lg">
+                      {(existingLead.firstName?.[0] || "") + (existingLead.lastName?.[0] || "")}
+                   </AvatarFallback>
+                </Avatar>
+                <div>
+                  <h4 className="erix-text-sm erix-font-bold">{existingLead.firstName} {existingLead.lastName}</h4>
+                  <p className="erix-text-xs erix-text-muted-foreground">{existingLead.email || "No email"}</p>
                 </div>
               </div>
 
-              <div className="erix-flex erix-flex-col erix-gap-2">
-                <Button
-                  onClick={() => handleConvertToLead(null, existingLead._id)}
-                  disabled={isConverting}
-                  className="erix-w-full erix-h-11"
-                >
-                  {isConverting && (
-                    <Loader2 className="erix-mr-2 erix-h-4 erix-w-4 erix-animate-spin" />
-                  )}
-                  Merge Conversation into Lead
+              <div className="erix-grid erix-grid-cols-1 erix-gap-2">
+                <Button onClick={() => handleConvertToLead(null, existingLead._id)} disabled={isConverting}>
+                  {isConverting && <Loader2 className="erix-mr-2 erix-h-4 erix-w-4 erix-animate-spin" />}
+                  Merge Workspace
                 </Button>
-                <Button
-                  variant="erix-outline"
-                  onClick={() => setIsConvertOpen(false)}
-                  disabled={isConverting}
-                  className="erix-w-full erix-h-11"
-                >
-                  Skip & Close
-                </Button>
-              </div>
-              <p className="erix-text-[10px] erix-text-center erix-text-muted-foreground erix-uppercase erix-tracking-widest erix-font-medium">
-                You cannot create duplicate leads with the same number
-              </p>
-            </div>
-          ) : (
-            <form
-              onSubmit={(e) => handleConvertToLead(e)}
-              className="erix-space-y-4"
-            >
-              <div className="erix-space-y-2">
-                <Label htmlFor="leadName">Full Name</Label>
-                <Input
-                  id="leadName"
-                  value={leadName}
-                  placeholder="Enter contact name"
-                  onChange={(e) => setLeadName(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="erix-space-y-2">
-                <Label htmlFor="leadEmail">Email (Optional)</Label>
-                <Input
-                  id="leadEmail"
-                  type="email"
-                  placeholder="email@example.com"
-                  value={leadEmail}
-                  onChange={(e) => setLeadEmail(e.target.value)}
-                />
-              </div>
-              <DialogFooter className="erix-pt-2">
-                <Button
-                  type="button"
-                  variant="erix-outline"
-                  onClick={() => setIsConvertOpen(false)}
-                >
+                <Button variant="outline" onClick={() => setIsConvertOpen(false)} disabled={isConverting}>
                   Cancel
                 </Button>
-                <Button type="submit" disabled={isConverting}>
-                  {isConverting && (
-                    <Loader2 className="erix-mr-2 erix-h-4 erix-w-4 erix-animate-spin" />
-                  )}
-                  Save & Link Lead
+              </div>
+            </div>
+          ) : (
+            <form onSubmit={(e) => handleConvertToLead(e)} className="erix-space-y-4">
+              <div className="erix-space-y-2">
+                <Label className="erix-text-[10px] erix-font-bold erix-uppercase erix-tracking-widest erix-text-muted-foreground">Full Name</Label>
+                <div className="erix-relative">
+                   <User className="erix-absolute erix-left-3 erix-top-2.5 erix-h-4 erix-w-4 erix-text-muted-foreground" />
+                   <Input value={leadName} onChange={(e) => setLeadName(e.target.value)} placeholder="John Doe" className="erix-pl-9" required />
+                </div>
+              </div>
+              <div className="erix-space-y-2">
+                <Label className="erix-text-[10px] erix-font-bold erix-uppercase erix-tracking-widest erix-text-muted-foreground">Email</Label>
+                <div className="erix-relative">
+                   <Mail className="erix-absolute erix-left-3 erix-top-2.5 erix-h-4 erix-w-4 erix-text-muted-foreground" />
+                   <Input value={leadEmail} onChange={(e) => setLeadEmail(e.target.value)} placeholder="john@example.com" className="erix-pl-9" type="email" />
+                </div>
+              </div>
+              <DialogFooter className="erix-pt-4">
+                <Button type="submit" disabled={isConverting} className="erix-w-full">
+                  {isConverting && <Loader2 className="erix-mr-2 erix-h-4 erix-w-4 erix-animate-spin" />}
+                  Link to CRM
                 </Button>
               </DialogFooter>
             </form>
@@ -401,20 +383,15 @@ export function ChatWindow({
       <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete Conversation</DialogTitle>
+            <DialogTitle>Permanent Deletion</DialogTitle>
           </DialogHeader>
-          <div className="erix-py-4 erix-text-sm erix-text-muted-foreground">
-            Are you sure you want to delete this conversation with{" "}
-            <span className="erix-font-semibold erix-text-foreground">
-              {chat.name}
-            </span>
-            ? This action cannot be undone and all messages will be permanently
-            removed.
+          <div className="erix-py-4 erix-text-sm erix-text-muted-foreground erix-leading-relaxed">
+            This will permanently remove the conversation with <span className="erix-font-bold erix-text-foreground">{chat.name}</span>. 
+            All message history, media, and attachments will be scrubbed from our systems. 
+            <span className="erix-block erix-mt-2 erix-font-bold erix-text-destructive">This cannot be undone.</span>
           </div>
-          <DialogFooter>
-            <Button variant="erix-outline" onClick={() => setIsDeleteOpen(false)}>
-              Cancel
-            </Button>
+          <DialogFooter className="erix-gap-2 sm:erix-gap-0">
+            <Button variant="outline" onClick={() => setIsDeleteOpen(false)}>Abort</Button>
             <Button
               variant="destructive"
               disabled={isDeleting}
@@ -428,10 +405,7 @@ export function ChatWindow({
                 }
               }}
             >
-              {isDeleting && (
-                <Loader2 className="erix-mr-2 erix-h-4 erix-w-4 erix-animate-spin" />
-              )}
-              Delete Permanently
+              {isDeleting ? <Loader2 className="erix-h-4 erix-w-4 erix-animate-spin" /> : "Confirm Deletion"}
             </Button>
           </DialogFooter>
         </DialogContent>

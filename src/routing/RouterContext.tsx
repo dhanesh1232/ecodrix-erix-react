@@ -73,6 +73,13 @@ export const ErixRouterProvider: React.FC<ErixRouterProviderProps> = ({
 
   const [pathname, setPathname] = React.useState<string>(getPathname);
 
+  // Sync internal state with prop changes (crucial for Next.js navigation)
+  React.useEffect(() => {
+    if (initialPathname) {
+      setPathname(initialPathname);
+    }
+  }, [initialPathname]);
+
   // ── Listen to all navigation events ────────────────────────────────────
   React.useEffect(() => {
     const handler = () => setPathname(window.location.pathname);

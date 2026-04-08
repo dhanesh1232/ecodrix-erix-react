@@ -46,7 +46,7 @@ export function MessageListSkeleton() {
           key={rowIdx}
           className={cn(
             "erix-flex erix-flex-col erix-gap-1",
-            row.side === "erix-right" ? "erix-items-end" : "erix-items-start",
+            row.side === "right" ? "erix-items-end" : "erix-items-start",
           )}
         >
           {row.widths.map((width, wIdx) => (
@@ -56,7 +56,7 @@ export function MessageListSkeleton() {
                 width,
                 row.height,
                 "erix-rounded-lg",
-                row.side === "erix-right"
+                row.side === "right"
                   ? "erix-rounded-tr-none erix-bg-[#dcf8c6]/80"
                   : "erix-rounded-tl-none erix-bg-white/80",
               )}
@@ -66,7 +66,7 @@ export function MessageListSkeleton() {
           <Skeleton
             className={cn(
               "erix-h-2 erix-w-10 erix-opacity-50",
-              row.side === "erix-right"
+              row.side === "right"
                 ? "erix-bg-[#dcf8c6]/60"
                 : "erix-bg-white/60",
             )}

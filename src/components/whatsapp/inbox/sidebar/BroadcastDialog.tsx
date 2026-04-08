@@ -123,7 +123,7 @@ export function BroadcastDialog({
         onSuccess();
         onOpenChange(false);
       } else {
-        throw new Error(result.error || "Failed to start broadcast");
+        throw new Error((result as any).error || "Failed to start broadcast");
       }
     } catch (error: any) {
       toast.error(error.message || "Failed to start broadcast");
@@ -237,7 +237,7 @@ export function BroadcastDialog({
                               className="erix-h-8 erix-text-xs erix-flex-1"
                             />
                             <Button
-                              variant="erix-outline"
+                              variant="outline"
                               size="sm"
                               className="erix-h-8 erix-px-2 erix-text-[10px] erix-shrink-0"
                               onClick={() =>

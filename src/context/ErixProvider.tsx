@@ -10,18 +10,23 @@ import { ErixRealtimeProvider } from "@/realtime/RealtimeContext";
 import { NotificationsProvider } from "@/notifications/NotificationsContext";
 import { ErixPermissionsProvider } from "@/permissions/PermissionsContext";
 import { ErixI18nProvider } from "@/i18n/I18nContext";
-import type { ErixModule, ErixPlatformConfig, ClientHealth } from "@/types/platform";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import type {
+  ErixModule,
+  ErixPlatformConfig,
+  ClientHealth,
+} from "@/types/platform";
 
 // ─── Context Shape ─────────────────────────────────────────────────────────────
 
 interface ErixPlatformContext {
-  config:        ErixPlatformConfig;
+  config: ErixPlatformConfig;
   /** Typed Ecodrix SDK client — use this for all API calls */
-  sdk:           Ecodrix;
+  sdk: Ecodrix;
   /** Check if a module is enabled */
-  hasModule:     (module: ErixModule) => boolean;
+  hasModule: (module: ErixModule) => boolean;
   /** Tenant health (lazy-loaded on mount) */
-  health:        ClientHealth | null;
+  health: ClientHealth | null;
   healthLoading: boolean;
   refreshHealth: () => Promise<void>;
 }
@@ -53,7 +58,7 @@ const ALL_MODULES: ErixModule[] = [
 // ─── Provider ─────────────────────────────────────────────────────────────────
 
 export interface ErixProviderProps {
-  config:   ErixPlatformConfig;
+  config: ErixPlatformConfig;
   children: React.ReactNode;
 }
 
@@ -64,9 +69,9 @@ export function ErixProvider({ config, children }: ErixProviderProps) {
   const sdk = React.useMemo(
     () =>
       new Ecodrix({
-        apiKey:     config.apiKey,
+        apiKey: config.apiKey,
         clientCode: config.clientCode,
-        baseUrl:    config.baseUrl ?? "https://api.ecodrix.com",
+        baseUrl: config.baseUrl ?? "https://api.ecodrix.com",
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [config.apiKey, config.clientCode, config.baseUrl],
@@ -75,7 +80,7 @@ export function ErixProvider({ config, children }: ErixProviderProps) {
   // Disconnect socket when credentials change or on unmount
   React.useEffect(() => () => sdk.disconnect(), [sdk]);
 
-  const [health, setHealth]               = React.useState<ClientHealth | null>(null);
+  const [health, setHealth] = React.useState<ClientHealth | null>(null);
   const [healthLoading, setHealthLoading] = React.useState(false);
 
   const refreshHealth = React.useCallback(async () => {
@@ -91,12 +96,17 @@ export function ErixProvider({ config, children }: ErixProviderProps) {
   }, [sdk]);
 
   // Eagerly fetch health on mount
-  React.useEffect(() => { void refreshHealth(); }, [refreshHealth]);
+  React.useEffect(() => {
+    void refreshHealth();
+  }, [refreshHealth]);
 
   // Theme injection — sets <html data-erix-platform-theme="dark|light">
   React.useEffect(() => {
     if (config.theme) {
-      document.documentElement.setAttribute("data-erix-platform-theme", config.theme);
+      document.documentElement.setAttribute(
+        "data-erix-platform-theme",
+        config.theme,
+      );
     }
     return () => {
       document.documentElement.removeAttribute("data-erix-platform-theme");
@@ -115,21 +125,22 @@ export function ErixProvider({ config, children }: ErixProviderProps) {
 
   return (
     <ErixI18nProvider locale={config.locale ?? "en"}>
-      <ErixPermissionsProvider 
+      <ErixPermissionsProvider
         role={config.role ?? (config.permissions ? "custom" : "admin")}
         permissions={config.permissions ?? []}
       >
         <ErixEventBusProvider>
-
           <ErixToastProvider>
-            <ErixCtx.Provider value={value}>
-              <ErixRealtimeProvider>
-                <NotificationsProvider disabled={config.disableNotifications}>
-                  {children}
-                </NotificationsProvider>
-              </ErixRealtimeProvider>
-              <ErixToaster />
-            </ErixCtx.Provider>
+            <TooltipProvider>
+              <ErixCtx.Provider value={value}>
+                <ErixRealtimeProvider>
+                  <NotificationsProvider disabled={config.disableNotifications}>
+                    {children}
+                  </NotificationsProvider>
+                </ErixRealtimeProvider>
+                <ErixToaster />
+              </ErixCtx.Provider>
+            </TooltipProvider>
           </ErixToastProvider>
         </ErixEventBusProvider>
       </ErixPermissionsProvider>

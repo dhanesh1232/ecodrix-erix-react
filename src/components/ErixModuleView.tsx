@@ -14,6 +14,7 @@ import * as React from "react";
 import { Loader2 } from "lucide-react";
 import { useErixRoute } from "@/routing/RouterContext";
 import { ErixErrorBoundary } from "./ErixErrorBoundary";
+import { cn } from "@/lib/utils";
 
 // ── Lazy-loaded module routers ────────────────────────────────────────────────
 // Each router chunk is only downloaded when the user first visits that module.
@@ -69,7 +70,7 @@ export const ErixModuleView: React.FC<ErixModuleViewProps> = ({
   if (!ModuleRouter) return <>{fallback}</>;
 
   return (
-    <div className={className} data-erix-module={activeModule}>
+    <div className={cn("erix-h-full", className)} data-erix-module={activeModule}>
       <ErixErrorBoundary moduleName={activeModule} fallback={errorFallback}>
         <React.Suspense fallback={loadingFallback}>
           <ModuleRouter />

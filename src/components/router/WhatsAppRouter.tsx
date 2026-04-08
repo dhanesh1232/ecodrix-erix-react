@@ -9,9 +9,10 @@
  */
 
 import * as React from "react";
+import { cn } from "@/lib/utils";
 import { matchSubPath } from "@/routing/match";
 import { useErixRoute } from "@/routing/RouterContext";
-import { WhatsAppInbox } from "../whatsapp/WhatsAppInbox";
+import { WhatsappInbox as WhatsAppInbox } from "../whatsapp/inbox/WhatsappInbox";
 
 export const WhatsAppRouter: React.FC = () => {
   const { subPath } = useErixRoute();

@@ -72,10 +72,10 @@ const getDisplayName = (src: ImageFormat) => {
 
 // ─── Skeleton ──────────────────────────────────────────────────────────────
 
-const GallerySkeleton = ({ mode }: { mode: "erix-grid" | "list" }) => (
+const GallerySkeleton = ({ mode }: { mode: "grid" | "list" }) => (
   <div
     className={cn(
-      mode === "erix-grid"
+      mode === "grid"
         ? "erix-grid erix-grid-cols-3 erix-gap-3"
         : "erix-space-y-2",
     )}
@@ -85,7 +85,7 @@ const GallerySkeleton = ({ mode }: { mode: "erix-grid" | "list" }) => (
         key={i}
         className={cn(
           "erix-bg-muted erix-animate-pulse erix-rounded-lg",
-          mode === "erix-grid" ? "erix-aspect-square" : "erix-h-12 erix-w-full",
+          mode === "grid" ? "erix-aspect-square" : "erix-h-12 erix-w-full",
         )}
       />
     ))}
@@ -321,7 +321,7 @@ export const ImagePickerNative: React.FC<{ children?: React.ReactNode }> = ({
                     className={cn(
                       "erix-p-1",
                       buttonRadius,
-                      viewMode === "erix-grid"
+                      viewMode === "grid"
                         ? "erix-bg-background erix-shadow-sm"
                         : "erix-text-muted-foreground",
                     )}
@@ -366,7 +366,7 @@ export const ImagePickerNative: React.FC<{ children?: React.ReactNode }> = ({
                 ) : (
                   <div
                     className={cn(
-                      viewMode === "erix-grid"
+                      viewMode === "grid"
                         ? "erix-grid erix-grid-cols-3 erix-gap-4"
                         : "erix-flex erix-flex-col erix-gap-2",
                     )}
@@ -383,7 +383,7 @@ export const ImagePickerNative: React.FC<{ children?: React.ReactNode }> = ({
                           selectedImage?.key === img.key
                             ? "erix-border-primary erix-ring-2 erix-ring-primary/20"
                             : "erix-border-border hover:erix-border-primary/50",
-                          viewMode === "erix-grid"
+                          viewMode === "grid"
                             ? "erix-aspect-square"
                             : "erix-flex erix-items-center erix-p-2 erix-gap-3",
                           buttonRadius,
@@ -392,7 +392,7 @@ export const ImagePickerNative: React.FC<{ children?: React.ReactNode }> = ({
                         <div
                           className={cn(
                             "erix-bg-muted erix-overflow-hidden",
-                            viewMode === "erix-grid"
+                            viewMode === "grid"
                               ? "erix-w-full erix-h-full"
                               : "erix-w-10 erix-h-10 erix-shrink-0",
                             buttonRadius,

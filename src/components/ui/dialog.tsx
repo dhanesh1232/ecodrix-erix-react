@@ -1,34 +1,34 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { XIcon } from "lucide-react"
-import { Dialog as DialogPrimitive } from "radix-ui"
+import * as React from "react";
+import { XIcon } from "lucide-react";
+import { Dialog as DialogPrimitive } from "radix-ui";
 
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 function Dialog({
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Root>) {
-  return <DialogPrimitive.Root data-slot="dialog" {...props} />
+  return <DialogPrimitive.Root data-slot="dialog" {...props} />;
 }
 
 function DialogTrigger({
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Trigger>) {
-  return <DialogPrimitive.Trigger data-slot="dialog-trigger" {...props} />
+  return <DialogPrimitive.Trigger data-slot="dialog-trigger" {...props} />;
 }
 
 function DialogPortal({
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Portal>) {
-  return <DialogPrimitive.Portal data-slot="dialog-portal" {...props} />
+  return <DialogPrimitive.Portal data-slot="dialog-portal" {...props} />;
 }
 
 function DialogClose({
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Close>) {
-  return <DialogPrimitive.Close data-slot="dialog-close" {...props} />
+  return <DialogPrimitive.Close data-slot="dialog-close" {...props} />;
 }
 
 function DialogOverlay({
@@ -40,11 +40,11 @@ function DialogOverlay({
       data-slot="dialog-overlay"
       className={cn(
         "erix-fixed erix-inset-0 erix-z-50 erix-bg-black/50 data-[state=closed]:erix-animate-out data-[state=closed]:erix-fade-out-0 data-[state=open]:erix-animate-in data-[state=open]:erix-fade-in-0",
-        className
+        className,
       )}
       {...props}
     />
-  )
+  );
 }
 
 function DialogContent({
@@ -53,7 +53,7 @@ function DialogContent({
   showCloseButton = true,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
-  showCloseButton?: boolean
+  showCloseButton?: boolean;
 }) {
   return (
     <DialogPortal data-slot="dialog-portal">
@@ -62,7 +62,7 @@ function DialogContent({
         data-slot="dialog-content"
         className={cn(
           "erix-fixed erix-top-[50%] erix-left-[50%] erix-z-50 erix-grid erix-w-full erix-max-w-[calc(100%-2rem)] erix-translate-x-[-50%] erix-translate-y-[-50%] erix-gap-4 erix-rounded-lg erix-border erix-bg-background erix-p-6 erix-shadow-lg erix-duration-200 erix-outline-none data-[state=closed]:erix-animate-out data-[state=closed]:erix-fade-out-0 data-[state=closed]:erix-zoom-out-95 data-[state=open]:erix-animate-in data-[state=open]:erix-fade-in-0 data-[state=open]:erix-zoom-in-95 sm:erix-max-w-lg",
-          className
+          className,
         )}
         {...props}
       >
@@ -78,17 +78,20 @@ function DialogContent({
         )}
       </DialogPrimitive.Content>
     </DialogPortal>
-  )
+  );
 }
 
 function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="dialog-header"
-      className={cn("erix-flex erix-flex-col erix-gap-2 erix-text-center sm:erix-text-left", className)}
+      className={cn(
+        "erix-flex erix-flex-col erix-gap-2 erix-text-center sm:erix-text-left",
+        className,
+      )}
       {...props}
     />
-  )
+  );
 }
 
 function DialogFooter({
@@ -97,25 +100,25 @@ function DialogFooter({
   children,
   ...props
 }: React.ComponentProps<"div"> & {
-  showCloseButton?: boolean
+  showCloseButton?: boolean;
 }) {
   return (
     <div
       data-slot="dialog-footer"
       className={cn(
         "erix-flex erix-flex-col-reverse erix-gap-2 sm:erix-flex-row sm:erix-justify-end",
-        className
+        className,
       )}
       {...props}
     >
       {children}
       {showCloseButton && (
         <DialogPrimitive.Close asChild>
-          <Button variant="erix-outline">Close</Button>
+          <Button variant="outline">Close</Button>
         </DialogPrimitive.Close>
       )}
     </div>
-  )
+  );
 }
 
 function DialogTitle({
@@ -125,10 +128,13 @@ function DialogTitle({
   return (
     <DialogPrimitive.Title
       data-slot="dialog-title"
-      className={cn("erix-text-lg erix-leading-none erix-font-semibold", className)}
+      className={cn(
+        "erix-text-lg erix-leading-none erix-font-semibold",
+        className,
+      )}
       {...props}
     />
-  )
+  );
 }
 
 function DialogDescription({
@@ -141,7 +147,7 @@ function DialogDescription({
       className={cn("erix-text-sm erix-text-muted-foreground", className)}
       {...props}
     />
-  )
+  );
 }
 
 export {
@@ -155,4 +161,4 @@ export {
   DialogPortal,
   DialogTitle,
   DialogTrigger,
-}
+};

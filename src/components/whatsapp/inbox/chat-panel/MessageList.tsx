@@ -422,7 +422,7 @@ export function MessageList({
         </CommandList>
         <div className="erix-bg-secondary/30 erix-flex erix-items-center erix-justify-end erix-gap-2 erix-border-t erix-p-3">
           <Button
-            variant="erix-outline"
+            variant="outline"
             size="sm"
             onClick={() => setIsForwardOpen(false)}
             className="erix-h-8"

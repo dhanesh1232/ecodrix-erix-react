@@ -44,7 +44,7 @@ export { AnalyticsDashboard } from "./components/analytics/AnalyticsDashboard";
 export { StatCard } from "./components/analytics/StatCard";
 
 // ─── WhatsApp Components ──────────────────────────────────────────────────────
-export { WhatsAppInbox } from "./components/whatsapp/WhatsAppInbox";
+export { WhatsappInbox as WhatsAppInbox } from "./components/whatsapp/inbox/WhatsappInbox";
 export { MessageBubble } from "./components/whatsapp/MessageBubble";
 export { TemplateSelector } from "./components/whatsapp/TemplateSelector";
 export { WhatsAppBroadcast } from "./components/whatsapp/WhatsAppBroadcast";
@@ -72,10 +72,7 @@ export {
   useWhatsAppAnalytics,
   useAnalyticsSummary,
 } from "./hooks/crm/useAnalytics";
-export {
-  useLeadActivities,
-  useLeadNotes,
-} from "./hooks/crm/useLeadActivity";
+export { useLeadActivities, useLeadNotes } from "./hooks/crm/useLeadActivity";
 export { useAutomations } from "./hooks/crm/useAutomations";
 
 // ─── WhatsApp Hooks ───────────────────────────────────────────────────────────
@@ -92,7 +89,11 @@ export { useMeetings } from "./hooks/meet/useMeetings";
 // ─── Types ────────────────────────────────────────────────────────────────────
 export * from "./types/erix";
 export * from "./types/platform";
-export type { ErixLead, ErixPaginatedResult, ExtractCustomFields } from "./types/custom-fields";
+export type {
+  ErixLead,
+  ErixPaginatedResult,
+  ExtractCustomFields,
+} from "./types/custom-fields";
 
 // ─── Module Router ────────────────────────────────────────────────────────────
 export { ErixModuleRouter } from "./components/ErixModuleRouter";
@@ -143,7 +144,10 @@ export type {
 // ─── Notifications ────────────────────────────────────────────────────────────
 export { useErixNotifications } from "./notifications/NotificationsContext";
 export type { NotificationsContextValue } from "./notifications/NotificationsContext";
-export { ErixNotifications } from "./notifications/ErixNotifications";
+export {
+  ErixNotifications,
+  type ErixNotificationsProps,
+} from "./notifications/ErixNotifications";
 export type {
   ErixNotification,
   ErixNotificationType,
@@ -159,7 +163,10 @@ export type { ErixPermissionsProviderProps } from "./permissions/PermissionsCont
 export { ErixGuard, ErixAccessDenied } from "./permissions/ErixGuard";
 export type { ErixGuardProps } from "./permissions/ErixGuard";
 export { useErixPermission } from "./permissions/useErixPermission";
-export type { ErixPermission as ErixPermissionString, ErixRolePreset } from "./permissions/types";
+export type {
+  ErixPermission as ErixPermissionString,
+  ErixRolePreset,
+} from "./permissions/types";
 export { ROLE_PERMISSION_MAP } from "./permissions/types";
 
 // ─── Event Bus ────────────────────────────────────────────────────────────────
@@ -178,7 +185,10 @@ export { useErixQueue } from "./offline/useErixQueue";
 export type { QueuedOp, UseErixQueueReturn } from "./offline/useErixQueue";
 
 // ─── Command Palette ─────────────────────────────────────────────────────────
-export { ErixCommandPalette, ErixCommandPaletteTrigger } from "./command-palette/ErixCommandPalette";
+export {
+  ErixCommandPalette,
+  ErixCommandPaletteTrigger,
+} from "./command-palette/ErixCommandPalette";
 export type {
   CommandItem,
   ErixCommandPaletteProps,

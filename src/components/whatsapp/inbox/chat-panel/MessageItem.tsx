@@ -181,7 +181,7 @@ export const MessageItem = memo(
         <div
           className={cn(
             "erix-flex erix-w-full erix-shrink-0 erix-min-w-0 erix-max-w-full",
-            msg.direction === "erix-outbound"
+            msg.direction === "outbound"
               ? "erix-justify-end"
               : "erix-justify-start",
           )}
@@ -203,9 +203,13 @@ export const MessageItem = memo(
               <div
                 className={cn(
                   "erix-group/msg erix-relative erix-z-0 erix-mb-1 erix-p-1 erix-text-sm erix-shadow-sm erix-transition-shadow erix-duration-150",
-                  msg.type === "erix-sticker"
+                  msg.type === "sticker"
                     ? "erix-bg-transparent erix-shadow-none"
-                    : ""erix-,"lg:erix-max-w-[40%] erix-max-w-[65%]"erix-, erix-msg.direction erix-==="outbound"erix-? erix-msg.status erix-==="failed"erix-?"erix-border erix-border-red-200 erix-bg-red-50":erix- erix-msg.type erix-==="sticker"erix-?"":erix-"erix-bg-[#dcf8c6] erix-shadow-[0_1px_0.5px_rgba(0,0,0,0.13)]"
+                    : "lg:erix-max-w-[40%] erix-max-w-[65%]",
+                  msg.direction === "outbound"
+                    ? msg.status === "failed"
+                      ? "erix-border erix-border-red-200 erix-bg-red-50"
+                      : "erix-bg-[#dcf8c6] erix-shadow-[0_1px_0.5px_rgba(0,0,0,0.13)]"
                     : msg.type === "sticker"
                       ? ""
                       : "erix-bg-[#ffffff] erix-shadow-[0_1px_0.5px_rgba(0,0,0,0.13)]",
@@ -245,10 +249,10 @@ export const MessageItem = memo(
                 {msg.status === "failed" && (
                   <div
                     className={cn(
-                      "erix-absolute erix-top-1/2 erix--erix-translate-y-1/2",
-                      msg.direction === "erix-outbound"
-                        ? "erix--erix-left-10"
-                        : "erix--erix-right-10",
+                      "erix-absolute erix-top-1/2 erix--translate-y-1/2",
+                      msg.direction === "outbound"
+                        ? "erix--left-10"
+                        : "erix--right-10",
                     )}
                   >
                     <Tooltip>
@@ -277,10 +281,10 @@ export const MessageItem = memo(
                 <div
                   className={cn(
                     "erix-rounded-inherit erix-min-w-0",
-                    msg.type !== "erix-text" &&
-                      msg.type !== "erix-template" &&
-                      msg.type !== "erix-location" &&
-                      msg.type !== "erix-contacts"
+                    msg.type !== "text" &&
+                      msg.type !== "template" &&
+                      msg.type !== "location" &&
+                      msg.type !== "contacts"
                       ? "erix-px-0.5 erix-pt-0.5"
                       : "erix-min-w-[120px] erix-px-1.5 erix-pt-1.5 erix-pb-5",
                   )}
@@ -289,7 +293,7 @@ export const MessageItem = memo(
                     <div
                       className={cn(
                         "erix-mb-1.5 erix-cursor-pointer erix-rounded-md erix-border-l-[3px] erix-bg-black/5 erix-p-1.5 erix-text-[10px] erix-transition-colors hover:erix-bg-black/10 dark:erix-bg-white/5",
-                        msg.direction === "erix-outbound"
+                        msg.direction === "outbound"
                           ? "erix-border-l-[#25D366]"
                           : "erix-border-l-[#34B7F1]",
                       )}
@@ -413,7 +417,7 @@ export const MessageItem = memo(
                       </p>
                     )}
                   {msg.type === "template" && msg.templateData && (
-                    <div className="erix-mt-2 erix--erix-mx-1 erix-border-t erix-border-black/5">
+                    <div className="erix-mt-2 erix--mx-1 erix-border-t erix-border-black/5">
                       {msg.templateData.footer && (
                         <p
                           className="erix-px-2 erix-pt-2 erix-text-[10px] erix-leading-tight erix-opacity-50 erix-whitespace-pre-wrap"
@@ -458,13 +462,13 @@ export const MessageItem = memo(
                 <div
                   className={cn(
                     "erix-flex erix-items-center erix-gap-1.5",
-                    msg.type !== "erix-text" &&
-                      msg.type !== "erix-template" &&
-                      msg.type !== "erix-sticker" &&
-                      msg.type !== "erix-location" &&
-                      msg.type !== "erix-contacts"
+                    msg.type !== "text" &&
+                      msg.type !== "template" &&
+                      msg.type !== "sticker" &&
+                      msg.type !== "location" &&
+                      msg.type !== "contacts"
                       ? "erix-mt-1 erix-justify-end erix-px-2 erix-pb-1"
-                      : msg.type === "erix-sticker"
+                      : msg.type === "sticker"
                         ? "erix-justify-end erix-pt-1"
                         : "erix-absolute erix-right-2 erix-bottom-1.5 erix-z-10",
                   )}
@@ -476,9 +480,9 @@ export const MessageItem = memo(
                   <span
                     className={cn(
                       "erix-text-[10px] erix-tabular-nums erix-font-medium",
-                      msg.type !== "erix-text" &&
-                        msg.type !== "erix-template" &&
-                        msg.type !== "erix-sticker"
+                      msg.type !== "text" &&
+                        msg.type !== "template" &&
+                        msg.type !== "sticker"
                         ? "erix-text-muted-foreground/80"
                         : "erix-text-secondary-foreground/40",
                     )}
@@ -546,10 +550,10 @@ export const MessageItem = memo(
                 {msg.reactions && msg.reactions.length > 0 && (
                   <div
                     className={cn(
-                      "erix-animate-in erix-fade-in erix-absolute erix--erix-bottom-2 erix-z-20 erix-flex erix-duration-150",
-                      msg.direction === "erix-outbound"
-                        ? "erix--erix-left-1"
-                        : "erix--erix-right-1",
+                      "erix-animate-in erix-fade-in erix-absolute erix--bottom-2 erix-z-20 erix-flex erix-duration-150",
+                      msg.direction === "outbound"
+                        ? "erix--left-1"
+                        : "erix--right-1",
                     )}
                   >
                     <div className="erix-bg-background erix-border-border erix-flex erix-items-center erix-justify-center erix-gap-0.5 erix-rounded-full erix-border erix-px-1 erix-py-0.5 erix-text-[14px] erix-leading-none erix-shadow-sm erix-ring-1 erix-ring-black/5">
