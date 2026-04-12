@@ -47,7 +47,7 @@ const ErixCommandPalette = React.lazy(() =>
   import("@/command-palette/ErixCommandPalette").then((m) => ({ default: m.ErixCommandPalette })),
 );
 
-type ActiveView = "overview" | "crm" | "analytics" | "whatsapp" | "marketing" | "meetings" | "editor";
+export type ActiveView = "overview" | "crm" | "analytics" | "whatsapp" | "marketing" | "meetings" | "editor";
 
 interface NavItem {
   id: ActiveView;

@@ -78,7 +78,7 @@ export interface ImageFormat {
   };
 }
 
-interface ImagePickerNativeProps {
+export interface ImagePickerNativeProps {
   onInsert?: (url: ImageFormat[]) => void;
   selected?: ImageFormat[];
   aspectRatio?: "square" | "portrait" | "landscape" | "free";

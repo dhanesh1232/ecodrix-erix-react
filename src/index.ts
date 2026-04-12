@@ -11,13 +11,15 @@ export type { ErixProviderProps } from "./context/ErixProvider";
 // ─── Editor ────────────────────────────────────────────────────────────────────
 export type { ErixEditorProps } from "./components/richtext/editor";
 export { ErixEditor, RichtextEditor } from "./components/richtext/editor";
+export type { ErixEditorContextShape } from "./context/editor";
 export { ErixRenderer } from "./components/richtext/ErixRenderer";
 export type { ErixRendererProps } from "./components/richtext/ErixRenderer";
-export { AiMenu } from "./components/richtext/menus/AiMenu";
+export { AiMenu, type AiMenuProps } from "./components/richtext/menus/AiMenu";
 export { BubbleMenu } from "./components/richtext/menus/BubbleMenu";
 export {
   DEFAULT_SLASH_COMMANDS,
   SlashMenu,
+  type SlashMenuProps,
 } from "./components/richtext/menus/SlashMenu";
 export {
   ToolbarBtn,
@@ -27,7 +29,7 @@ export {
   ToolbarWrapper,
   type ToolbarWrapperProps,
 } from "./components/richtext/toolbar/Toolbar";
-export { ToolbarChain } from "./components/richtext/toolbar/ToolbarChain";
+export { ToolbarChain, type ToolbarChainConfig } from "./components/richtext/toolbar/ToolbarChain";
 export type { ErixEditorProviderProps } from "./context/editor";
 export { useErixEditor } from "./context/editor";
 export { ErixChain } from "./core/chain";
@@ -38,17 +40,18 @@ export { ErixDashboard } from "./components/dashboard/ErixDashboard";
 export type { ErixDashboardProps } from "./components/dashboard/ErixDashboard";
 
 // ─── CRM Components ───────────────────────────────────────────────────────────
-export { KanbanBoard } from "./components/crm/KanbanBoard";
-export { LeadCard } from "./components/crm/LeadCard";
+export { KanbanBoard, type KanbanBoardProps } from "./components/crm/KanbanBoard";
+export { LeadCard, type LeadCardProps } from "./components/crm/LeadCard";
 
 // ─── Analytics Components ─────────────────────────────────────────────────────
 export { AnalyticsDashboard } from "./components/analytics/AnalyticsDashboard";
-export { StatCard } from "./components/analytics/StatCard";
+export { StatCard, type StatCardProps } from "./components/analytics/StatCard";
+export type { ActiveView } from "./components/dashboard/ErixDashboard";
 
 // ─── WhatsApp Components ──────────────────────────────────────────────────────
 export { WhatsappInbox as WhatsAppInbox } from "./components/whatsapp/inbox/WhatsappInbox";
 export { MessageBubble } from "./components/whatsapp/MessageBubble";
-export { TemplateSelector } from "./components/whatsapp/TemplateSelector";
+export { TemplateSelector, type TemplateSelectorProps } from "./components/whatsapp/TemplateSelector";
 export { WhatsAppBroadcast } from "./components/whatsapp/WhatsAppBroadcast";
 export type { WhatsAppBroadcastProps } from "./components/whatsapp/WhatsAppBroadcast";
 
@@ -56,9 +59,9 @@ export type { WhatsAppBroadcastProps } from "./components/whatsapp/WhatsAppBroad
 export { MeetingList } from "./components/meet/MeetingList";
 
 // ─── Shared UI ────────────────────────────────────────────────────────────────
-export { ErixBadge } from "./components/ui/erix-badge";
+export { ErixBadge, type ErixBadgeProps } from "./components/ui/erix-badge";
 export { ErixSpinner, ErixLoadingOverlay } from "./components/ui/erix-spinner";
-export { ImagePickerNative } from "./components/ui/ImagePickerNative";
+export { ImagePickerNative, type ImagePickerNativeProps } from "./components/ui/ImagePickerNative";
 export type { ImageFormat } from "./components/ui/ImagePickerNative";
 
 // ─── CRM Hooks ───────────────────────────────────────────────────────────────
@@ -132,7 +135,7 @@ export { makeReactRouterAdapter } from "./routing/adapters/react-router";
 export type { RouterAdapter } from "./routing/adapters/types";
 
 // ─── Error Boundary ──────────────────────────────────────────────────────────
-export { ErixErrorBoundary } from "./components/ErixErrorBoundary";
+export { ErixErrorBoundary, type ErixErrorBoundaryProps } from "./components/ErixErrorBoundary";
 
 // ─── Toast ────────────────────────────────────────────────────────────────────
 export { ErixToastProvider, useToastContext } from "./toast/ToastContext";
@@ -219,5 +222,5 @@ export {
   useLeadAiSummary,
 } from "./ai/useErixAi";
 export type { SmartReplySuggestion } from "./ai/useErixAi";
-export { LeadScoreBadge } from "./ai/LeadScoreBadge";
-export { SmartReplySuggestions } from "./ai/SmartReplySuggestions";
+export { LeadScoreBadge, type LeadScoreBadgeProps } from "./ai/LeadScoreBadge";
+export { SmartReplySuggestions, type SmartReplySuggestionsProps } from "./ai/SmartReplySuggestions";

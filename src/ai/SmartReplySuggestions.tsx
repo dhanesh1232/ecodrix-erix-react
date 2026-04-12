@@ -4,11 +4,11 @@ import * as React from "react";
 import { Loader2, Sparkles } from "lucide-react";
 import { useSmartReplies } from "./useErixAi";
 
-interface SmartReplySuggestionsProps {
+export interface SmartReplySuggestionsProps {
   conversationId: string;
-  lastMessage?:   string;
+  lastMessage?: string;
   /** Called when user picks a suggestion */
-  onSelect:       (text: string) => void;
+  onSelect: (text: string) => void;
 }
 
 /**
@@ -24,26 +24,53 @@ interface SmartReplySuggestionsProps {
  * />
  * ```
  */
-export function SmartReplySuggestions({ conversationId, lastMessage, onSelect }: SmartReplySuggestionsProps) {
+export function SmartReplySuggestions({
+  conversationId,
+  lastMessage,
+  onSelect,
+}: SmartReplySuggestionsProps) {
   const { suggestions, loading, generate } = useSmartReplies(conversationId);
 
   React.useEffect(() => {
     if (lastMessage) void generate(lastMessage);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lastMessage]);
 
   if (!loading && suggestions.length === 0) return null;
 
   return (
-    <div style={{ display: "erix-flex", gap: 6, flexWrap: "wrap", padding: "6px 0" }}>
+    <div
+      style={{
+        display: "erix-flex",
+        gap: 6,
+        flexWrap: "wrap",
+        padding: "6px 0",
+      }}
+    >
       {loading ? (
-        <span style={{ display: "erix-flex", alignItems: "center", gap: 4, fontSize: 12, color: "#94a3b8" }}>
+        <span
+          style={{
+            display: "erix-flex",
+            alignItems: "center",
+            gap: 4,
+            fontSize: 12,
+            color: "#94a3b8",
+          }}
+        >
           <Loader2 size={12} style={{ animation: "spin 1s linear infinite" }} />
           Thinking…
         </span>
       ) : (
         <>
-          <span style={{ color: "#6366f1", display: "erix-flex", alignItems: "center", gap: 3, fontSize: 11 }}>
+          <span
+            style={{
+              color: "#6366f1",
+              display: "erix-flex",
+              alignItems: "center",
+              gap: 3,
+              fontSize: 11,
+            }}
+          >
             <Sparkles size={11} /> AI suggests:
           </span>
           {suggestions.map((s) => (
@@ -52,9 +79,13 @@ export function SmartReplySuggestions({ conversationId, lastMessage, onSelect }:
               type="button"
               onClick={() => onSelect(s.text)}
               style={{
-                background: "#1e293b", border: "1px solid #334155",
-                borderRadius: 20, padding: "3px 10px",
-                fontSize: 12, color: "#e2e8f0", cursor: "pointer",
+                background: "#1e293b",
+                border: "1px solid #334155",
+                borderRadius: 20,
+                padding: "3px 10px",
+                fontSize: 12,
+                color: "#e2e8f0",
+                cursor: "pointer",
                 fontFamily: "inherit",
               }}
             >

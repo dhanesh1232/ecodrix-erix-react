@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import type { Lead } from "@/types/platform";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 
-interface LeadCardProps {
+export interface LeadCardProps {
   lead: Lead;
   onOpen?: (id: string) => void;
   onConvert?: (id: string, outcome: "won" | "lost") => void;

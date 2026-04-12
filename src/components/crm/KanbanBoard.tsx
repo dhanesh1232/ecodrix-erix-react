@@ -141,7 +141,7 @@ function KanbanColumn({
 }
 
 // ─── Main Board ────────────────────────────────────────────────────────────────
-interface KanbanBoardProps {
+export interface KanbanBoardProps {
   pipelineId: string;
   onLeadOpen?: (leadId: string) => void;
   onAddLead?: (stageId: string) => void;

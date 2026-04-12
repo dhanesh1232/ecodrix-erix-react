@@ -6,7 +6,7 @@ import { useLeadScore } from "./useErixAi";
 const SCORE_COLOR = (s: number) =>
   s >= 80 ? "#22c55e" : s >= 50 ? "#eab308" : s >= 25 ? "#f97316" : "#ef4444";
 
-interface LeadScoreBadgeProps {
+export interface LeadScoreBadgeProps {
   leadId: string;
   className?: string;
   /** Show recalculate button */

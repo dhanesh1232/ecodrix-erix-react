@@ -7,7 +7,7 @@ interface State {
   error: Error | null;
 }
 
-interface ErixErrorBoundaryProps {
+export interface ErixErrorBoundaryProps {
   moduleName:   string;
   fallback?:    (error: Error, reset: () => void) => React.ReactNode;
   children:     React.ReactNode;

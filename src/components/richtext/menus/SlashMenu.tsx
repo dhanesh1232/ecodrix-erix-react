@@ -215,7 +215,7 @@ const GROUP_LABELS: Record<string, string> = {
 };
 
 // ─── Component ────────────────────────────────────────────────────────────────
-interface SlashMenuProps {
+export interface SlashMenuProps {
   commands?: SlashCommand[];
 }
 

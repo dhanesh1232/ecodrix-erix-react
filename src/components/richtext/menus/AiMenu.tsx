@@ -17,7 +17,7 @@ import { useErixEditor, useErixStyle } from "@/context/editor";
 import { cn } from "@/lib/utils";
 import type { AiAction, AiProvider } from "@/types/erix";
 
-interface AiMenuProps {
+export interface AiMenuProps {
   provider?: AiProvider;
   visible?: boolean;
   onClose?: () => void;

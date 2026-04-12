@@ -6,7 +6,7 @@ import { useTemplates } from "@/hooks/whatsapp/useTemplates";
 import { ErixBadge } from "@/components/ui/erix-badge";
 import { ErixSpinner } from "@/components/ui/erix-spinner";
 
-interface TemplateSelectorProps {
+export interface TemplateSelectorProps {
   onSelect: (name: string, variables?: string[]) => void;
   onClose: () => void;
 }
