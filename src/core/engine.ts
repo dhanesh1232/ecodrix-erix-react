@@ -3,7 +3,7 @@
 
 import { buildIframeHTML } from "@/core/iframe-template";
 import { erixRuntimeInit } from "@/core/runtime/index";
-import type { ErixContextState, ErixEngineConfig, ErixEvents } from "@/types/erix";
+import type { ErixContextState, ErixEngineConfig, ErixEvents, ErixNode, ErixOutputFormat } from "@/types/erix";
 
 type Listener<T> = (data: T) => void;
 type ListenerMap = { [K in keyof ErixEvents]?: Array<Listener<ErixEvents[K]>> };
@@ -13,6 +13,10 @@ export class ErixEngine {
   private config: ErixEngineConfig;
   private iframeWin: Window | null = null;
   private listeners: ListenerMap = {};
+  // Caches the last ERIX_UPDATE payload for synchronous getters
+  private lastUpdate: ErixEvents["update"] = { html: "", json: [], markdown: "", text: "" };
+  // Caches the last context so ERIX_HISTORY can emit a merged update
+  private _lastContext: ErixContextState | null = null;
   isReady = false;
 
   constructor(config: ErixEngineConfig) {
@@ -67,8 +71,9 @@ export class ErixEngine {
 
     const html = buildIframeHTML(
       this.config.initialContent ?? "<p><br></p>",
-      this.config.placeholder ?? "Type '/' for commands…",
+      this.config.placeholder ?? "Start writing… or type '/' for commands",
       this.config.shortcuts ?? true,
+      this.config.contentStyles ?? "",
     );
 
     doc.open();
@@ -108,23 +113,50 @@ export class ErixEngine {
         this.emit("ready", undefined as undefined);
         break;
 
-      case "ERIX_UPDATE":
-        this.emit("update", {
-          html: d.html,
-          text: d.text,
-          charCount: d.charCount,
-          wordCount: d.wordCount,
-        });
-        this.config.onUpdate?.(d.html);
+      case "ERIX_UPDATE": {
+        const update: ErixEvents["update"] = {
+          html: d.html as string ?? "",
+          json: d.json as ErixNode[] | undefined,
+          markdown: d.markdown as string | undefined,
+          text: d.text as string | undefined,
+          charCount: d.charCount as number | undefined,
+          wordCount: d.wordCount as number | undefined,
+        };
+        this.lastUpdate = update;
+        this.emit("update", update);
+        // Resolve the value the host asked for based on outputFormat
+        const fmt: ErixOutputFormat = this.config.format ?? "html";
+        let outValue: string;
+        if (fmt === "json") {
+          outValue = JSON.stringify(update.json ?? []);
+        } else if (fmt === "markdown") {
+          outValue = update.markdown ?? "";
+        } else if (fmt === "text") {
+          outValue = update.text ?? "";
+        } else {
+          outValue = update.html;
+        }
+        this.config.onUpdate?.(outValue, fmt, update);
         break;
+      }
 
       case "ERIX_CONTEXT":
+        this._lastContext = d as ErixContextState;
         this.emit("context", d as ErixContextState);
         this.config.onContext?.(d as ErixContextState);
         break;
 
       case "ERIX_HISTORY":
         this.emit("history", { canUndo: d.canUndo, canRedo: d.canRedo });
+        // Also surface to the context callback so the host ctx.canUndo / ctx.canRedo
+        // updates immediately on undo/redo clicks (before the next ERIX_CONTEXT fires).
+        if (this.config.onContext) {
+          this.config.onContext({
+            ...(this._lastContext ?? ({} as ErixContextState)),
+            canUndo: !!d.canUndo,
+            canRedo: !!d.canRedo,
+          } as ErixContextState);
+        }
         break;
 
       case "ERIX_SLASH_OPEN":
@@ -302,6 +334,23 @@ export class ErixEngine {
     this.post("ERIX_SET_READONLY", { readonly });
   }
 
+  /**
+   * Inject or replace the host-supplied CSS in the iframe document at runtime.
+   * Safe to call whenever the `contentStyles` prop changes — it only mutates
+   * the `#__ERIX_HOST__` style tag without reinitialising the editor.
+   */
+  setContentStyles(css: string) {
+    const iDoc = this.iframe.contentDocument;
+    if (!iDoc) return;
+    let el = iDoc.getElementById("__ERIX_HOST__") as HTMLStyleElement | null;
+    if (!el) {
+      el = iDoc.createElement("style") as HTMLStyleElement;
+      el.id = "__ERIX_HOST__";
+      iDoc.head.appendChild(el);
+    }
+    el.textContent = css;
+  }
+
   tableAddRow(pos: "before" | "after" = "after") {
     this.post("ERIX_TABLE_ADD_ROW", { pos });
   }
@@ -350,6 +399,21 @@ export class ErixEngine {
     const clone = body.cloneNode(true) as HTMLElement;
     clone.querySelector("#__ERIX_RUNTIME__")?.remove();
     return clone.innerHTML.trim();
+  }
+
+  /** Returns the last emitted structured JSON document tree */
+  getJSON(): ErixNode[] {
+    return this.lastUpdate.json ?? [];
+  }
+
+  /** Returns the last emitted Markdown string */
+  getMarkdown(): string {
+    return this.lastUpdate.markdown ?? "";
+  }
+
+  /** Returns the last emitted plain-text string */
+  getText(): string {
+    return this.lastUpdate.text ?? "";
   }
 
   executeSlash(command: string, data?: Record<string, unknown>) {

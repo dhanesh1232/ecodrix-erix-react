@@ -1,7 +1,17 @@
 // src/types/erix.ts — Core SDK type definitions
+import type { CSSProperties } from "react";
 
 /** Loader variants for the editor initialization state */
 export type EditorLoader = "skeleton" | "dots" | "shine" | "spinner";
+
+/**
+ * The format in which the editor's content is emitted via `onChange`.
+ * - `html`     — Raw innerHTML string (default, backwards-compatible)
+ * - `json`     — Structured ErixNode tree (great for custom renderers)
+ * - `markdown` — Standard Markdown / GFM string
+ * - `text`     — Plain text (all markup stripped)
+ */
+export type ErixOutputFormat = "html" | "json" | "markdown" | "text";
 
 /** Heading levels 1-6 */
 export type Heading = 1 | 2 | 3 | 4 | 5 | 6;
@@ -167,9 +177,15 @@ export interface ErixEngineConfig {
   extensions?: ErixExtension[];
   shortcuts?: boolean;
   apiKey?: string;
+  format?: ErixOutputFormat;
   onReady?: () => void;
-  onUpdate?: (html: string) => void;
+  onUpdate?: (value: string, format: ErixOutputFormat, raw: ErixEvents["update"]) => void;
   onContext?: (ctx: ErixContextState) => void;
+  /**
+   * Raw CSS string injected into the iframe document as a `<style>` block.
+   * Applied after all built-in erix styles so it wins on every rule.
+   */
+  contentStyles?: string;
 }
 
 /** Event map for listener subscriptions */
@@ -177,6 +193,8 @@ export type ErixEvents = {
   ready: undefined;
   update: {
     html: string;
+    json?: ErixNode[];
+    markdown?: string;
     text?: string;
     charCount?: number;
     wordCount?: number;
@@ -259,7 +277,12 @@ export interface ErixEditorProps {
   slashCommands?: SlashCommand[];
   aiProvider?: AiProvider;
   loader?: EditorLoader;
-  onChange?: (html: string) => void;
+  /**
+   * The format of the value passed to `onChange`.
+   * Defaults to `"html"` for backwards compatibility.
+   */
+  format?: ErixOutputFormat;
+  onChange?: (value: string) => void;
   onReady?: () => void;
   onContext?: (ctx: ErixContextState) => void;
   style?: DesignProps;
@@ -270,8 +293,17 @@ export interface ErixEditorProps {
   readonly?: boolean;
   onFocus?: () => void;
   onBlur?: () => void;
-  className?: string;
   tokens?: ErixThemeTokens;
+  /**
+   * Raw CSS injected into the iframe `<body>` document (the editable area).
+   * Applied last so host rules always win over all built-in Erix styles.
+   */
+  contentStyles?: string;
+  /**
+   * Inline `style` object applied to the toolbar's root wrapper element.
+   * Useful for CSS custom property overrides that don't have utility class equivalents.
+   */
+  toolbarStyle?: CSSProperties;
 }
 
 /** Formal metadata for images manipulated by the SDK */

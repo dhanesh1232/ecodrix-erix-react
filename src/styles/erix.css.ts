@@ -74,15 +74,19 @@ body {
 /* ── Placeholder ────────────────────────────────────────────────────────── */
 body.erix-empty::before {
   content: attr(data-placeholder);
-  color: var(--erix-color-placeholder, rgba(100, 116, 139, 0.55));
+  color: var(--erix-color-placeholder, rgba(100, 116, 139, 0.5));
   pointer-events: none;
   user-select: none;
   position: absolute;
-  inset-block-start: calc(var(--erix-editor-pad-y, 1rem));
-  inset-inline-start: calc(var(--erix-editor-pad-x, 1.25rem));
+  top: 1rem;
+  left: 1.25rem;
+  right: 1.25rem;
+  white-space: pre-wrap;
+  word-break: break-word;
   font-size: inherit;
   font-family: inherit;
   line-height: inherit;
+  z-index: 0;
 }
 
 /* ── Block Spacing ──────────────────────────────────────────────────────── */

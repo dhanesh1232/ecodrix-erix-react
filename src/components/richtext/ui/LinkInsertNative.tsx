@@ -4,38 +4,50 @@ import { Link, Link2Off, X } from "lucide-react";
 import * as React from "react";
 import { useErixEditor, useErixStyle } from "@/context/editor";
 import { cn } from "@/lib/utils";
-import { Popover, PopoverContent, PopoverTrigger } from "./popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 export const LinkInsertNative: React.FC<{ children?: React.ReactNode }> = ({
   children,
 }) => {
-  const { linkPickerVisible, setLinkPickerVisible, engine, ctx } =
-    useErixEditor();
+  const { engine, ctx } = useErixEditor();
+  const [open, setOpen] = React.useState(false);
   const [url, setUrl] = React.useState("https://");
   const inputRef = React.useRef<HTMLInputElement>(null);
 
   React.useEffect(() => {
-    if (linkPickerVisible) {
+    if (open) {
       setUrl("https://");
       setTimeout(() => inputRef.current?.focus(), 50);
     }
-  }, [linkPickerVisible]);
+  }, [open]);
+
+  // Listen to engine linkOpen events (e.g. from CMD+K)
+  React.useEffect(() => {
+    if (!engine) return;
+    const handleLinkOpen = () => setOpen(true);
+    engine.on("linkOpen", handleLinkOpen);
+    return () => engine.off("linkOpen", handleLinkOpen);
+  }, [engine]);
 
   const apply = () => {
     if (!url.trim()) return;
     engine?.link(url.trim());
-    setLinkPickerVisible(false);
+    setOpen(false);
   };
 
   const remove = () => {
     engine?.unlink();
-    setLinkPickerVisible(false);
+    setOpen(false);
   };
 
   const { popoverRadius, buttonRadius, shadowClass } = useErixStyle();
 
   return (
-    <Popover open={linkPickerVisible} onOpenChange={setLinkPickerVisible}>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>{children}</PopoverTrigger>
       <PopoverContent
         side="bottom"
@@ -69,7 +81,7 @@ export const LinkInsertNative: React.FC<{ children?: React.ReactNode }> = ({
           </div>
           <button
             type="button"
-            onClick={() => setLinkPickerVisible(false)}
+            onClick={() => setOpen(false)}
             className={cn(
               "erix-w-7 erix-h-7 erix-flex erix-items-center erix-justify-center hover:erix-bg-accent erix-text-muted-foreground hover:erix-text-foreground erix-transition-all",
               buttonRadius,
@@ -88,7 +100,7 @@ export const LinkInsertNative: React.FC<{ children?: React.ReactNode }> = ({
             onChange={(e) => setUrl(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === "Enter") apply();
-              if (e.key === "Escape") setLinkPickerVisible(false);
+              if (e.key === "Escape") setOpen(false);
             }}
             placeholder="https://example.com"
             className={cn(

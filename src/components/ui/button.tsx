@@ -26,6 +26,9 @@ const buttonVariants = cva(
         ghost:
           "hover:erix-bg-accent hover:erix-text-accent-foreground dark:erix-bg-accent/50",
         link: "erix-text-primary erix-underline-offset-4 hover:erix-underline",
+        dashed: "erix-border erix-border-dashed",
+        primary:
+          "erix-bg-primary erix-text-primary-foreground hover:erix-bg-primary/90",
       },
       size: {
         default: "erix-h-9 erix-px-4 erix-py-2 has-[>svg]:erix-px-3",

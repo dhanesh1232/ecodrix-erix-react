@@ -23,6 +23,7 @@ import {
   Type,
   Video as VideoIcon,
 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { useErixEditor, useErixStyle } from "@/context/editor";
@@ -229,6 +230,7 @@ export const SlashMenu: React.FC<SlashMenuProps> = ({
     closeSlash,
     setAiVisible,
     menuContainerRef,
+    iframeRef,
   } = useErixEditor();
   const { buttonRadius, popoverRadius, shadowClass } = useErixStyle();
   const [activeIdx, setActiveIdx] = React.useState(0);
@@ -302,18 +304,25 @@ export const SlashMenu: React.FC<SlashMenuProps> = ({
         closeSlash();
       }
     };
+
+    // Listen on both host window AND iframe window to ensure coverage
     window.addEventListener("keydown", handler, { capture: true });
-    return () =>
+    const iframeWin = iframeRef.current?.contentWindow;
+    iframeWin?.addEventListener("keydown", handler, { capture: true });
+
+    return () => {
       window.removeEventListener("keydown", handler, { capture: true });
+      iframeWin?.removeEventListener("keydown", handler, { capture: true });
+    };
     // biome-ignore lint/correctness/useExhaustiveDependencies: select is stable
-  }, [slashVisible, filtered, activeIdx, select, closeSlash]);
+  }, [slashVisible, filtered, activeIdx, select, closeSlash, iframeRef]);
 
   // Scroll active item into view
   React.useEffect(() => {
     const el = listRef.current?.querySelector(
       `[data-slash-idx="${activeIdx}"]`,
     );
-    el?.scrollIntoView({ block: "nearest" });
+    el?.scrollIntoView({ block: "nearest", behavior: "smooth" });
   }, [activeIdx]);
 
   function select(cmd: SlashCommand) {
@@ -337,82 +346,112 @@ export const SlashMenu: React.FC<SlashMenuProps> = ({
   let globalIdx = 0;
 
   return ReactDOM.createPortal(
-    <div
-      role="presentation"
-      className={cn(
-        "erix-absolute erix-z-100 erix-w-72 erix-max-h-80 erix-overflow-y-auto",
-        "erix-bg-popover/90 erix-border erix-border-border erix-py-2 erix-backdrop-blur-xl",
-        "erix-scrollbar-thin erix-scrollbar-thumb-border/60",
-        popoverRadius,
-        shadowClass,
-      )}
-      style={{ left: adjustedX, top: slashPos.y }}
-      data-erix-ignore-dismiss="true"
-      onMouseDown={(e) => e.preventDefault()}
-    >
-      {filtered.length === 0 && (
-        <div className="erix-px-4 erix-py-3 erix-text-sm erix-text-muted-foreground">
-          No results for &quot;{slashQuery}&quot;
-        </div>
-      )}
+    <AnimatePresence>
+      {slashVisible && (
+        <motion.div
+          ref={listRef}
+          key="slash-menu"
+          initial={{ opacity: 0, y: 15, scale: 0.92, filter: "blur(4px)" }}
+          animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
+          exit={{ opacity: 0, y: 15, scale: 0.92, filter: "blur(4px)" }}
+          transition={{
+            type: "spring",
+            damping: 25,
+            stiffness: 350,
+          }}
+          role="presentation"
+          className={cn(
+            "erix-absolute erix-z-100 erix-w-72 erix-max-h-80 erix-overflow-y-auto",
+            "erix-bg-popover/90 erix-border erix-border-border erix-py-2 erix-backdrop-blur-xl",
+            "erix-scrollbar-thin erix-scrollbar-thumb-border/60",
+            popoverRadius,
+            shadowClass,
+          )}
+          style={{ left: adjustedX, top: slashPos.y }}
+          data-erix-ignore-dismiss="true"
+          onMouseDown={(e) => e.preventDefault()}
+        >
+          {filtered.length === 0 && (
+            <div className="erix-px-4 erix-py-3 erix-text-sm erix-text-muted-foreground">
+              No results for &quot;{slashQuery}&quot;
+            </div>
+          )}
 
-      {Array.from(groups.entries()).map(([group, items]) => (
-        <div key={group}>
-          <div className="erix-px-4 erix-py-2 erix-text-[10px] erix-font-bold erix-uppercase erix-tracking-widest erix-text-muted-foreground/50">
-            {GROUP_LABELS[group] ?? group}
-          </div>
-          {items.map((cmd) => {
-            const idx = globalIdx++;
-            const isActive = idx === activeIdx;
-            return (
-              <button
-                type="button"
-                key={cmd.id}
-                data-slash-idx={idx}
-                onMouseEnter={() => setActiveIdx(idx)}
-                onMouseDown={(e) => {
-                  e.preventDefault();
-                  select(cmd);
-                }}
-                className={cn(
-                  "erix-w-full erix-flex erix-items-center erix-gap-3 erix-px-3 erix-py-2 erix-text-left erix-transition-all erix-duration-150",
-                  isActive
-                    ? "erix-bg-primary erix-text-primary-foreground"
-                    : "hover:erix-bg-accent/60 erix-text-foreground/90",
-                )}
-              >
-                <span
-                  className={cn(
-                    "erix-w-9 erix-h-9 erix-flex erix-items-center erix-justify-center erix-text-lg erix-shrink-0 erix-font-mono erix-transition-colors",
-                    buttonRadius,
-                    isActive
-                      ? "erix-bg-white/20"
-                      : "erix-bg-muted erix-text-muted-foreground",
-                  )}
-                >
-                  {cmd.icon}
-                </span>
-                <span className="erix-flex erix-flex-col erix-min-w-0">
-                  <span className="erix-text-sm erix-font-semibold erix-leading-snug">
-                    {cmd.label}
-                  </span>
-                  <span
+          {Array.from(groups.entries()).map(([group, items]) => (
+            <div key={group}>
+              <div className="erix-px-4 erix-py-2 erix-text-[10px] erix-font-bold erix-uppercase erix-tracking-widest erix-text-muted-foreground/50">
+                {GROUP_LABELS[group] ?? group}
+              </div>
+              {items.map((cmd) => {
+                const idx = globalIdx++;
+                const isActive = idx === activeIdx;
+                return (
+                  <button
+                    type="button"
+                    key={cmd.id}
+                    data-slash-idx={idx}
+                    onMouseEnter={() => setActiveIdx(idx)}
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      select(cmd);
+                    }}
                     className={cn(
-                      "erix-text-xs erix-truncate erix-leading-relaxed",
+                      "erix-relative erix-w-full erix-flex erix-items-center erix-gap-3 erix-px-3 erix-py-2 erix-text-left erix-transition-colors erix-duration-200",
                       isActive
-                        ? "erix-text-primary-foreground/80"
-                        : "erix-text-muted-foreground",
+                        ? "erix-text-primary-foreground"
+                        : "hover:erix-bg-accent/40 erix-text-foreground/90",
                     )}
                   >
-                    {cmd.description}
-                  </span>
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      ))}
-    </div>,
+                    {isActive && (
+                      <motion.div
+                        layoutId="active-bg"
+                        className="erix-absolute erix-inset-1 erix-bg-primary -erix-z-10"
+                        style={{ borderRadius: "calc(var(--erix-radius) - 2px)" }}
+                        transition={{
+                          type: "spring",
+                          damping: 30,
+                          stiffness: 400,
+                        }}
+                      />
+                    )}
+                    <motion.span
+                      animate={{
+                        scale: isActive ? 1.1 : 1,
+                        rotate: isActive ? 5 : 0,
+                      }}
+                      className={cn(
+                        "erix-w-9 erix-h-9 erix-flex erix-items-center erix-justify-center erix-text-lg erix-shrink-0 erix-font-mono erix-transition-colors",
+                        buttonRadius,
+                        isActive
+                          ? "erix-bg-white/20"
+                          : "erix-bg-muted erix-text-muted-foreground",
+                      )}
+                    >
+                      {cmd.icon}
+                    </motion.span>
+                    <span className="erix-flex erix-flex-col erix-min-w-0">
+                      <span className="erix-text-sm erix-font-semibold erix-leading-snug">
+                        {cmd.label}
+                      </span>
+                      <span
+                        className={cn(
+                          "erix-text-xs erix-truncate erix-leading-relaxed erix-transition-colors",
+                          isActive
+                            ? "erix-text-primary-foreground/80"
+                            : "erix-text-muted-foreground",
+                        )}
+                      >
+                        {cmd.description}
+                      </span>
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          ))}
+        </motion.div>
+      )}
+    </AnimatePresence>,
     menuContainerRef.current,
   );
 };

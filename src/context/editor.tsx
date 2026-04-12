@@ -8,6 +8,7 @@ import type {
   EditorLoader,
   ErixContextState,
   ErixEvents,
+  ErixOutputFormat,
   ErixThemeTokens,
   SlashCommand,
 } from "@/types/erix";
@@ -63,8 +64,6 @@ export type ErixEditorContextShape = {
   slashQuery: string;
   slashPos: { x: number; y: number } | null;
   closeSlash: () => void;
-  linkPickerVisible: boolean;
-  setLinkPickerVisible: (v: boolean) => void;
   imagePickerVisible: boolean;
   setImagePickerVisible: (v: boolean) => void;
   aiVisible: boolean;
@@ -82,6 +81,8 @@ export type ErixEditorContextShape = {
   shortcutsEnabled: boolean;
   isApiValid: boolean;
   isApiValidating: boolean;
+  /** Inline style applied to the toolbar wrapper element */
+  toolbarStyle?: React.CSSProperties;
 };
 
 export const useErixStyle = () => {
@@ -140,7 +141,15 @@ export interface ErixEditorProviderProps {
   placeholder?: string;
   theme?: "light" | "dark" | Record<string, string>;
   tokens?: ErixThemeTokens;
-  onChange?: (html: string) => void;
+  /**
+   * The format emitted by `onChange`. Defaults to `"html"` for backwards compat.
+   * - `"html"`     – raw innerHTML string
+   * - `"json"`     – JSON-stringified ErixNode tree
+   * - `"markdown"` – GFM Markdown string
+   * - `"text"`     – plain text (all markup stripped)
+   */
+  format?: ErixOutputFormat;
+  onChange?: (value: string) => void;
   onContext?: (ctx: ErixContextState) => void;
   slashCommands?: SlashCommand[];
   shortcutsEnabled?: boolean;
@@ -157,22 +166,53 @@ export interface ErixEditorProviderProps {
     bg?: string;
     fg?: string;
   };
-  className?: string;
+  /**
+   * Extra CSS injected into the editor's iframe `<body>` document.
+   *
+   * Use this to override fonts, colours, spacing, or any other visual
+   * aspect of the editable content area without touching the host app's
+   * global stylesheet.
+   *
+   * @example
+   * ```tsx
+   * contentStyles={`
+   *   body { font-family: 'Georgia', serif; font-size: 16px; }
+   *   h1   { color: #1a1a2e; }
+   *   p    { line-height: 1.9; }
+   * `}
+   * ```
+   */
+  contentStyles?: string;
+  /**
+   * Inline `style` object applied to the toolbar's root wrapper element.
+   *
+   * Use this to override background colour, border, padding, or any other
+   * box-level CSS property of the toolbar. Only typed CSS properties are
+   * accepted — no arbitrary class strings.
+   *
+   * @example
+   * ```tsx
+   * toolbarStyle={{ background: '#0f172a', borderColor: '#1e293b' }}
+   * ```
+   */
+  toolbarStyle?: React.CSSProperties;
   children?: React.ReactNode;
 }
 
 export const ErixEditorProvider: React.FC<ErixEditorProviderProps> = ({
   initialContent = "",
-  placeholder = "Type '/' for commands…",
+  placeholder = "Start writing… or type '/' for commands",
   theme = "light",
   tokens,
+  format = "html",
   onChange,
   onContext,
   onFocus,
   onBlur,
   readonly = false,
   style,
-  className,
+  contentStyles = "",
+  toolbarStyle,
   shortcutsEnabled = true,
   apiKey = "",
   apiUrl = "https://api.ecodrix.com",
@@ -200,6 +240,12 @@ export const ErixEditorProvider: React.FC<ErixEditorProviderProps> = ({
   const [ctx, setCtx] = React.useState<ErixContextState>(DEFAULT_CTX);
   const [html, setHtml] = React.useState(initialContent);
   const [isFocused, setIsFocused] = React.useState(false);
+  // Tracks the last HTML value that the editor itself emitted via onUpdate.
+  // Used to distinguish host-driven content changes (e.g. loading a saved post)
+  // from reactive echo-backs (host stores HTML in state → re-passes as initialContent).
+  // Without this, every keypress causes: type → onChange → state update →
+  // setHTML(initialContent) → iframe resets cursor to position 0.
+  const lastEmittedHtmlRef = React.useRef<string>(initialContent ?? "");
 
   // ─── Theme Synchronization Bridge ──────────────────────────────────────────
   React.useEffect(() => {
@@ -306,7 +352,6 @@ export const ErixEditorProvider: React.FC<ErixEditorProviderProps> = ({
   } | null>(null);
 
   // Link / Image pickers
-  const [linkPickerVisible, setLinkPickerVisible] = React.useState(false);
   const [imagePickerVisible, setImagePickerVisible] = React.useState(false);
   const [aiVisible, setAiVisible] = React.useState(false);
   const [bubbleSide, setBubbleSide] = React.useState<"top" | "bottom">("top");
@@ -314,7 +359,6 @@ export const ErixEditorProvider: React.FC<ErixEditorProviderProps> = ({
 
   const closeAllMenus = React.useCallback(() => {
     setSlashVisible(false);
-    setLinkPickerVisible(false);
     setImagePickerVisible(false);
     setAiVisible(false);
     // Any other global popovers managed here
@@ -340,9 +384,17 @@ export const ErixEditorProvider: React.FC<ErixEditorProviderProps> = ({
       theme,
       shortcuts: shortcutsEnabled,
       apiKey,
-      onUpdate: (h) => {
-        setHtml(h);
-        stableOnChange.current?.(h);
+      format,
+      contentStyles,
+      onUpdate: (value) => {
+        // value is already resolved to the requested format by the engine.
+        // For the reactive-loop guard we always track the raw HTML from the
+        // engine's lastUpdate cache, not the serialised value, because
+        // initialContent is always HTML.
+        const rawHtml = eng.getHTML();
+        lastEmittedHtmlRef.current = rawHtml;
+        setHtml(rawHtml);
+        stableOnChange.current?.(value);
       },
       onContext: (c) => {
         setCtx(c);
@@ -385,7 +437,6 @@ export const ErixEditorProvider: React.FC<ErixEditorProviderProps> = ({
       setSlashVisible(false);
       setSlashQuery("");
     });
-    eng.on("linkOpen", () => setLinkPickerVisible(true));
     eng.on("imageOpen", () => setImagePickerVisible(true));
     eng.on("clickOutside", () => closeAllMenus());
     eng.on("focusIn", () => onFocus?.());
@@ -424,16 +475,24 @@ export const ErixEditorProvider: React.FC<ErixEditorProviderProps> = ({
     onBlur,
     apiUrl,
     placeholder,
-    initialContent,
     closeAllMenus,
     apiKey,
   ]);
 
-  // ── Sync initialContent changes ──────────────────────────────────────
+  // ── Sync initialContent changes ────────────────────────────────────────
+  // IMPORTANT: Only push content into the editor when it's a genuine external
+  // change (e.g. the host loaded a saved document), NOT when it's the reactive
+  // echo of the editor's own last output. Without this guard, every keystroke
+  // causes: type → onChange → host state update → setHTML → cursor jumps to 0.
   React.useEffect(() => {
-    if (engineRef.current && initialContent !== undefined) {
-      engineRef.current.setHTML(initialContent || "<p><br></p>");
-    }
+    if (!engineRef.current || initialContent === undefined) return;
+    const incoming = initialContent || "<p><br></p>";
+    // If the incoming content is identical to what the editor just emitted,
+    // it's just our own output being echoed back — skip the reset.
+    if (incoming === lastEmittedHtmlRef.current) return;
+    // Genuine external update — push it in.
+    lastEmittedHtmlRef.current = incoming;
+    engineRef.current.setHTML(incoming);
   }, [initialContent]);
 
   // ── Apply token overrides when they change ───────────────────────────
@@ -442,6 +501,15 @@ export const ErixEditorProvider: React.FC<ErixEditorProviderProps> = ({
       engineRef.current.applyTokens(tokens);
     }
   }, [tokens]);
+
+  // ── Sync host contentStyles changes live ──────────────────────────────
+  // When the host changes the contentStyles prop, push the new CSS into
+  // the iframe without reinitializing the editor.
+  React.useEffect(() => {
+    if (engineRef.current) {
+      engineRef.current.setContentStyles(contentStyles ?? "");
+    }
+  }, [contentStyles]);
 
   // ── Focus & Global Dismissal ──────────────────────────────────────────
   React.useEffect(() => {
@@ -452,11 +520,15 @@ export const ErixEditorProvider: React.FC<ErixEditorProviderProps> = ({
       window.dispatchEvent(new CustomEvent("erix:iframe-enter"));
 
     // Host-side dismissal
-    const handleHostClick = (e: PointerEvent) => {
-      const target = e.target as HTMLElement;
+    const handleHostClick = (e: PointerEvent | MouseEvent | Event) => {
+      const target = e.target as HTMLElement | null;
       // If clicking inside a menu/picker or a toolbar button, don't dismiss everything
-      // We'll use a data-attribute for this
-      if (target.closest('[data-erix-ignore-dismiss="true"]')) return;
+      // We'll use a data-attribute for this.
+      // Use optional chaining / type checking because synthetic events dispatched from iframe
+      // might have the document as target, which lacks .closest().
+      if (target && typeof target.closest === "function") {
+        if (target.closest('[data-erix-ignore-dismiss="true"]')) return;
+      }
 
       // If we have active menus, close them
       closeAllMenus();
@@ -528,8 +600,6 @@ export const ErixEditorProvider: React.FC<ErixEditorProviderProps> = ({
           setSlashVisible(false);
           setSlashQuery("");
         },
-        linkPickerVisible,
-        setLinkPickerVisible,
         imagePickerVisible,
         setImagePickerVisible,
         aiVisible,
@@ -545,6 +615,7 @@ export const ErixEditorProvider: React.FC<ErixEditorProviderProps> = ({
         shortcutsEnabled,
         isApiValid,
         isApiValidating,
+        toolbarStyle,
       }}
     >
       <div
@@ -560,7 +631,6 @@ export const ErixEditorProvider: React.FC<ErixEditorProviderProps> = ({
           radiusMap[borderRadius] ?? "erix-rounded-md",
           shadowMap[shadow] ?? "erix-shadow-none",
           theme === "dark" ? "erix-dark dark" : "erix-light",
-          className,
         )}
         onMouseEnter={() => setIsFocused(true)}
         onMouseLeave={() => setIsFocused(false)}

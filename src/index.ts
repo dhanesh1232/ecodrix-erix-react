@@ -11,6 +11,8 @@ export type { ErixProviderProps } from "./context/ErixProvider";
 // ─── Editor ────────────────────────────────────────────────────────────────────
 export type { ErixEditorProps } from "./components/richtext/editor";
 export { ErixEditor, RichtextEditor } from "./components/richtext/editor";
+export { ErixRenderer } from "./components/richtext/ErixRenderer";
+export type { ErixRendererProps } from "./components/richtext/ErixRenderer";
 export { AiMenu } from "./components/richtext/menus/AiMenu";
 export { BubbleMenu } from "./components/richtext/menus/BubbleMenu";
 export {
@@ -56,6 +58,8 @@ export { MeetingList } from "./components/meet/MeetingList";
 // ─── Shared UI ────────────────────────────────────────────────────────────────
 export { ErixBadge } from "./components/ui/erix-badge";
 export { ErixSpinner, ErixLoadingOverlay } from "./components/ui/erix-spinner";
+export { ImagePickerNative } from "./components/ui/ImagePickerNative";
+export type { ImageFormat } from "./components/ui/ImagePickerNative";
 
 // ─── CRM Hooks ───────────────────────────────────────────────────────────────
 export { useLeads, useLead } from "./hooks/crm/useLeads";

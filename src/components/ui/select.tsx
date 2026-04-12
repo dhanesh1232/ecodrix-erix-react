@@ -14,12 +14,15 @@ const SelectValue = SelectPrimitive.Value;
 
 const SelectTrigger = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Trigger>,
-  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger>
->(({ className, children, ...props }, ref) => (
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger> & {
+    size?: "sm" | "md" | "lg" | "default";
+  }
+>(({ className, size = "default", children, ...props }, ref) => (
   <SelectPrimitive.Trigger
     ref={ref}
+    data-size={size}
     className={cn(
-      "erix-flex erix-h-10 erix-w-full erix-items-center erix-justify-between erix-rounded-md erix-border erix-border-input erix-bg-background erix-px-3 erix-py-2 erix-text-sm erix-ring-offset-background placeholder:erix-text-muted-foreground focus:erix-outline-none focus:erix-ring-2 focus:erix-ring-ring focus:erix-ring-offset-2 disabled:erix-cursor-not-allowed disabled:erix-opacity-50 [&>span]:erix-line-clamp-1",
+      "erix-flex erix-h-10 data-[size=default]:erix-h-9 data-[size=sm]:erix-h-8 data-[size=lg]:erix-h-11 erix-w-full erix-items-center erix-justify-between erix-rounded-md erix-border erix-border-input erix-bg-background erix-px-3 erix-py-2 erix-text-sm erix-ring-offset-background placeholder:erix-text-muted-foreground focus:erix-outline-none focus:erix-ring-2 focus:erix-ring-ring focus:erix-ring-offset-2 disabled:erix-cursor-not-allowed disabled:erix-opacity-50 [&>span]:erix-line-clamp-1",
       className,
     )}
     {...props}

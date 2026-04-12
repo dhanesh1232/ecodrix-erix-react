@@ -75,16 +75,20 @@ import {
   DropdownMenuItem,
   DropdownMenuShortcut,
   DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
-import { ImagePickerNative } from "../ui/ImagePickerNative";
+} from "@/components/ui/dropdown-menu";
+import { ImagePickerNative, ImageFormat } from "../../ui/ImagePickerNative";
 import { LinkInsertNative } from "../ui/LinkInsertNative";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "../ui/tooltip";
+} from "@/components/ui/tooltip";
 import { ToolbarBtn, ToolbarGroup } from "./Toolbar";
 
 // ─── Config ──────────────────────────────────────────────────────────────────
@@ -691,7 +695,7 @@ export const ToolbarChain: React.FC<
 > = (rawProps) => {
   const { onAiClick, ...configProps } = rawProps;
   const cfg = { ...DEFAULTS, ...configProps };
-  const { engine, ctx } = useErixEditor();
+  const { engine, ctx, apiUrl, apiKey, clientCode, toolbarStyle } = useErixEditor();
   const { containerRadius, shadowClass, popoverRadius, buttonRadius } =
     useErixStyle();
 
@@ -924,7 +928,17 @@ export const ToolbarChain: React.FC<
               </LinkInsertNative>
             )}
             {cfg.image && (
-              <ImagePickerNative>
+              <ImagePickerNative
+                apiUrl={apiUrl}
+                apiKey={apiKey}
+                clientCode={clientCode}
+                variant="richtext"
+                onInsert={(images: ImageFormat[]) => {
+                  if (images.length > 0 && engine) {
+                    engine.image(images[0].url);
+                  }
+                }}
+              >
                 <ToolbarBtn tooltip="Insert image">
                   <ImagePlus size={14} />
                 </ToolbarBtn>
@@ -1064,10 +1078,15 @@ export const ToolbarChain: React.FC<
       ref={wrapRef}
       className={cn(
         "erix-relative erix-w-full erix-select-none",
-        "erix-bg-background erix-border-b erix-border-border",
+        "erix-bg-accent/40 erix-border-b erix-border-border",
         notMeasured ? "erix-invisible" : "erix-visible",
         containerRadius,
       )}
+      style={{
+        borderBottomRightRadius: "0px",
+        borderBottomLeftRadius: "0px",
+        ...toolbarStyle,
+      }}
     >
       {/* Ghost row — measurement only */}
       <div

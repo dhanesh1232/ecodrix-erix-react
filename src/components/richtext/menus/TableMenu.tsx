@@ -163,6 +163,7 @@ export const TableMenu: React.FC = () => {
               btn.action();
             }}
             title={btn.label}
+            aria-label={btn.label}
             className={cn(
               "erix-p-1.5 transition-colors erix-flex erix-items-center erix-justify-center",
               btn.danger

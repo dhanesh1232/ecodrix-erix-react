@@ -18,13 +18,16 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { useErixEditor, useErixStyle } from "@/context/editor";
 import { cn } from "@/lib/utils";
+import { ColorPickerNative } from "../ui/ColorPickerNative";
+import { LinkInsertNative } from "../ui/LinkInsertNative";
 
 interface BubbleBtn {
   icon: React.ReactNode;
   label: string;
-  action: () => void;
+  action?: () => void;
   active?: boolean;
   separator?: boolean;
+  wrapper?: React.FC<{ children: React.ReactNode }>;
 }
 
 export const BubbleMenu: React.FC = () => {
@@ -34,7 +37,6 @@ export const BubbleMenu: React.FC = () => {
     bubbleSide,
     engine,
     ctx,
-    setLinkPickerVisible,
     setAiVisible,
     menuContainerRef,
   } = useErixEditor();
@@ -91,12 +93,6 @@ export const BubbleMenu: React.FC = () => {
 
   const buttons: BubbleBtn[] = [
     {
-      icon: <Sparkles size={14} className="erix-text-primary" />,
-      label: "Ask AI",
-      action: () => setAiVisible(true),
-    },
-    { separator: true } as BubbleBtn,
-    {
       icon: <Bold size={14} />,
       label: "Bold",
       active: ctx.bold,
@@ -131,12 +127,14 @@ export const BubbleMenu: React.FC = () => {
       icon: ctx.link ? <Unlink size={14} /> : <Link size={14} />,
       label: ctx.link ? "Unlink" : "Link",
       active: ctx.link,
-      action: () => (ctx.link ? engine?.unlink() : setLinkPickerVisible(true)),
+      action: ctx.link ? () => engine?.unlink() : undefined,
+      wrapper: ctx.link ? undefined : LinkInsertNative,
     },
     {
       icon: <Highlighter size={14} />,
-      label: "Highlight",
-      action: () => engine?.highlight("var(--erix-primary)"),
+      label: "Color",
+      active: !!(ctx.foreColor || ctx.backColor),
+      wrapper: ColorPickerNative,
     },
     { separator: true } as BubbleBtn,
     {
@@ -192,14 +190,17 @@ export const BubbleMenu: React.FC = () => {
             />
           );
         }
-        return (
+        const btnElement = (
           <button
             type="button"
             key={btn.label}
             title={btn.label}
+            aria-label={btn.label}
             onMouseDown={(e) => {
-              e.preventDefault();
-              btn.action();
+              if (btn.action) {
+                e.preventDefault();
+                btn.action();
+              }
             }}
             className={cn(
               "erix-w-8 erix-h-8 erix-flex erix-items-center erix-justify-center erix-transition-all erix-duration-150",
@@ -214,6 +215,14 @@ export const BubbleMenu: React.FC = () => {
             {btn.icon}
           </button>
         );
+
+        if (btn.wrapper) {
+          const WrapperComponent = btn.wrapper;
+          return (
+            <WrapperComponent key={btn.label}>{btnElement}</WrapperComponent>
+          );
+        }
+        return btnElement;
       })}
     </div>,
     menuContainerRef.current,

@@ -9,7 +9,12 @@ export function buildIframeHTML(
   initialHTML: string,
   placeholder: string,
   shortcuts = true,
+  contentStyles = "",
 ): string {
+  const hostStyleTag = contentStyles.trim()
+    ? `<style id="__ERIX_HOST__">${contentStyles}</style>`
+    : "";
+
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -17,6 +22,7 @@ export function buildIframeHTML(
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style id="__ERIX_TOKENS__">${tokensCSS}</style>
   <style id="__ERIX_STYLES__">${editorCSS}</style>
+  ${hostStyleTag}
 </head>
 <body
   contenteditable="true"

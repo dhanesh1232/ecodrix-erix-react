@@ -14,26 +14,102 @@ import { TableMenu } from "./menus/TableMenu";
 import { ToolbarChain, type ToolbarChainConfig } from "./toolbar/ToolbarChain";
 import type { AiProvider, SlashCommand } from "@/types/erix";
 
-// ─── Loader ───────────────────────────────────────────────────────────────────
-const EditorSkeleton: React.FC = () => (
-  <div className="erix-w-full erix-h-full erix-rounded-xl erix-border erix-border-border erix-bg-background erix-animate-pulse erix-overflow-hidden">
-    <div className="erix-h-10 erix-border-b erix-border-border erix-bg-muted/30" />
-    <div className="erix-p-4 erix-space-y-3">
-      {[100, 80, 95, 60, 85].map((w, index) => (
+// ─── Loader components ────────────────────────────────────────────────────────
+
+/**
+ * Full-editor skeleton: mimics the toolbar strip + content lines so the
+ * layout shift on first render is invisible to the user.
+ */
+const EditorSkeleton: React.FC<{ height?: string }> = ({
+  height = "400px",
+}) => (
+  <div
+    className="erix-w-full erix-rounded-xl erix-border erix-border-border erix-bg-background erix-overflow-hidden"
+    style={{ height }}
+    aria-hidden="true"
+  >
+    {/* Toolbar placeholder */}
+    <div className="erix-flex erix-items-center erix-gap-1.5 erix-px-3 erix-h-[42px] erix-border-b erix-border-border erix-bg-muted/20 erix-shrink-0">
+      {/* History group */}
+      <div className="erix-flex erix-gap-1">
+        <div className="erix-h-[26px] erix-w-[26px] erix-rounded erix-bg-muted/60 erix-animate-pulse" />
+        <div className="erix-h-[26px] erix-w-[26px] erix-rounded erix-bg-muted/60 erix-animate-pulse" />
+      </div>
+      <div className="erix-w-px erix-h-3.5 erix-bg-border/50 erix-mx-1" />
+      {/* Block type */}
+      <div className="erix-h-[26px] erix-w-[56px] erix-rounded erix-bg-muted/60 erix-animate-pulse" />
+      <div className="erix-w-px erix-h-3.5 erix-bg-border/50 erix-mx-1" />
+      {/* Font group */}
+      <div className="erix-h-[26px] erix-w-[46px] erix-rounded erix-bg-muted/60 erix-animate-pulse" />
+      <div className="erix-h-[26px] erix-w-[36px] erix-rounded erix-bg-muted/60 erix-animate-pulse" />
+      <div className="erix-w-px erix-h-3.5 erix-bg-border/50 erix-mx-1" />
+      {/* Format group */}
+      {[...Array(5)].map((_, i) => (
+        // biome-ignore lint/suspicious/noArrayIndexKey: static skeleton
         <div
-          // biome-ignore lint/suspicious/noArrayIndexKey: Static skeleton heights
-          key={`skel-${index}`}
-          className="erix-h-3 erix-rounded-full erix-bg-muted"
-          style={{ width: `${w}%` }}
+          key={i}
+          className="erix-h-[26px] erix-w-[26px] erix-rounded erix-bg-muted/60 erix-animate-pulse"
+        />
+      ))}
+      <div className="erix-flex-1" />
+      {/* Right side overflow btn */}
+      <div className="erix-h-[26px] erix-w-[26px] erix-rounded erix-bg-muted/60 erix-animate-pulse" />
+    </div>
+
+    {/* Content placeholder */}
+    <div className="erix-flex-1 erix-p-5 erix-space-y-3">
+      {[92, 78, 88, 55, 82, 68, 75].map((w, i) => (
+        <div
+          // biome-ignore lint/suspicious/noArrayIndexKey: static skeleton
+          key={i}
+          className="erix-h-[14px] erix-rounded-full erix-bg-muted/50 erix-animate-pulse"
+          style={{ width: `${w}%`, animationDelay: `${i * 60}ms` }}
         />
       ))}
     </div>
   </div>
 );
 
+/**
+ * Full-editor spinner overlay: shows on top of the actual editor shell
+ * (which has already rendered) while the API key is being validated.
+ */
+const EditorSpinnerOverlay: React.FC = () => (
+  <div className="erix-absolute erix-inset-0 erix-z-50 erix-flex erix-flex-col erix-items-center erix-justify-center erix-gap-3 erix-bg-background/85 erix-backdrop-blur-sm erix-rounded-[inherit]">
+    <div className="erix-relative erix-flex erix-items-center erix-justify-center">
+      {/* Outer ring */}
+      <div className="erix-w-9 erix-h-9 erix-rounded-full erix-border-2 erix-border-primary/20" />
+      {/* Spinning arc */}
+      <div className="erix-absolute erix-w-9 erix-h-9 erix-rounded-full erix-border-2 erix-border-transparent erix-border-t-primary erix-animate-spin" />
+    </div>
+    <span className="erix-text-[11px] erix-font-medium erix-text-muted-foreground erix-tracking-wide erix-select-none">
+      Validating…
+    </span>
+  </div>
+);
+
+/**
+ * Blocked-content skeleton used while apiValidating to keep toolbar visible
+ * but replace content area with a breathing skeleton.
+ */
+const ContentSkeleton: React.FC = () => (
+  <div className="erix-flex-1 erix-p-5 erix-space-y-3">
+    {[88, 72, 84, 50, 79, 64, 91].map((w, i) => (
+      <div
+        // biome-ignore lint/suspicious/noArrayIndexKey: static skeleton
+        key={i}
+        className="erix-h-[14px] erix-rounded-full erix-bg-muted/50 erix-animate-pulse"
+        style={{ width: `${w}%`, animationDelay: `${i * 70}ms` }}
+      />
+    ))}
+  </div>
+);
+
 // ─── Props ────────────────────────────────────────────────────────────────────
-export interface ErixEditorProps
-  extends Omit<ErixEditorProviderProps, "children"> {
+export interface ErixEditorProps extends Omit<
+  ErixEditorProviderProps,
+  "children" | "className" | "toolbarClassName"
+> {
   /** Toolbar feature flags */
   toolbar?: ToolbarChainConfig;
   /** Whether to show the bubble menu on selection */
@@ -44,8 +120,34 @@ export interface ErixEditorProps
   slashCommands?: SlashCommand[];
   /** AI provider for the AI menu */
   aiProvider?: AiProvider;
-  /** Loading state indicator */
-  loader?: "skeleton" | "none";
+  /**
+   * Loading state indicator shown while the editor is mounting or the API key
+   * is being validated.
+   *
+   * - `"skeleton"` (default) — full-editor skeleton that matches the toolbar +
+   *   content proportions, zero layout-shift.
+   * - `"spinner"` — translucent overlay with a centered spinner; the editor
+   *   shell is still visible in the background.
+   * - `"none"` — no loader at all; render the editor immediately.
+   */
+  loader?: "skeleton" | "spinner" | "none";
+  /**
+   * CSS injected directly into the editor's iframe `<body>` document.
+   *
+   * Use this to customise fonts, colours, line-height, or any other visual
+   * property of the editable content area — completely isolated from your
+   * app's global stylesheet.
+   *
+   * @example
+   * ```tsx
+   * contentStyles={`
+   *   body { font-family: 'Georgia', serif; font-size: 17px; line-height: 1.9; }
+   *   h1, h2 { color: #1a1a2e; }
+   *   blockquote { border-left-color: #f59e0b; }
+   * `}
+   * ```
+   */
+  contentStyles?: string;
   /** Theme: 'light' | 'dark' */
   theme?: "light" | "dark";
   /** Style overrides */
@@ -71,24 +173,33 @@ export const ErixEditor: React.FC<ErixEditorProps> = ({
   slashMenu = true,
   slashCommands = DEFAULT_SLASH_COMMANDS,
   aiProvider,
-  loader = "skeleton",
+  loader = "none",
   apiKey,
   shortcutsEnabled = true,
   style,
   apiUrl,
   clientCode,
+  contentStyles = "",
   ...providerProps
 }) => {
   const [mounted, setMounted] = React.useState(false);
-  const [_isValidated, _setIsValidated] = React.useState<boolean | null>(null);
 
+  // Give the first paint a single microtask to flush so hydration completes
+  // before we swap in the real editor; avoids SSR mismatch warnings.
   React.useEffect(() => {
-    const t = setTimeout(() => setMounted(true), 50);
+    const t = setTimeout(() => setMounted(true), 30);
     return () => clearTimeout(t);
   }, []);
 
-  if (!mounted && loader === "skeleton") return <EditorSkeleton />;
+  // Derive height string once for the skeleton so it matches the real editor.
+  const h = style?.height ?? "400px";
+  const heightStr = typeof h === "number" ? `${h}px` : h;
 
+  if (!mounted && loader === "skeleton") {
+    return <EditorSkeleton height={heightStr} />;
+  }
+
+  // For "none" or already mounted — render the full editor.
   return (
     <ErixEditorProvider
       apiKey={apiKey}
@@ -96,6 +207,7 @@ export const ErixEditor: React.FC<ErixEditorProps> = ({
       clientCode={clientCode}
       shortcutsEnabled={shortcutsEnabled}
       style={style}
+      contentStyles={contentStyles}
       {...providerProps}
     >
       <EditorContent
@@ -104,41 +216,59 @@ export const ErixEditor: React.FC<ErixEditorProps> = ({
         slashMenu={slashMenu}
         slashCommands={slashCommands}
         aiProvider={aiProvider}
+        loader={loader}
       />
     </ErixEditorProvider>
   );
 };
 
-const EditorContent: React.FC<Omit<ErixEditorProps, "loader">> = ({
+// ─── Inner content (needs context) ───────────────────────────────────────────
+interface EditorContentProps {
+  toolbar?: ToolbarChainConfig;
+  bubbleMenu?: boolean;
+  slashMenu?: boolean;
+  slashCommands?: SlashCommand[];
+  aiProvider?: AiProvider;
+  loader?: ErixEditorProps["loader"];
+}
+
+const EditorContent: React.FC<EditorContentProps> = ({
   toolbar,
   bubbleMenu,
   slashMenu,
   slashCommands,
   aiProvider,
+  loader,
 }) => {
   const { aiVisible, setAiVisible, isApiValid, isApiValidating } =
     useErixEditor();
 
-  if (isApiValidating) {
+  // API key is invalid — hard block with a clear error state
+  if (!isApiValidating && !isApiValid) {
     return (
-      <div className="erix-w-full erix-h-full erix-flex erix-items-center erix-justify-center erix-bg-background/80 erix-backdrop-blur-sm erix-z-50">
-        <div className="erix-flex erix-flex-col erix-items-center erix-gap-2">
-          <div className="erix-w-6 erix-h-6 erix-border-2 erix-border-primary erix-border-t-transparent erix-rounded-full erix-animate-spin" />
-          <span className="erix-text-xs erix-font-medium erix-text-muted-foreground">
-            Validating SDK...
-          </span>
-        </div>
-      </div>
-    );
-  }
-
-  if (!isApiValid) {
-    return (
-      <div className="erix-w-full erix-h-full erix-flex erix-flex-col erix-items-center erix-justify-center erix-bg-destructive/5 erix-text-destructive erix-p-8 erix-text-center">
-        <h3 className="erix-font-bold erix-text-lg">Invalid API Key</h3>
-        <p className="erix-text-sm erix-opacity-80">
-          Your Erix API key is invalid or has expired. Please check your
-          credentials at console.ecodrix.com.
+      <div className="erix-flex-1 erix-flex erix-flex-col erix-items-center erix-justify-center erix-gap-2 erix-bg-destructive/5 erix-text-destructive erix-p-8 erix-text-center">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="28"
+          height="28"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="8" x2="12" y2="12" />
+          <line x1="12" y1="16" x2="12.01" y2="16" />
+        </svg>
+        <h3 className="erix-font-bold erix-text-base erix-mt-1">
+          Invalid API Key
+        </h3>
+        <p className="erix-text-sm erix-opacity-80 erix-max-w-xs">
+          Your Erix API key is invalid or has expired. Check your credentials at{" "}
+          <span className="erix-font-medium">console.ecodrix.com</span>.
         </p>
       </div>
     );
@@ -146,22 +276,35 @@ const EditorContent: React.FC<Omit<ErixEditorProps, "loader">> = ({
 
   return (
     <>
+      {/* Toolbar — always rendered so layout stays stable during validation */}
       <ToolbarChain
         {...toolbar}
         ai={!!(toolbar?.ai ?? !!aiProvider)}
         onAiClick={() => setAiVisible(true)}
       />
 
-      {bubbleMenu && <BubbleMenu />}
-      <TableMenu />
-      <ImageResizer />
-      {slashMenu && <SlashMenu commands={slashCommands} />}
-      {aiProvider && (
-        <AiMenu
-          provider={aiProvider}
-          visible={aiVisible}
-          onClose={() => setAiVisible(false)}
-        />
+      {/*
+       * Content area — when validating, replace the iframe with a skeleton.
+       * The spinner overlay (for loader="spinner") sits on top of the real
+       * content via absolute positioning inside the outer relative container.
+       */}
+      {isApiValidating && loader === "skeleton" ? (
+        <ContentSkeleton />
+      ) : (
+        <>
+          {isApiValidating && loader === "spinner" && <EditorSpinnerOverlay />}
+          {bubbleMenu && <BubbleMenu />}
+          <TableMenu />
+          <ImageResizer />
+          {slashMenu && <SlashMenu commands={slashCommands} />}
+          {aiProvider && (
+            <AiMenu
+              provider={aiProvider}
+              visible={aiVisible}
+              onClose={() => setAiVisible(false)}
+            />
+          )}
+        </>
       )}
     </>
   );

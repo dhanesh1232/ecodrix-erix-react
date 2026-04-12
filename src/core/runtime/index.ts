@@ -19,7 +19,7 @@ export function erixRuntimeInit() {
 
   // ─── postMessage bridge ──────────────────────────────────────────────────
   function send(type: string, payload: Record<string, unknown> = {}) {
-    parent.postMessage({ type, ...payload }, "*");
+    parent.postMessage(Object.assign({ type }, payload), "*");
   }
 
   // ─── Selection helpers ────────────────────────────────────────────────────
@@ -37,6 +37,7 @@ export function erixRuntimeInit() {
     const s = getSel();
     if (!s) return false;
     try {
+      window.focus();
       s.removeAllRanges();
       s.addRange(lastRange.cloneRange());
       return true;
@@ -148,8 +149,23 @@ export function erixRuntimeInit() {
   function unwrapEl(el: Element) {
     const p = el.parentNode;
     if (!p) return;
+    const first = el.firstChild;
+    const last = el.lastChild;
     while (el.firstChild) p.insertBefore(el.firstChild, el);
     p.removeChild(el);
+    if (first && last) {
+      try {
+        const r = document.createRange();
+        if (first.nodeType === 3) r.setStart(first, 0);
+        else r.setStartBefore(first);
+        if (last.nodeType === 3) r.setEnd(last, last.textContent?.length || 0);
+        else r.setEndAfter(last);
+        const s = getSel();
+        s?.removeAllRanges();
+        s?.addRange(r);
+        saveRange();
+      } catch {}
+    }
   }
 
   // ─── Mark detection ───────────────────────────────────────────────────────
@@ -181,6 +197,7 @@ export function erixRuntimeInit() {
       r.selectNodeContents(wrapper);
       s.removeAllRanges();
       s.addRange(r);
+      saveRange();
     } catch {
       // surroundContents fails on partial selections across block — fallback
       const frag = r.extractContents();
@@ -192,6 +209,7 @@ export function erixRuntimeInit() {
       r.selectNodeContents(wrapper);
       s.removeAllRanges();
       s.addRange(r);
+      saveRange();
     }
   }
 
@@ -200,6 +218,7 @@ export function erixRuntimeInit() {
     tags: string[],
     attrs?: Record<string, string>,
   ) {
+    restoreRange();
     if (isMarkActive(tags)) {
       // unwrap all matching ancestors from anchor
       const s = getSel();
@@ -360,6 +379,7 @@ export function erixRuntimeInit() {
 
   // ─── Block commands ───────────────────────────────────────────────────────
   function formatBlock(tag: string) {
+    restoreRange();
     const s = getSel();
     if (!s || s.rangeCount === 0) return;
     const block = anchorBlock();
@@ -387,6 +407,7 @@ export function erixRuntimeInit() {
   }
 
   function setAlign(align: string) {
+    restoreRange();
     const block = anchorBlock();
     if (block) {
       block.style.textAlign = align;
@@ -395,6 +416,7 @@ export function erixRuntimeInit() {
   }
 
   function indent() {
+    restoreRange();
     const block = anchorBlock();
     if (!block) return;
     const cur = parseFloat(block.style.paddingLeft || "0");
@@ -403,6 +425,7 @@ export function erixRuntimeInit() {
   }
 
   function outdent() {
+    restoreRange();
     const block = anchorBlock();
     if (!block) return;
     const cur = parseFloat(block.style.paddingLeft || "0");
@@ -411,6 +434,7 @@ export function erixRuntimeInit() {
   }
 
   function toggleList(tag: "ul" | "ol") {
+    restoreRange();
     const s = getSel();
     if (!s || s.rangeCount === 0) return;
     const block = anchorBlock();
@@ -437,6 +461,7 @@ export function erixRuntimeInit() {
   }
 
   function insertHR() {
+    restoreRange();
     const block = anchorBlock();
     const hr = document.createElement("hr");
     const p = document.createElement("p");
@@ -455,10 +480,10 @@ export function erixRuntimeInit() {
   function insertTaskList() {
     restoreRange();
     const ul = document.createElement("ul");
-    ul.className="erix-task-list";
+    ul.className = "erix-task-list";
     ul.setAttribute("data-erix-task-list", "true");
     const li = document.createElement("li");
-    li.className="erix-task-item";
+    li.className = "erix-task-item";
     const cb = document.createElement("input");
     cb.type = "checkbox";
     cb.contentEditable = "false";
@@ -489,15 +514,15 @@ export function erixRuntimeInit() {
   ) {
     restoreRange();
     const callout = document.createElement("div");
-    callout.className="erix-callout";
+    callout.className = "erix-callout";
     callout.setAttribute("data-erix-type", "callout");
     callout.style.cssText = `background:${bgColor};border-color:${borderColor};`;
     const emojiEl = document.createElement("span");
-    emojiEl.className="erix-callout-emoji";
+    emojiEl.className = "erix-callout-emoji";
     emojiEl.contentEditable = "false";
     emojiEl.textContent = emoji;
     const content = document.createElement("div");
-    content.className="erix-callout-content";
+    content.className = "erix-callout-content";
     const p = document.createElement("p");
     p.innerHTML = "<br>";
     content.appendChild(p);
@@ -514,13 +539,13 @@ export function erixRuntimeInit() {
   function insertToggle() {
     restoreRange();
     const toggle = document.createElement("div");
-    toggle.className="erix-toggle";
+    toggle.className = "erix-toggle";
     toggle.setAttribute("data-erix-type", "toggle");
     const trigger = document.createElement("div");
-    trigger.className="erix-toggle-trigger";
+    trigger.className = "erix-toggle-trigger";
     trigger.contentEditable = "false";
     const arrow = document.createElement("span");
-    arrow.className="erix-toggle-arrow";
+    arrow.className = "erix-toggle-arrow";
     arrow.textContent = "▶";
     const label = document.createElement("span");
     label.contentEditable = "true";
@@ -528,7 +553,7 @@ export function erixRuntimeInit() {
     trigger.appendChild(arrow);
     trigger.appendChild(label);
     const content = document.createElement("div");
-    content.className="erix-toggle-content";
+    content.className = "erix-toggle-content";
     const p = document.createElement("p");
     p.innerHTML = "<br>";
     content.appendChild(p);
@@ -546,7 +571,7 @@ export function erixRuntimeInit() {
   function insertTable(rows = 3, cols = 3) {
     restoreRange();
     const wrapper = document.createElement("div");
-    wrapper.className="erix-table-wrapper";
+    wrapper.className = "erix-table-wrapper";
     const table = document.createElement("table");
     table.style.width = "100%";
     for (let r = 0; r < rows; r++) {
@@ -680,11 +705,11 @@ export function erixRuntimeInit() {
   function insertColumns(cols = 2) {
     restoreRange();
     const layout = document.createElement("div");
-    layout.className="erix-columns";
+    layout.className = "erix-columns";
     layout.setAttribute("data-cols", String(cols));
     for (let i = 0; i < cols; i++) {
       const col = document.createElement("div");
-      col.className="erix-column";
+      col.className = "erix-column";
       const p = document.createElement("p");
       p.innerHTML = "<br>";
       col.appendChild(p);
@@ -718,7 +743,7 @@ export function erixRuntimeInit() {
       embedUrl = `https://player.vimeo.com/video/${vimeoMatch[1]}`;
 
     const wrapper = document.createElement("div");
-    wrapper.className="erix-video-embed";
+    wrapper.className = "erix-video-embed";
     wrapper.setAttribute("data-erix-type", "video");
     wrapper.setAttribute("data-src", url);
     const iframe = document.createElement("iframe");
@@ -927,11 +952,32 @@ export function erixRuntimeInit() {
 
   function executeSlash(command: string, data?: Record<string, unknown>) {
     // Delete the slash trigger text from current block
+    const sel = getSel();
+    if (sel && sel.rangeCount > 0) {
+      const r = sel.getRangeAt(0);
+      const node = r.startContainer;
+      if (node.nodeType === 3) {
+        const text = node.textContent || "";
+        const q = "/" + slashQuery;
+        const beforeCursor = text.substring(0, r.startOffset);
+        if (beforeCursor.endsWith(q)) {
+          const afterCursor = text.substring(r.startOffset);
+          node.textContent =
+            beforeCursor.substring(0, beforeCursor.length - q.length) +
+            afterCursor;
+          r.setStart(node, beforeCursor.length - q.length);
+          r.collapse(true);
+          sel.removeAllRanges();
+          sel.addRange(r);
+        }
+      }
+    }
+
     const block = anchorBlock();
     if (block) {
-      const text = block.textContent || "";
-      if (text.startsWith("/")) block.innerHTML = "<br>";
+      if (!block.textContent?.trim()) block.innerHTML = "<br>";
     }
+
     closeSlash();
     switch (command) {
       case "h1":
@@ -1012,7 +1058,7 @@ export function erixRuntimeInit() {
     const last = undoStack[undoStack.length - 1];
     if (last?.html === entry.html) return;
     undoStack.push(entry);
-    if (undoStack.length > 200) undoStack.shift();
+    if (undoStack.length > 50) undoStack.shift();
     redoStack.length = 0;
     send("ERIX_HISTORY", { canUndo: undoStack.length > 1, canRedo: false });
   }
@@ -1023,6 +1069,13 @@ export function erixRuntimeInit() {
   }
 
   function undo() {
+    const current = snapshot();
+    const top = undoStack[undoStack.length - 1];
+    if (top && top.html !== current.html) {
+      undoStack.push(current);
+      redoStack.length = 0;
+    }
+
     if (undoStack.length <= 1) return;
     const cur = undoStack.pop()!;
     redoStack.push(cur);
@@ -1030,7 +1083,7 @@ export function erixRuntimeInit() {
     document.body.innerHTML = prev.html || "<p><br></p>";
     ensureContent();
     setCaretFromPath(prev.sel);
-    send("ERIX_UPDATE", { html: prev.html });
+    emit(true);
     send("ERIX_HISTORY", {
       canUndo: undoStack.length > 1,
       canRedo: redoStack.length > 0,
@@ -1045,7 +1098,7 @@ export function erixRuntimeInit() {
     document.body.innerHTML = next.html || "<p><br></p>";
     ensureContent();
     setCaretFromPath(next.sel);
-    send("ERIX_UPDATE", { html: next.html });
+    emit(true);
     send("ERIX_HISTORY", {
       canUndo: undoStack.length > 1,
       canRedo: redoStack.length > 0,
@@ -1151,6 +1204,11 @@ export function erixRuntimeInit() {
       })(),
       hasSelection,
       selectionRect: selRect,
+      // ── History state ─────────────────────────────────────────────────────
+      // Always send live undo/redo availability so the toolbar reflects reality
+      // without waiting for a separate ERIX_HISTORY message.
+      canUndo: undoStack.length > 1,
+      canRedo: redoStack.length > 0,
       isIndented,
       isEmbed: !!block?.closest("figure, .erix-video-embed"),
       isNonEditable: !!block?.closest('[contenteditable="false"]'),
@@ -1197,11 +1255,22 @@ export function erixRuntimeInit() {
 
   // ─── Placeholder ──────────────────────────────────────────────────────────
   function checkPlaceholder() {
-    const isEmpty =
-      !document.body.textContent?.trim() &&
-      !document.body.querySelector(
-        "img,table,.erix-callout,.erix-task-list,.erix-video-embed",
-      );
+    // No visible text content at all
+    const hasText = !!document.body.textContent;
+    // Has a meaningful embedded element (image, table, etc.)
+    const hasEmbed = !!document.body.querySelector(
+      "img,table,.erix-callout,.erix-task-list,.erix-video-embed,.erix-columns",
+    );
+    // Canonical empty state: single block containing only a <br>
+    const children = Array.from(document.body.children).filter(
+      (el) => el.id !== "__ERIX_RUNTIME__",
+    );
+    const isCanonicalEmpty =
+      children.length === 1 &&
+      /^(P|H[1-6]|DIV)$/.test(children[0].tagName) &&
+      children[0].innerHTML.trim().toLowerCase() === "<br>";
+
+    const isEmpty = (!hasText && !hasEmbed) || isCanonicalEmpty;
     document.body.classList.toggle("erix-empty", isEmpty);
   }
 
@@ -1215,20 +1284,365 @@ export function erixRuntimeInit() {
     }
   }
 
+  // ─── DOM to JSON serializer ───────────────────────────────────────────────
+  function serializeInline(
+    container: Element,
+    stopAt: Element = container,
+  ): Record<string, unknown>[] {
+    const children: Record<string, unknown>[] = [];
+    for (const node of Array.from(container.childNodes)) {
+      if (node.nodeType === 3) {
+        const text = node.textContent || "";
+        if (text) {
+          const marks = getInlineMarks(node, stopAt);
+          children.push({ type: "text", content: text, marks });
+        }
+      } else if (node.nodeType === 1) {
+        const t = (node as HTMLElement).tagName.toLowerCase();
+        if (t === "br") {
+          children.push({ type: "text", content: "\n" });
+        } else if (t === "img") {
+          children.push({
+            type: "image",
+            attrs: {
+              src: (node as HTMLImageElement).src,
+              alt: (node as HTMLImageElement).alt || "",
+            },
+          });
+        } else {
+          children.push(...serializeInline(node as Element, stopAt));
+        }
+      }
+    }
+    return children;
+  }
+
+  function getInlineMarks(
+    node: Node,
+    stopAt: Element,
+  ): Record<string, unknown>[] {
+    const marks: Record<string, unknown>[] = [];
+    let cur: Node | null = node.parentNode;
+    while (cur && cur !== stopAt && cur.nodeType === 1) {
+      const t = (cur as HTMLElement).tagName.toLowerCase();
+      if (t === "strong" || t === "b") marks.push({ type: "bold" });
+      else if (t === "em" || t === "i") marks.push({ type: "italic" });
+      else if (t === "u") marks.push({ type: "underline" });
+      else if (t === "s" || t === "del" || t === "strike")
+        marks.push({ type: "strike" });
+      else if (t === "code") marks.push({ type: "code" });
+      else if (t === "sup") marks.push({ type: "superscript" });
+      else if (t === "sub") marks.push({ type: "subscript" });
+      else if (t === "a")
+        marks.push({
+          type: "link",
+          attrs: { href: (cur as HTMLAnchorElement).href },
+        });
+      else if (t === "span" || t === "mark") {
+        const s = (cur as HTMLElement).style;
+        if (s.color) marks.push({ type: "color", attrs: { color: s.color } });
+        if (s.backgroundColor)
+          marks.push({
+            type: "highlight",
+            attrs: { color: s.backgroundColor },
+          });
+        if (s.fontSize)
+          marks.push({ type: "font_size", attrs: { size: s.fontSize } });
+        if (s.fontFamily)
+          marks.push({ type: "font_family", attrs: { family: s.fontFamily } });
+      }
+      cur = cur.parentNode;
+    }
+    return marks;
+  }
+
+  function domToJSONNode(el: Element): Record<string, unknown> | null {
+    const tag = el.tagName.toLowerCase();
+
+    if (/^h[1-6]$/.test(tag)) {
+      return {
+        type: "heading",
+        attrs: {
+          level: parseInt(tag[1]),
+          textAlign: (el as HTMLElement).style?.textAlign || "left",
+        },
+        children: serializeInline(el),
+      };
+    }
+    if (tag === "p") {
+      return {
+        type: "paragraph",
+        attrs: { textAlign: (el as HTMLElement).style?.textAlign || "left" },
+        children: serializeInline(el),
+      };
+    }
+    if (tag === "blockquote") {
+      return { type: "blockquote", children: serializeInline(el) };
+    }
+    if (tag === "pre") {
+      return { type: "code_block", content: el.textContent || "" };
+    }
+    if (tag === "hr") {
+      return { type: "divider" };
+    }
+    if (tag === "ul" && el.classList.contains("erix-task-list")) {
+      return {
+        type: "task_list",
+        children: Array.from(el.querySelectorAll("li.erix-task-item")).map(
+          (li) => ({
+            type: "task_item",
+            attrs: {
+              checked: !!(
+                li.querySelector("input[type=checkbox]") as HTMLInputElement
+              )?.checked,
+            },
+            children: serializeInline(li.querySelector("span") ?? li),
+          }),
+        ),
+      };
+    }
+    if (tag === "ul") {
+      return {
+        type: "bullet_list",
+        children: Array.from(el.querySelectorAll(":scope > li")).map((li) => ({
+          type: "list_item",
+          children: serializeInline(li),
+        })),
+      };
+    }
+    if (tag === "ol") {
+      return {
+        type: "ordered_list",
+        children: Array.from(el.querySelectorAll(":scope > li")).map((li) => ({
+          type: "list_item",
+          children: serializeInline(li),
+        })),
+      };
+    }
+    if (tag === "figure" && (el as HTMLElement).dataset.erixType === "image") {
+      const img = el.querySelector("img");
+      const a = el.querySelector("a");
+      return {
+        type: "image",
+        attrs: {
+          src: img?.src || "",
+          alt: img?.alt || "",
+          link: a?.href || null,
+        },
+      };
+    }
+    if (tag === "div" && (el as HTMLElement).dataset.erixType === "video") {
+      return {
+        type: "video",
+        attrs: { src: (el as HTMLElement).dataset.src || "" },
+      };
+    }
+    if (tag === "div" && (el as HTMLElement).dataset.erixType === "callout") {
+      const emoji =
+        el.querySelector(".erix-callout-emoji")?.textContent || "💡";
+      const content = el.querySelector(".erix-callout-content");
+      return {
+        type: "callout",
+        attrs: { emoji, bg: (el as HTMLElement).style.background || "#fef3c7" },
+        children: content ? serializeChildren(content) : [],
+      };
+    }
+    if (tag === "div" && (el as HTMLElement).dataset.erixType === "toggle") {
+      const label =
+        el.querySelector(".erix-toggle-trigger span[contenteditable]")
+          ?.textContent || "";
+      const content = el.querySelector(".erix-toggle-content");
+      return {
+        type: "toggle",
+        attrs: { label },
+        children: content ? serializeChildren(content) : [],
+      };
+    }
+    if (tag === "div" && el.classList.contains("erix-columns")) {
+      return {
+        type: "column_layout",
+        attrs: { cols: parseInt((el as HTMLElement).dataset.cols || "2") },
+        children: Array.from(el.querySelectorAll(":scope > .erix-column")).map(
+          (col) => ({
+            type: "column",
+            children: serializeChildren(col),
+          }),
+        ),
+      };
+    }
+    if (tag === "div" && el.classList.contains("erix-table-wrapper")) {
+      const tbl = el.querySelector("table");
+      if (!tbl) return null;
+      return {
+        type: "table",
+        children: Array.from(tbl.querySelectorAll("tr")).map((row) => ({
+          type: "table_row",
+          children: Array.from(row.querySelectorAll("th, td")).map((cell) => ({
+            type:
+              cell.tagName.toLowerCase() === "th"
+                ? "table_header"
+                : "table_cell",
+            children: serializeInline(cell),
+          })),
+        })),
+      };
+    }
+    // Fallback
+    return { type: "paragraph", children: serializeInline(el) };
+  }
+
+  function serializeChildren(container: Element): Record<string, unknown>[] {
+    const out: Record<string, unknown>[] = [];
+    for (const child of Array.from(container.children)) {
+      const node = domToJSONNode(child);
+      if (node) out.push(node);
+    }
+    return out;
+  }
+
+  // ─── JSON to Markdown serializer ──────────────────────────────────────────
+  function inlineToMd(children: Record<string, unknown>[]): string {
+    return children
+      .map((c) => {
+        if (c.type === "image") {
+          const a = (c.attrs || {}) as Record<string, string>;
+          return `![${a.alt || ""}](${a.src || ""})`;
+        }
+        const raw = (c.content as string) || "";
+        if (!raw || raw === "\n") return raw;
+        const marks = (c.marks || []) as Array<Record<string, unknown>>;
+        const hasType = (t: string) => marks.some((m) => m.type === t);
+        let out = raw;
+        if (hasType("code")) out = `\`${out}\``;
+        if (hasType("bold")) out = `**${out}**`;
+        if (hasType("italic")) out = `_${out}_`;
+        if (hasType("strike")) out = `~~${out}~~`;
+        const linkMark = marks.find((m) => m.type === "link");
+        if (linkMark) {
+          const href =
+            ((linkMark.attrs as Record<string, string>) || {}).href || "";
+          out = `[${out}](${href})`;
+        }
+        return out;
+      })
+      .join("");
+  }
+
+  function nodesToMarkdown(nodes: Record<string, unknown>[]): string {
+    const lines: string[] = [];
+    for (const node of nodes) {
+      const type = node.type as string;
+      const children = (node.children || []) as Record<string, unknown>[];
+      const attrs = (node.attrs || {}) as Record<string, unknown>;
+
+      if (type === "heading") {
+        lines.push(
+          `${"#".repeat(Number(attrs.level) || 1)} ${inlineToMd(children)}`,
+        );
+        lines.push("");
+      } else if (type === "paragraph") {
+        lines.push(inlineToMd(children).trim() || "");
+        lines.push("");
+      } else if (type === "blockquote") {
+        lines.push(`> ${inlineToMd(children)}`);
+        lines.push("");
+      } else if (type === "code_block") {
+        lines.push("```");
+        lines.push(String(node.content || ""));
+        lines.push("```");
+        lines.push("");
+      } else if (type === "bullet_list") {
+        for (const item of children) {
+          lines.push(
+            `- ${inlineToMd((item.children || []) as Record<string, unknown>[])}`,
+          );
+        }
+        lines.push("");
+      } else if (type === "ordered_list") {
+        children.forEach((item, i) => {
+          lines.push(
+            `${i + 1}. ${inlineToMd((item.children || []) as Record<string, unknown>[])}`,
+          );
+        });
+        lines.push("");
+      } else if (type === "task_list") {
+        for (const item of children) {
+          const a = (item.attrs || {}) as Record<string, unknown>;
+          lines.push(
+            `- [${a.checked ? "x" : " "}] ${inlineToMd((item.children || []) as Record<string, unknown>[])}`,
+          );
+        }
+        lines.push("");
+      } else if (type === "divider") {
+        lines.push("---");
+        lines.push("");
+      } else if (type === "image") {
+        const a = attrs as Record<string, string>;
+        lines.push(`![${a.alt || ""}](${a.src || ""})`);
+        lines.push("");
+      } else if (type === "video") {
+        lines.push(`[Video](${String(attrs.src || "")})`);
+        lines.push("");
+      } else if (type === "callout") {
+        lines.push(
+          `> ${String(attrs.emoji || "💡")} ${nodesToMarkdown(children).trim()}`,
+        );
+        lines.push("");
+      } else if (type === "toggle") {
+        lines.push(`<details><summary>${String(attrs.label || "")}</summary>`);
+        lines.push("");
+        lines.push(nodesToMarkdown(children));
+        lines.push("</details>");
+        lines.push("");
+      } else if (type === "column_layout") {
+        for (const col of children) {
+          lines.push(
+            nodesToMarkdown((col.children || []) as Record<string, unknown>[]),
+          );
+        }
+      } else if (type === "table") {
+        const rows = children;
+        rows.forEach((row, ri) => {
+          const cells = (row.children || []) as Record<string, unknown>[];
+          lines.push(
+            `| ${cells.map((c) => inlineToMd((c.children || []) as Record<string, unknown>[])).join(" | ")} |`,
+          );
+          if (ri === 0) {
+            lines.push(`| ${cells.map(() => "---").join(" | ")} |`);
+          }
+        });
+        lines.push("");
+      }
+    }
+    return lines
+      .join("\n")
+      .replace(/\n{3,}/g, "\n\n")
+      .trim();
+  }
+
   // ─── Emit update ─────────────────────────────────────────────────────────
-  function emit() {
+  function emit(skipHistory: boolean = false) {
     checkPlaceholder();
     const clone = document.body.cloneNode(true) as HTMLElement;
     clone.querySelector("#__ERIX_RUNTIME__")?.remove();
+
     const rawText = clone.textContent || "";
+    const htmlStr = clone.innerHTML.trim();
+    const jsonNodes = serializeChildren(clone);
+    const markdownStr = nodesToMarkdown(jsonNodes);
+
     send("ERIX_UPDATE", {
-      html: clone.innerHTML.trim(),
+      html: htmlStr,
+      json: jsonNodes,
+      markdown: markdownStr,
       text: rawText,
       charCount: rawText.length,
       wordCount: rawText.trim() ? rawText.trim().split(/\s+/).length : 0,
     });
     sendContext();
-    schedulePush();
+    if (!skipHistory) {
+      schedulePush();
+    }
   }
 
   // ─── Paste ───────────────────────────────────────────────────────────────
@@ -1585,13 +1999,10 @@ export function erixRuntimeInit() {
     checkInputRules();
     // Slash command detection
     const ie = e as InputEvent;
-    if (ie.data === "/") {
-      const block = anchorBlock();
-      const text = block?.textContent?.trim() || "";
-      if (text === "/") {
-        openSlash();
-        return;
-      }
+    if (!inSlash && ie.data === "/") {
+      openSlash();
+      emit();
+      return;
     }
     if (inSlash) {
       if (ie.inputType === "deleteContentBackward") {
@@ -1606,6 +2017,8 @@ export function erixRuntimeInit() {
         send("ERIX_SLASH_QUERY", { query: slashQuery });
       }
     }
+    // Schedule a history snapshot on every input so undo/redo stays current
+    schedulePush();
     emit();
   });
 
@@ -1645,6 +2058,20 @@ export function erixRuntimeInit() {
       reader.onload = (ev) => {
         const dataUrl = ev.target?.result as string;
         if (!dataUrl) return;
+
+        // Strict protection against JSON AST memory crashing from huge inline Base64 payloads
+        if (file.size > 1.5 * 1024 * 1024) {
+          console.warn(
+            "Erix: Image exceeds 1.5MB. Suppressing auto-insertion to prevent memory crash.",
+          );
+          send("ERIX_DROP_IMAGE", {
+            dataUrl,
+            name: file.name,
+            warn: "size_limit",
+          });
+          return;
+        }
+
         // Insert immediately as preview
         insertImage(dataUrl, file.name);
         // Also notify the host — host can upload, get a real URL, and call engine.image() to replace

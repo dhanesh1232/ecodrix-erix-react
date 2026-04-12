@@ -156,7 +156,7 @@ export function AnalyticsDashboard({ pipelineId }: { pipelineId?: string }) {
                   cx="50%"
                   cy="50%"
                   outerRadius={80}
-                  label={({ source, percent }) => `${source} ${(percent! * 100).toFixed(0)}%`}
+                  label={({ name, percent }: any) => `${name} ${(percent * 100).toFixed(0)}%`}
                   labelLine={false}
                 >
                   {(sources ?? []).map((_, i) => (

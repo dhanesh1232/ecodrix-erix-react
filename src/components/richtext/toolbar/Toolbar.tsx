@@ -15,13 +15,17 @@ import { MoreHorizontal } from "lucide-react";
 import * as React from "react";
 import { useErixStyle } from "@/context/editor";
 import { cn } from "@/lib/utils";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "../ui/tooltip";
+} from "@/components/ui/tooltip";
 
 // ─── ToolbarBtn ───────────────────────────────────────────────────────────────
 export interface ToolbarBtnProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -230,6 +234,10 @@ export const ToolbarWrapper = React.forwardRef<
         className,
       )}
       {...props}
+      style={{
+        borderBottomRightRadius: "0px",
+        borderBottomLeftRadius: "0px",
+      }}
     >
       {/* Ghost layer for measurement */}
       <div

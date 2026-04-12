@@ -7,9 +7,19 @@ const define = { "process.env.NODE_ENV": JSON.stringify("production") };
 export default defineConfig([
   // --- ESM build ---
   {
-    entry: ["src/index.ts"],
+    entry: {
+      index: "src/index.ts",
+      crm: "src/crm.ts",
+      analytics: "src/analytics.ts",
+      whatsapp: "src/whatsapp.ts",
+      marketing: "src/marketing.ts",
+      meetings: "src/meetings.ts",
+      dashboard: "src/dashboard.ts",
+      editor: "src/editor.ts",
+    },
     format: ["esm"],
     outDir: "dist/es",
+    treeshake: true,
     sourcemap: true,
     clean: true,
     minify: false,
@@ -25,14 +35,27 @@ export default defineConfig([
     define,
     esbuildOptions(o) {
       o.assetNames = "globals";
+      o.banner = {
+        js: '"use client";',
+      };
     },
   },
 
   // --- CJS build ---
   {
-    entry: ["src/index.ts"],
+    entry: {
+      index: "src/index.ts",
+      crm: "src/crm.ts",
+      analytics: "src/analytics.ts",
+      whatsapp: "src/whatsapp.ts",
+      marketing: "src/marketing.ts",
+      meetings: "src/meetings.ts",
+      dashboard: "src/dashboard.ts",
+      editor: "src/editor.ts",
+    },
     format: ["cjs"],
     outDir: "dist/cjs",
+    treeshake: true,
     sourcemap: true,
     dts: false,
     clean: false,
@@ -41,6 +64,9 @@ export default defineConfig([
     define,
     esbuildOptions(o) {
       o.assetNames = "globals";
+      o.banner = {
+        js: '"use client";',
+      };
     },
   },
 

@@ -5,7 +5,11 @@ import * as React from "react";
 import { type ColorResult, SketchPicker } from "react-color";
 import { useErixEditor, useErixStyle } from "@/context/editor";
 import { cn } from "@/lib/utils";
-import { Popover, PopoverContent, PopoverTrigger } from "./popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 const SWATCHES = [
   "#000000",
