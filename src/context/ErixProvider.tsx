@@ -84,21 +84,48 @@ export function ErixProvider({ config, children }: ErixProviderProps) {
   const [healthLoading, setHealthLoading] = React.useState(false);
 
   const refreshHealth = React.useCallback(async () => {
+    // Basic credential validation to prevent unnecessary retries
+    const isPlaceholder =
+      !config.apiKey ||
+      config.apiKey.length < 10 ||
+      config.apiKey.includes("YOUR_API_KEY");
+
+    if (isPlaceholder) {
+      if (process.env.NODE_ENV === "development") {
+        console.warn(
+          "[ECODrIx SDK] API Key is missing or appears to be a placeholder. Health checks and realtime features may not work.",
+        );
+      }
+      return;
+    }
+
     try {
       setHealthLoading(true);
       const res = await sdk.health.clientHealth();
       setHealth((res as any)?.data ?? res ?? null);
-    } catch {
-      // Non-fatal — health is informational only
+    } catch (error: any) {
+      // Non-fatal — health is informational only. 
+      // Silencing noise for 401/403 in development if already warned.
+      if (process.env.NODE_ENV === "development") {
+        const isAuthError = error.status === 401 || error.status === 403;
+        if (!isAuthError) {
+          console.error("[ECODrIx SDK] Health check failed:", error.message);
+        }
+      }
     } finally {
       setHealthLoading(false);
     }
-  }, [sdk]);
+  }, [sdk, config.apiKey]);
 
   // Eagerly fetch health on mount
   React.useEffect(() => {
-    void refreshHealth();
-  }, [refreshHealth]);
+    const isDev = process.env.NODE_ENV === "development";
+    const skipHealth = config.disableHealthCheck || (isDev && !config.apiKey);
+    
+    if (!skipHealth) {
+      void refreshHealth();
+    }
+  }, [refreshHealth, config.disableHealthCheck, config.apiKey]);
 
   // Theme injection — sets <html data-erix-platform-theme="dark|light">
   React.useEffect(() => {

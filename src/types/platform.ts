@@ -56,6 +56,11 @@ export interface ErixPlatformConfig {
    * If true, no API calls or socket listeners for notifications will be created.
    */
   disableNotifications?: boolean;
+  /**
+   * Disable the eager health check fetch on mount.
+   * Useful for development or when running in environments without API access.
+   */
+  disableHealthCheck?: boolean;
 }
 
 // ─── CRM Types ──────────────────────────────────────────────────────────────
