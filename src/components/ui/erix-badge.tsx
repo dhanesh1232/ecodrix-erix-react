@@ -2,15 +2,26 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
-type BadgeVariant = "default" | "success" | "warning" | "danger" | "info" | "ghost";
+type BadgeVariant =
+  | "default"
+  | "success"
+  | "warning"
+  | "danger"
+  | "info"
+  | "ghost";
 
 const variants: Record<BadgeVariant, string> = {
-  default: "bg-muted text-muted-foreground border border-border",
-  success: "bg-emerald-500/15 text-emerald-400 border border-emerald-500/20",
-  warning: "bg-amber-500/15 text-amber-400 border border-amber-500/20",
-  danger: "bg-red-500/15 text-red-400 border border-red-500/20",
-  info: "bg-blue-500/15 text-blue-400 border border-blue-500/20",
-  ghost: "bg-transparent text-muted-foreground border border-transparent",
+  default:
+    "erix-bg-muted erix-text-muted-foreground erix-border erix-border-border",
+  success:
+    "erix-bg-emerald-500/15 erix-text-emerald-400 erix-border erix-border-emerald-500/20",
+  warning:
+    "erix-bg-amber-500/15 erix-text-amber-400 erix-border erix-border-amber-500/20",
+  danger:
+    "erix-bg-red-500/15 erix-text-red-400 erix-border erix-border-red-500/20",
+  info: "erix-bg-blue-500/15 erix-text-blue-400 erix-border erix-border-blue-500/20",
+  ghost:
+    "erix-bg-transparent erix-text-muted-foreground erix-border erix-border-transparent",
 };
 
 export interface ErixBadgeProps extends React.HTMLAttributes<HTMLSpanElement> {

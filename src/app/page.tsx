@@ -1,6 +1,6 @@
 // src/app/page.tsx — live demo for the dev server
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ErixEditor } from "@/components/richtext/editor";
 import { ErixRenderer } from "@/components/richtext/ErixRenderer";
 import { AiAction, AiProvider } from "@/types/erix";
@@ -33,18 +33,46 @@ const mockAiProvider: AiProvider = {
   },
 };
 
+type DataSource = "editor" | "leads_manifest" | "pipeline_manifest";
+
 export default function Page() {
   const [content, setContent] = useState<any>();
   const [format, setFormat] = useState<"html" | "json" | "markdown" | "text">(
     "json",
   );
+  const [dataSource, setDataSource] = useState<DataSource>("editor");
+  const [manifestData, setManifestData] = useState<any>(null);
+
+  // ─── SDK Introspection Logic ───────────────────────────────────────────────
+  // Ideally this would use the useResourceManifest hook, but for the raw
+  // playground we'll fetch them directly from the client instance.
+  useEffect(() => {
+    async function fetchManifests() {
+      // In a real app, this comes from useErixClient(), but for this dev demo
+      // we'll assume a global window.ecodrix or create a temporary one.
+      const sdk = (window as any).ecodrix;
+      if (!sdk) return;
+
+      if (dataSource === "leads_manifest") {
+        const manifest = await sdk.crm.leads.describe();
+        setManifestData(manifest);
+      } else if (dataSource === "pipeline_manifest") {
+        const manifest = await sdk.crm.pipelines.getStageManifest("default");
+        setManifestData(manifest);
+      }
+    }
+    fetchManifests();
+  }, [dataSource]);
+
+  // Determine what to show in the raw block
+  const rawContent = dataSource === "editor" ? content : manifestData;
 
   return (
     <div className="erix-w-full erix-min-h-screen erix-overflow-auto erix-flex erix-flex-col lg:erix-flex-row erix-items-start erix-justify-center erix-gap-6 erix-p-6 erix-bg-background">
       {/* Editor */}
       <div className="erix-w-full lg:erix-w-7/12 erix-flex erix-flex-col erix-gap-4">
         <h1 className="erix-text-2xl erix-font-bold erix-tracking-tight">
-          Erix Rich Text Editor
+          Erix SDK Playground
         </h1>
         <ErixEditor
           apiKey={process.env.NEXT_PUBLIC_ERIX_API_KEY as string}
@@ -53,7 +81,7 @@ export default function Page() {
           loader="spinner"
           onChange={setContent}
           aiProvider={mockAiProvider}
-          style={{ height: "480px", border: { radius: "lg" }, shadow: "md" }}
+          style={{ height: "480px", border: { radius: "lg" }, shadow: "none" }}
           format={format}
           toolbar={{
             history: true,
@@ -76,18 +104,20 @@ export default function Page() {
         {/* Rendered Preview */}
         <div className="erix-flex erix-flex-col erix-gap-2">
           <div className="erix-flex erix-justify-between erix-items-center">
-            <h2 className="erix-text-lg erix-font-semibold">Format Preview</h2>
-            <Select value={format} onValueChange={(e) => setFormat(e as any)}>
-              <SelectTrigger className="erix-w-32 max-w-32">
-                <SelectValue placeholder="Select format" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="json">JSON</SelectItem>
-                <SelectItem value="html">HTML</SelectItem>
-                <SelectItem value="markdown">Markdown</SelectItem>
-                <SelectItem value="text">Text</SelectItem>
-              </SelectContent>
-            </Select>
+            <h2 className="erix-text-lg erix-font-semibold">Live Preview</h2>
+            <div className="erix-flex erix-gap-2">
+              <Select value={format} onValueChange={(e) => setFormat(e as any)}>
+                <SelectTrigger className="erix-w-28">
+                  <SelectValue placeholder="Format" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="json">JSON</SelectItem>
+                  <SelectItem value="html">HTML</SelectItem>
+                  <SelectItem value="markdown">Markdown</SelectItem>
+                  <SelectItem value="text">Text</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
           <div className="erix-p-4 erix-bg-background erix-rounded-xl erix-border erix-border-border erix-overflow-auto erix-max-h-[300px]">
             {content ? (
@@ -102,22 +132,40 @@ export default function Page() {
 
         {/* Raw Output Data */}
         <div className="erix-flex erix-flex-col erix-gap-2">
-          <h2 className="erix-text-lg erix-font-semibold">
-            Raw Data Data Output
-          </h2>
-          <pre className="erix-text-xs erix-p-4 erix-bg-muted erix-rounded-xl erix-border erix-border-border erix-overflow-auto erix-max-h-[300px] erix-whitespace-pre-wrap erix-break-all">
-            {content ? (
+          <div className="erix-flex erix-justify-between erix-items-center">
+            <h2 className="erix-text-lg erix-font-semibold">Inspect Data</h2>
+            <Select
+              value={dataSource}
+              onValueChange={(e) => setDataSource(e as any)}
+            >
+              <SelectTrigger className="erix-w-44">
+                <SelectValue placeholder="Select source" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="editor">Editor Content</SelectItem>
+                <SelectItem value="leads_manifest">Leads Manifest</SelectItem>
+                <SelectItem value="pipeline_manifest">
+                  Pipeline Manifest
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <pre className="erix-text-xs erix-p-4 erix-bg-muted erix-rounded-xl erix-border erix-border-border erix-overflow-auto erix-max-h-[400px] erix-whitespace-pre-wrap erix-break-all">
+            {rawContent ? (
+              typeof rawContent === "string" &&
+              dataSource === "editor" &&
               format === "json" ? (
-                typeof content === "string" ? (
-                  JSON.stringify(JSON.parse(content), null, 2)
-                ) : (
-                  JSON.stringify(content, null, 2)
-                )
+                JSON.stringify(JSON.parse(rawContent), null, 2)
+              ) : typeof rawContent === "object" ? (
+                JSON.stringify(rawContent, null, 2)
               ) : (
-                content
+                rawContent
               )
             ) : (
-              <span className="erix-text-muted-foreground">Start typing…</span>
+              <span className="erix-text-muted-foreground">
+                No data available for this source.
+              </span>
             )}
           </pre>
         </div>

@@ -421,6 +421,23 @@ export class ErixEngine {
   }
 
   // ─── Theme ────────────────────────────────────────────────────────────
+  setFormat(format: ErixOutputFormat) {
+    this.config.format = format;
+    // Re-emit the current content in the new format so listeners get the update
+    const update = this.lastUpdate;
+    let outValue: string;
+    if (format === "json") {
+      outValue = JSON.stringify(update.json ?? []);
+    } else if (format === "markdown") {
+      outValue = update.markdown ?? "";
+    } else if (format === "text") {
+      outValue = update.text ?? "";
+    } else {
+      outValue = update.html;
+    }
+    this.config.onUpdate?.(outValue, format, update);
+  }
+
   setTheme(theme: "light" | "dark" | Record<string, string>) {
     const doc = this.iframe.contentDocument;
     if (!doc) return;

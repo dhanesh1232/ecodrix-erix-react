@@ -131,7 +131,9 @@ function KanbanColumn({
           ))}
           {leads.length === 0 && (
             <div className="erix-flex erix-flex-col erix-items-center erix-gap-1 erix-rounded-xl erix-border erix-border-dashed erix-border-border py-8 erix-text-center">
-              <p className="erix-text-xs erix-text-muted-foreground">No leads</p>
+              <p className="erix-text-xs erix-text-muted-foreground">
+                No leads
+              </p>
             </div>
           )}
         </div>
@@ -152,7 +154,7 @@ export function KanbanBoard({
   onLeadOpen,
   onAddLead,
 }: KanbanBoardProps) {
-  const { board, loading } = usePipelineBoard(pipelineId);
+  const { board, stageManifest, loading } = usePipelineBoard(pipelineId);
   const { move, convert, archive } = useLeads({ pipelineId });
   const [draggingLead, setDraggingLead] = React.useState<Lead | null>(null);
 
@@ -160,7 +162,7 @@ export function KanbanBoard({
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
   );
 
-  if (loading) {
+  if (loading && !board) {
     return (
       <div className="erix-flex erix-h-64 erix-items-center erix-justify-center">
         <ErixSpinner size="lg" />
@@ -170,54 +172,80 @@ export function KanbanBoard({
 
   if (!board) return null;
 
-  const allLeads = board.columns.flatMap((c) => c.leads);
-
-  function handleDragStart(e: DragStartEvent) {
-    const lead = allLeads.find((l) => l._id === e.active.id);
-    setDraggingLead(lead ?? null);
-  }
-
-  function handleDragEnd(e: DragEndEvent) {
-    setDraggingLead(null);
-    const { active, over } = e;
-    if (!over || active.id === over.id) return;
-
-    // Determine target column from over.id
-    const targetColumn = board?.columns.find(
-      (col) =>
-        col.stage._id === over.id || col.leads.some((l) => l._id === over.id),
+  // Enhance columns with metadata from manifest if applicable
+  const enhancedColumns = board.columns.map((column) => {
+    const manifestField: any = stageManifest?.fields.find(
+      (f: any) => f.key === column.stage._id,
     );
-    if (targetColumn) {
-      void move(String(active.id), targetColumn.stage._id);
+    return {
+      ...column,
+      stage: {
+        ...column.stage,
+        name: manifestField?.label || column.stage.name,
+        color: manifestField?.uiHints?.color || column.stage.color,
+      },
+    };
+  });
+
+  const onDragStart = (event: DragStartEvent) => {
+    const { active } = event;
+    const lead = board.columns
+      .flatMap((c) => c.leads)
+      .find((l) => l._id === active.id);
+    if (lead) setDraggingLead(lead);
+  };
+
+  const onDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    setDraggingLead(null);
+    if (!over) return;
+
+    const leadId = String(active.id);
+    const overId = String(over.id);
+
+    // If dropped over a column (stage ID) or another card (belonging to a stage)
+    const column = enhancedColumns.find(
+      (c) => c.stage._id === overId || c.leads.some((l) => l._id === overId),
+    );
+
+    if (column) {
+      void move(leadId, column.stage._id);
     }
-  }
+  };
 
   return (
     <DndContext
       sensors={sensors}
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
+      onDragStart={onDragStart}
+      onDragEnd={onDragEnd}
     >
-      <div className="erix-flex erix-gap-4 erix-overflow-x-auto pb-4 px-6">
-        {board.columns.map((col) => (
+      <div className="erix-flex erix-h-full erix-gap-4 erix-overflow-x-auto erix-pb-4">
+        {enhancedColumns.map((col) => (
           <KanbanColumn
             key={col.stage._id}
             stage={col.stage}
             leads={col.leads}
             total={col.total}
-            onOpen={(id) => onLeadOpen?.(id)}
-            onConvert={(id, outcome) => void convert(id, outcome)}
-            onArchive={(id) => void archive(id)}
+            onOpen={onLeadOpen || (() => {})}
+            onConvert={convert}
+            onArchive={archive}
             onAddLead={onAddLead}
           />
         ))}
       </div>
-      <DragOverlay dropAnimation={null}>
-        {draggingLead && (
-          <div className="erix-w-[280px]">
-            <LeadCard lead={draggingLead} isDragging />
+
+      <DragOverlay>
+        {draggingLead ? (
+          <div className="erix-w-[280px] erix-rotate-3 erix-scale-105 erix-cursor-grabbing">
+            <LeadCard
+              lead={draggingLead}
+              onOpen={() => {}}
+              onConvert={() => {}}
+              onArchive={() => {}}
+              isDragging={true}
+            />
           </div>
-        )}
+        ) : null}
       </DragOverlay>
     </DndContext>
   );

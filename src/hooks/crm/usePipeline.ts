@@ -2,28 +2,32 @@
 // src/hooks/crm/usePipeline.ts
 import * as React from "react";
 import { useErixClient } from "@/context/ErixProvider";
+import type { ResourceManifest } from "@ecodrix/erix-api";
 import type { Pipeline, KanbanBoard, PipelineForecast } from "@/types/platform";
 
 export function usePipelines() {
   const sdk = useErixClient();
   const [pipelines, setPipelines] = React.useState<Pipeline[]>([]);
-  const [loading, setLoading]     = React.useState(false);
-  const [error, setError]         = React.useState<string | null>(null);
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
 
-  const fetch_ = React.useCallback(async (signal?: AbortSignal) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res: any = await sdk.crm.pipelines.list();
-      if (signal?.aborted) return;
-      setPipelines(res?.data ?? []);
-    } catch (e) {
-      if (signal?.aborted) return;
-      setError((e as Error).message);
-    } finally {
-      if (!signal?.aborted) setLoading(false);
-    }
-  }, [sdk]);
+  const fetch_ = React.useCallback(
+    async (signal?: AbortSignal) => {
+      setLoading(true);
+      setError(null);
+      try {
+        const res: any = await sdk.crm.pipelines.list();
+        if (signal?.aborted) return;
+        setPipelines(res?.data ?? []);
+      } catch (e) {
+        if (signal?.aborted) return;
+        setError((e as Error).message);
+      } finally {
+        if (!signal?.aborted) setLoading(false);
+      }
+    },
+    [sdk],
+  );
 
   React.useEffect(() => {
     const ctrl = new AbortController();
@@ -36,25 +40,36 @@ export function usePipelines() {
 
 export function usePipelineBoard(pipelineId: string | null) {
   const sdk = useErixClient();
-  const [board, setBoard]     = React.useState<KanbanBoard | null>(null);
+  const [board, setBoard] = React.useState<KanbanBoard | null>(null);
+  const [stageManifest, setStageManifest] =
+    React.useState<ResourceManifest | null>(null);
   const [loading, setLoading] = React.useState(false);
-  const [error, setError]     = React.useState<string | null>(null);
+  const [error, setError] = React.useState<string | null>(null);
 
-  const fetch_ = React.useCallback(async (signal?: AbortSignal) => {
-    if (!pipelineId) return;
-    setLoading(true);
-    setError(null);
-    try {
-      const res: any = await sdk.crm.pipelines.board(pipelineId);
-      if (signal?.aborted) return;
-      setBoard(res?.data ?? null);
-    } catch (e) {
-      if (signal?.aborted) return;
-      setError((e as Error).message);
-    } finally {
-      if (!signal?.aborted) setLoading(false);
-    }
-  }, [sdk, pipelineId]);
+  const fetch_ = React.useCallback(
+    async (signal?: AbortSignal) => {
+      if (!pipelineId) return;
+      setLoading(true);
+      setError(null);
+      try {
+        const [boardRes, manifestRes] = await Promise.all([
+          sdk.crm.pipelines.board(pipelineId),
+          sdk.crm.pipelines.getStageManifest(pipelineId),
+        ]);
+
+        if (signal?.aborted) return;
+
+        setBoard(boardRes?.data ?? null);
+        setStageManifest(manifestRes || []);
+      } catch (e) {
+        if (signal?.aborted) return;
+        setError((e as Error).message);
+      } finally {
+        if (!signal?.aborted) setLoading(false);
+      }
+    },
+    [sdk, pipelineId],
+  );
 
   React.useEffect(() => {
     const ctrl = new AbortController();
@@ -62,14 +77,14 @@ export function usePipelineBoard(pipelineId: string | null) {
     return () => ctrl.abort();
   }, [fetch_]);
 
-  return { board, loading, error, refetch: () => fetch_() };
+  return { board, stageManifest, loading, error, refetch: () => fetch_() };
 }
 
 export function usePipelineForecast(pipelineId: string | null) {
   const sdk = useErixClient();
   const [forecast, setForecast] = React.useState<PipelineForecast | null>(null);
-  const [loading, setLoading]   = React.useState(false);
-  const [error, setError]       = React.useState<string | null>(null);
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     if (!pipelineId) return;

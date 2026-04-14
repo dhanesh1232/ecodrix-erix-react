@@ -104,7 +104,7 @@ export function ErixProvider({ config, children }: ErixProviderProps) {
       const res = await sdk.health.clientHealth();
       setHealth((res as any)?.data ?? res ?? null);
     } catch (error: any) {
-      // Non-fatal — health is informational only. 
+      // Non-fatal — health is informational only.
       // Silencing noise for 401/403 in development if already warned.
       if (process.env.NODE_ENV === "development") {
         const isAuthError = error.status === 401 || error.status === 403;
@@ -121,14 +121,35 @@ export function ErixProvider({ config, children }: ErixProviderProps) {
   React.useEffect(() => {
     const isDev = process.env.NODE_ENV === "development";
     const skipHealth = config.disableHealthCheck || (isDev && !config.apiKey);
-    
+
     if (!skipHealth) {
       void refreshHealth();
     }
   }, [refreshHealth, config.disableHealthCheck, config.apiKey]);
 
-  // Theme injection — sets <html data-erix-platform-theme="dark|light">
+  // ─── Wappalyzer & Technology Detection ─────────────────────────────────────
   React.useEffect(() => {
+    // 1. Inject Meta Generator
+    let meta = document.querySelector(
+      'meta[name="generator"]',
+    ) as HTMLMetaElement;
+    if (!meta) {
+      meta = document.createElement("meta");
+      meta.name = "generator";
+      document.head.appendChild(meta);
+    }
+    // We add Ecodrix to the existing generator list or set it if empty
+    const current = meta.content;
+    if (!current.includes("Ecodrix")) {
+      meta.content = current
+        ? `${current}, Ecodrix Platform`
+        : "Ecodrix Platform";
+    }
+
+    // 2. Set Version Attributes on HTML
+    document.documentElement.setAttribute("data-erix-sdk-version", "0.1.5");
+
+    // 3. Theme injection — sets <html data-erix-platform-theme="dark|light">
     if (config.theme) {
       document.documentElement.setAttribute(
         "data-erix-platform-theme",

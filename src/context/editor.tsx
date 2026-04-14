@@ -502,6 +502,15 @@ export const ErixEditorProvider: React.FC<ErixEditorProviderProps> = ({
     }
   }, [tokens]);
 
+  // ── Sync format changes ──────────────────────────────────────────────
+  // When the host toggles the 'format' prop (e.g. JSON -> HTML), tell the
+  // engine to re-serialise the current content in the new format immediately.
+  React.useEffect(() => {
+    if (engineRef.current && format) {
+      engineRef.current.setFormat(format);
+    }
+  }, [format]);
+
   // ── Sync host contentStyles changes live ──────────────────────────────
   // When the host changes the contentStyles prop, push the new CSS into
   // the iframe without reinitializing the editor.
