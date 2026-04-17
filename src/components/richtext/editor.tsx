@@ -167,60 +167,92 @@ export interface ErixEditorProps extends Omit<
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
-export const ErixEditor: React.FC<ErixEditorProps> = ({
-  toolbar,
-  bubbleMenu = true,
-  slashMenu = true,
-  slashCommands = DEFAULT_SLASH_COMMANDS,
-  aiProvider,
-  loader = "none",
-  apiKey,
-  shortcutsEnabled = true,
-  style,
-  apiUrl,
-  clientCode,
-  contentStyles = "",
-  ...providerProps
-}) => {
-  const [mounted, setMounted] = React.useState(false);
+export interface ErixEditorRef {
+  engine: any; // ErixEngine | null
+  insertContent: (content: string) => void;
+  focus: () => void;
+}
 
-  // Give the first paint a single microtask to flush so hydration completes
-  // before we swap in the real editor; avoids SSR mismatch warnings.
-  React.useEffect(() => {
-    const t = setTimeout(() => setMounted(true), 30);
-    return () => clearTimeout(t);
-  }, []);
+export const ErixEditor = React.forwardRef<ErixEditorRef, ErixEditorProps>(
+  (
+    {
+      toolbar,
+      bubbleMenu = true,
+      slashMenu = true,
+      slashCommands = DEFAULT_SLASH_COMMANDS,
+      aiProvider,
+      loader = "none",
+      apiKey,
+      shortcutsEnabled = true,
+      style,
+      apiUrl,
+      clientCode,
+      contentStyles = "",
+      ...providerProps
+    },
+    ref,
+  ) => {
+    const [mounted, setMounted] = React.useState(false);
+    const engineRef = React.useRef<any>(null);
 
-  // Derive height string once for the skeleton so it matches the real editor.
-  const h = style?.height ?? "400px";
-  const heightStr = typeof h === "number" ? `${h}px` : h;
+    React.useImperativeHandle(ref, () => ({
+      engine: engineRef.current,
+      insertContent: (content: string) => {
+        engineRef.current?.insertHTML(content);
+      },
+      focus: () => {
+        engineRef.current?.focus();
+      },
+    }));
 
-  if (!mounted && loader === "skeleton") {
-    return <EditorSkeleton height={heightStr} />;
-  }
+    // Give the first paint a single microtask to flush so hydration completes
+    // before we swap in the real editor; avoids SSR mismatch warnings.
+    React.useEffect(() => {
+      const t = setTimeout(() => setMounted(true), 30);
+      return () => clearTimeout(t);
+    }, []);
 
-  // For "none" or already mounted — render the full editor.
-  return (
-    <ErixEditorProvider
-      apiKey={apiKey}
-      apiUrl={apiUrl}
-      clientCode={clientCode}
-      shortcutsEnabled={shortcutsEnabled}
-      style={style}
-      contentStyles={contentStyles}
-      {...providerProps}
-    >
-      <EditorContent
-        toolbar={toolbar}
-        bubbleMenu={bubbleMenu}
-        slashMenu={slashMenu}
-        slashCommands={slashCommands}
-        aiProvider={aiProvider}
-        loader={loader}
-      />
-    </ErixEditorProvider>
-  );
-};
+    // Derive height string once for the skeleton so it matches the real editor.
+    const h = style?.height ?? "400px";
+    const heightStr = typeof h === "number" ? `${h}px` : h;
+
+    if (!mounted && loader === "skeleton") {
+      return <EditorSkeleton height={heightStr} />;
+    }
+
+    // For "none" or already mounted — render the full editor.
+    return (
+      <ErixEditorProvider
+        apiKey={apiKey}
+        apiUrl={apiUrl}
+        clientCode={clientCode}
+        shortcutsEnabled={shortcutsEnabled}
+        style={style}
+        contentStyles={contentStyles}
+        onContext={(ctx) => {
+          // Internal synchronization — we don't store the engine here
+          // as it's already in the provider's ref, but we could if needed.
+          providerProps.onContext?.(ctx);
+        }}
+        {...providerProps}
+      >
+        <EditorContent
+          toolbar={toolbar}
+          bubbleMenu={bubbleMenu}
+          slashMenu={slashMenu}
+          slashCommands={slashCommands}
+          aiProvider={aiProvider}
+          loader={loader}
+          onEngineReady={(eng) => {
+            engineRef.current = eng;
+          }}
+        />
+      </ErixEditorProvider>
+    );
+  },
+);
+
+ErixEditor.displayName = "ErixEditor";
 
 // ─── Inner content (needs context) ───────────────────────────────────────────
 interface EditorContentProps {
@@ -230,6 +262,7 @@ interface EditorContentProps {
   slashCommands?: SlashCommand[];
   aiProvider?: AiProvider;
   loader?: ErixEditorProps["loader"];
+  onEngineReady?: (engine: any) => void;
 }
 
 const EditorContent: React.FC<EditorContentProps> = ({
@@ -239,9 +272,16 @@ const EditorContent: React.FC<EditorContentProps> = ({
   slashCommands,
   aiProvider,
   loader,
+  onEngineReady,
 }) => {
-  const { aiVisible, setAiVisible, isApiValid, isApiValidating } =
+  const { aiVisible, setAiVisible, isApiValid, isApiValidating, engine } =
     useErixEditor();
+
+  React.useEffect(() => {
+    if (engine) {
+      onEngineReady?.(engine);
+    }
+  }, [engine, onEngineReady]);
 
   // API key is invalid — hard block with a clear error state
   if (!isApiValidating && !isApiValid) {

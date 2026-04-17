@@ -366,12 +366,20 @@ export const ErixEditorProvider: React.FC<ErixEditorProviderProps> = ({
 
   const stableOnChange = React.useRef(onChange);
   const stableOnContext = React.useRef(onContext);
+  const stableOnFocus = React.useRef(onFocus);
+  const stableOnBlur = React.useRef(onBlur);
   React.useEffect(() => {
     stableOnChange.current = onChange;
   }, [onChange]);
   React.useEffect(() => {
     stableOnContext.current = onContext;
   }, [onContext]);
+  React.useEffect(() => {
+    stableOnFocus.current = onFocus;
+  }, [onFocus]);
+  React.useEffect(() => {
+    stableOnBlur.current = onBlur;
+  }, [onBlur]);
 
   // ── Init engine ────────────────────────────────────────────────────────
   React.useEffect(() => {
@@ -439,8 +447,8 @@ export const ErixEditorProvider: React.FC<ErixEditorProviderProps> = ({
     });
     eng.on("imageOpen", () => setImagePickerVisible(true));
     eng.on("clickOutside", () => closeAllMenus());
-    eng.on("focusIn", () => onFocus?.());
-    eng.on("focusOut", () => onBlur?.());
+    eng.on("focusIn", () => stableOnFocus.current?.());
+    eng.on("focusOut", () => stableOnBlur.current?.());
     eng.on("dropImage", ({ dataUrl, name }) => {
       // If API available, upload and replace; otherwise the preview is already inserted
       if (apiUrl && apiKey) {
@@ -470,9 +478,7 @@ export const ErixEditorProvider: React.FC<ErixEditorProviderProps> = ({
   }, [
     theme,
     shortcutsEnabled,
-    onFocus,
     readonly,
-    onBlur,
     apiUrl,
     placeholder,
     closeAllMenus,

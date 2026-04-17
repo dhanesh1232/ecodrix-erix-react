@@ -106,5 +106,8 @@ export function resolveRoute(
 export function buildModulePath(prefix: string, subPath: string): string {
   const norm = normalizePrefix(prefix);
   if (!subPath) return norm;
+  if (subPath.startsWith("?") || subPath.startsWith("#")) {
+    return `${norm}${subPath}`;
+  }
   return `${norm}/${subPath}`;
 }

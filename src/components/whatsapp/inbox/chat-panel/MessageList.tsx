@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Loader2, ChevronUp, ChevronDown, Send, Search } from "lucide-react";
+import { Loader2, ChevronDown, Send, Search } from "lucide-react";
 import { useErixToast } from "../../../../toast/useErixToast";
 import { Avatar, AvatarFallback, AvatarImage } from "../../../ui/avatar";
 import { Button } from "../../../ui/button";
@@ -32,8 +32,8 @@ const formatDateLabel = (dateString: string) => {
   if (date.toDateString() === today.toDateString()) return "Today";
   if (date.toDateString() === yesterday.toDateString()) return "Yesterday";
   return date.toLocaleDateString("en-GB", {
-    day: "2-digit",
-    month: "2-digit",
+    day: "numeric",
+    month: "short",
     year: "numeric",
   });
 };
@@ -260,7 +260,7 @@ export function MessageList({
           ref={scrollAreaRef}
           onContextMenu={(e) => e.preventDefault()}
           onDoubleClick={(e) => e.preventDefault()}
-          className="erix-relative erix-z-0 erix-w-full erix-flex-1 erix-overflow-y-auto erix-bg-[#efeae2] erix-pl-3 erix-pr-4 erix-pt-1"
+          className="erix-relative erix-z-0 erix-w-full erix-flex-1 erix-overflow-y-auto erix-bg-[#efeae2] erix-px-[5%] erix-pt-2"
           onScrollCapture={handleScroll}
         >
           <div
@@ -271,25 +271,13 @@ export function MessageList({
               backgroundRepeat: "repeat",
             }}
           />
-          <div className="erix-w-full erix-space-y-2 erix-pb-4">
+          <div className="erix-mx-auto erix-w-full erix-max-w-[920px] erix-space-y-1 erix-pb-4">
             <div ref={topSentinelRef} className="erix-h-px erix-w-full" />
-            {hasMore && (
-              <div className="erix-flex erix-justify-center erix-py-2">
-                {isFetchingMore ? (
-                  <div className="erix-bg-background/80 erix-border-border erix-flex erix-items-center erix-gap-2 erix-rounded-full erix-border erix-px-3 erix-py-1.5 erix-shadow-sm">
-                    <Loader2 className="erix-text-muted-foreground erix-h-3.5 erix-w-3.5 erix-animate-spin" />
-                    <span className="erix-text-muted-foreground erix-text-xs">
-                      Loading older messages...
-                    </span>
-                  </div>
-                ) : (
-                  <div className="erix-bg-background/80 erix-border-border erix-flex erix-items-center erix-gap-2 erix-rounded-full erix-border erix-px-3 erix-py-1.5 erix-shadow-sm">
-                    <ChevronUp className="erix-text-muted-foreground erix-h-3.5 erix-w-3.5" />
-                    <span className="erix-text-muted-foreground erix-text-xs">
-                      Scroll up for more
-                    </span>
-                  </div>
-                )}
+            {hasMore && isFetchingMore && (
+              <div className="erix-flex erix-justify-center erix-py-3">
+                <span className="erix-bg-[#fff8e3]/95 erix-text-[#54656f] erix-border-none erix-rounded-full erix-px-3 erix-py-1 erix-text-[12px] erix-font-normal erix-shadow-sm erix-backdrop-blur-sm">
+                  Loading older messages...
+                </span>
               </div>
             )}
 
@@ -356,7 +344,7 @@ export function MessageList({
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
-            className="erix-absolute erix-bottom-4 erix-left-1/2 erix-z-20 erix--erix-translate-x-1/2"
+            className="erix-absolute erix-bottom-4 erix-left-1/2 erix-z-20 erix-translate-x-1/2"
           >
             <Button
               size="icon"

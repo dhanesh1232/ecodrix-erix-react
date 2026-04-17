@@ -556,7 +556,9 @@ export const ImagePickerNative: React.FC<ImagePickerNativeProps> = ({
                   <ImagePlus className="erix-h-3.5 erix-w-3.5 erix-text-primary" />
                 </div>
                 <DialogTitle className="erix-whitespace-nowrap erix-text-sm erix-font-semibold erix-leading-none erix-tracking-tight">
-                  {activeTab === "library" ? "Media Library" : "Insert from URL"}
+                  {activeTab === "library"
+                    ? "Media Library"
+                    : "Insert from URL"}
                 </DialogTitle>
                 {activeTab === "library" &&
                   !loadingImages &&
@@ -695,7 +697,7 @@ export const ImagePickerNative: React.FC<ImagePickerNativeProps> = ({
             {activeTab === "library" && (
               <div className="erix-flex erix-items-center erix-gap-2 erix-px-5 erix-pb-3">
                 <div className="erix-relative erix-flex-1">
-                  <Search className="erix-pointer-events-none erix-absolute erix-left-2.5 erix-top-1/2 erix-h-3.5 erix-w-3.5 erix--translate-y-1/2 erix-text-muted-foreground/60" />
+                  <Search className="erix-pointer-events-none erix-absolute erix-left-2.5 erix-top-1/2 erix-h-3.5 erix-w-3.5 -erix-translate-y-1/2 erix-text-muted-foreground/60" />
                   <input
                     type="search"
                     placeholder="Search files…"
@@ -717,10 +719,18 @@ export const ImagePickerNative: React.FC<ImagePickerNativeProps> = ({
                     <SelectValue placeholder="All types" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all" className="erix-text-xs">All types</SelectItem>
-                    <SelectItem value="image" className="erix-text-xs">Images</SelectItem>
-                    <SelectItem value="video" className="erix-text-xs">Videos</SelectItem>
-                    <SelectItem value="pdf" className="erix-text-xs">PDFs</SelectItem>
+                    <SelectItem value="all" className="erix-text-xs">
+                      All types
+                    </SelectItem>
+                    <SelectItem value="image" className="erix-text-xs">
+                      Images
+                    </SelectItem>
+                    <SelectItem value="video" className="erix-text-xs">
+                      Videos
+                    </SelectItem>
+                    <SelectItem value="pdf" className="erix-text-xs">
+                      PDFs
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -733,7 +743,6 @@ export const ImagePickerNative: React.FC<ImagePickerNativeProps> = ({
             className="erix-mt-0 erix-flex erix-min-h-0 erix-flex-1 erix-flex-col erix-overflow-hidden data-[state=inactive]:erix-hidden"
           >
             <div className="erix-flex-1 erix-overflow-y-auto erix-bg-muted/10 erix-p-4 erix-space-y-4">
-
               {/* Upload zone */}
               <div
                 className={cn(
@@ -754,8 +763,12 @@ export const ImagePickerNative: React.FC<ImagePickerNativeProps> = ({
                     <div className="erix-flex erix-h-10 erix-w-10 erix-items-center erix-justify-center erix-rounded-full erix-border erix-border-destructive/30 erix-bg-destructive/10">
                       <X className="erix-h-5 erix-w-5 erix-text-destructive" />
                     </div>
-                    <p className="erix-text-sm erix-font-semibold erix-text-destructive">Storage limit reached</p>
-                    <p className="erix-text-xs erix-text-muted-foreground">Free up space or upgrade to continue uploading</p>
+                    <p className="erix-text-sm erix-font-semibold erix-text-destructive">
+                      Storage limit reached
+                    </p>
+                    <p className="erix-text-xs erix-text-muted-foreground">
+                      Free up space or upgrade to continue uploading
+                    </p>
                   </div>
                 ) : isUploading ? (
                   <div className="erix-flex erix-w-full erix-max-w-xs erix-flex-col erix-items-center erix-gap-3">
@@ -768,7 +781,8 @@ export const ImagePickerNative: React.FC<ImagePickerNativeProps> = ({
                     <div className="erix-w-full">
                       <div className="erix-mb-1.5 erix-flex erix-justify-between erix-text-xs">
                         <span className="erix-font-medium">
-                          Uploading {uploadingCount} file{uploadingCount !== 1 ? "s" : ""}…
+                          Uploading {uploadingCount} file
+                          {uploadingCount !== 1 ? "s" : ""}…
                         </span>
                         <span className="erix-tabular-nums erix-text-muted-foreground">
                           {uploadProgress}%
@@ -788,7 +802,7 @@ export const ImagePickerNative: React.FC<ImagePickerNativeProps> = ({
                       className="erix-group/upload erix-flex erix-h-11 erix-w-11 erix-cursor-pointer erix-items-center erix-justify-center erix-rounded-xl erix-border erix-border-primary/20 erix-bg-primary/8 erix-transition-all hover:erix-scale-105 hover:erix-border-primary/40 hover:erix-bg-primary/15"
                       onClick={() => fileInputRef.current?.click()}
                     >
-                      <UploadCloud className="erix-h-5 erix-w-5 erix-text-primary erix-transition-transform group-hover/upload:erix--translate-y-0.5" />
+                      <UploadCloud className="erix-h-5 erix-w-5 erix-text-primary erix-transition-transform group-hover/upload:-erix-translate-y-0.5" />
                     </div>
                     <div className="erix-text-center">
                       <p className="erix-text-sm erix-font-medium erix-text-foreground/80">
@@ -898,7 +912,8 @@ export const ImagePickerNative: React.FC<ImagePickerNativeProps> = ({
                     )}
 
                   {filteredImages.map((src, i) => {
-                    const isDeleting = src.key && deletingKeys.includes(src.key);
+                    const isDeleting =
+                      src.key && deletingKeys.includes(src.key);
                     const selected = isSelected(src);
                     const displayName = getDisplayName(src);
                     const isCopied = copyFeedback === src.url;
@@ -972,7 +987,9 @@ export const ImagePickerNative: React.FC<ImagePickerNativeProps> = ({
                                 : "erix-border-border/60 erix-bg-background",
                             )}
                           >
-                            {selected && <Check className="erix-h-2.5 erix-w-2.5" />}
+                            {selected && (
+                              <Check className="erix-h-2.5 erix-w-2.5" />
+                            )}
                           </div>
                         </div>
                       );
@@ -1031,7 +1048,9 @@ export const ImagePickerNative: React.FC<ImagePickerNativeProps> = ({
                               : "erix-border-white/60 erix-bg-black/25 erix-backdrop-blur-sm erix-opacity-0 group-hover:erix-opacity-100",
                           )}
                         >
-                          {selected && <Check className="erix-h-2.5 erix-w-2.5" />}
+                          {selected && (
+                            <Check className="erix-h-2.5 erix-w-2.5" />
+                          )}
                         </div>
 
                         {/* Usage badge */}
@@ -1071,7 +1090,9 @@ export const ImagePickerNative: React.FC<ImagePickerNativeProps> = ({
                   <LinkIcon className="erix-h-6 erix-w-6 erix-text-muted-foreground/60" />
                 </div>
                 <div className="erix-max-w-sm erix-text-center">
-                  <h3 className="erix-text-sm erix-font-semibold">Insert from External URL</h3>
+                  <h3 className="erix-text-sm erix-font-semibold">
+                    Insert from External URL
+                  </h3>
                   <p className="erix-mt-1.5 erix-text-xs erix-leading-relaxed erix-text-muted-foreground">
                     Paste a publicly accessible image URL. HTTPS recommended.
                   </p>
@@ -1081,7 +1102,7 @@ export const ImagePickerNative: React.FC<ImagePickerNativeProps> = ({
                     Image URL
                   </label>
                   <div className="erix-relative">
-                    <LinkIcon className="erix-pointer-events-none erix-absolute erix-left-3 erix-top-1/2 erix-h-3.5 erix-w-3.5 erix--translate-y-1/2 erix-text-muted-foreground/50" />
+                    <LinkIcon className="erix-pointer-events-none erix-absolute erix-left-3 erix-top-1/2 erix-h-3.5 erix-w-3.5 -erix-translate-y-1/2 erix-text-muted-foreground/50" />
                     <Input
                       className="erix-h-9 erix-pl-9 erix-text-xs"
                       placeholder="https://example.com/image.png"
@@ -1121,7 +1142,8 @@ export const ImagePickerNative: React.FC<ImagePickerNativeProps> = ({
                           alt="URL preview"
                           className="erix-max-h-40 erix-max-w-full erix-object-contain erix-shadow-sm"
                           onError={(e) => {
-                            (e.target as HTMLImageElement).style.display = "none";
+                            (e.target as HTMLImageElement).style.display =
+                              "none";
                           }}
                         />
                       </div>
@@ -1157,7 +1179,9 @@ export const ImagePickerNative: React.FC<ImagePickerNativeProps> = ({
                     </div>
                   ) : (
                     <span className="erix-text-xs erix-text-muted-foreground">
-                      {images.length > 0 ? "Click a file to select" : "No files in library"}
+                      {images.length > 0
+                        ? "Click a file to select"
+                        : "No files in library"}
                     </span>
                   )}
                 </div>

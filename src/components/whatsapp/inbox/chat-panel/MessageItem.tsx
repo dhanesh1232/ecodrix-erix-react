@@ -172,8 +172,8 @@ export const MessageItem = memo(
         )}
       >
         {showDate && currentDateLabel && (
-          <div className="erix-pointer-events-none erix-sticky erix-top-2 erix-z-20 erix-my-4 erix-flex erix-justify-center">
-            <span className="erix-bg-white/90 erix-text-zinc-500 erix-border-none erix-rounded-md erix-px-3 erix-py-1 erix-text-[11px] erix-font-medium erix-shadow-sm erix-backdrop-blur-sm erix-uppercase erix-tracking-wide">
+          <div className="erix-pointer-events-none erix-sticky erix-top-2 erix-z-20 erix-my-3 erix-flex erix-justify-center">
+            <span className="erix-bg-white/95 erix-text-[#54656f] erix-border-none erix-rounded-[7.5px] erix-px-3 erix-py-1.5 erix-text-[12.5px] erix-font-normal erix-shadow-[0_1px_0.5px_rgba(11,20,26,0.13)] erix-backdrop-blur-sm">
               {currentDateLabel}
             </span>
           </div>
@@ -202,27 +202,27 @@ export const MessageItem = memo(
             >
               <div
                 className={cn(
-                  "erix-group/msg erix-relative erix-z-0 erix-mb-1 erix-p-1 erix-text-sm erix-shadow-sm erix-transition-shadow erix-duration-150",
+                  "erix-group/msg erix-relative erix-z-0 erix-mb-0.5 erix-px-2 erix-pt-1.5 erix-text-sm erix-transition-shadow erix-duration-150",
                   msg.type === "sticker"
                     ? "erix-bg-transparent erix-shadow-none"
                     : "lg:erix-max-w-[40%] erix-max-w-[65%]",
                   msg.direction === "outbound"
                     ? msg.status === "failed"
                       ? "erix-border erix-border-red-200 erix-bg-red-50"
-                      : "erix-bg-[#dcf8c6] erix-shadow-[0_1px_0.5px_rgba(0,0,0,0.13)]"
+                      : "erix-bg-[#dcf8c6] erix-shadow-[0_1px_0.5px_rgba(0,0,0,0.13)] erix-rounded-[7.5px]"
                     : msg.type === "sticker"
                       ? ""
-                      : "erix-bg-[#ffffff] erix-shadow-[0_1px_0.5px_rgba(0,0,0,0.13)]",
+                      : "erix-bg-white erix-shadow-[0_1px_0.5px_rgba(0,0,0,0.13)] erix-rounded-[7.5px]",
                   !isSameSender &&
                     msg.direction === "outbound" &&
                     msg.status !== "failed" &&
                     msg.type !== "sticker" &&
-                    "erix-rounded-md erix-rounded-tr-none after:erix-absolute after:erix-top-0 after:-erix-right-[9px] after:erix-h-[13px] after:erix-w-[13px] after:erix-bg-[#dcf8c6] after:[clip-path:path('M0,0_C0,0_10,0_10,0_C10,0_0,10_0,10_C0,10_0,0_0,0_Z')] after:erix-content-[''] after:erix-drop-shadow-[1px_1px_1px_rgba(0,0,0,0.05)]",
+                    "erix-rounded-[7.5px] erix-rounded-tr-none after:erix-absolute after:erix-top-0 after:-erix-right-[9px] after:erix-h-[13px] after:erix-w-[13px] after:erix-bg-[#dcf8c6] after:[clip-path:path('M0,0_C0,0_10,0_10,0_C10,0_0,10_0,10_C0,10_0,0_0,0_Z')] after:erix-content-[''] after:erix-drop-shadow-[1px_1px_1px_rgba(0,0,0,0.05)]",
                   !isSameSender &&
                     msg.direction !== "outbound" &&
                     msg.type !== "sticker" &&
-                    "erix-rounded-md erix-rounded-tl-none before:erix-absolute before:erix-top-0 before:-erix-left-[9px] before:erix-h-[13px] before:erix-w-[13px] before:erix-bg-[#ffffff] before:[clip-path:path('M10,0_C10,0_0,0_0,0_C0,0_10,10_10,10_C10,10_10,0_10,0_Z')] before:erix-content-[''] before:erix-drop-shadow-[-1px_1px_1px_rgba(0,0,0,0.05)]",
-                  isSameSender && "erix-mt-0.5 erix-rounded-md",
+                    "erix-rounded-[7.5px] erix-rounded-tl-none before:erix-absolute before:erix-top-0 before:-erix-left-[9px] before:erix-h-[13px] before:erix-w-[13px] before:erix-bg-white before:[clip-path:path('M10,0_C10,0_0,0_0,0_C0,0_10,10_10,10_C10,10_10,0_10,0_Z')] before:erix-content-[''] before:erix-drop-shadow-[-1px_1px_1px_rgba(0,0,0,0.05)]",
+                  isSameSender && "erix-mt-0.5 erix-rounded-[7.5px]",
                   msg.status === "failed" &&
                     "erix-border-l-destructive/80 erix-bg-destructive/10 erix-border-l-4",
                   msg.type !== "text" &&
@@ -249,10 +249,10 @@ export const MessageItem = memo(
                 {msg.status === "failed" && (
                   <div
                     className={cn(
-                      "erix-absolute erix-top-1/2 erix--translate-y-1/2",
+                      "erix-absolute erix-top-1/2 -erix-translate-y-1/2",
                       msg.direction === "outbound"
-                        ? "erix--left-10"
-                        : "erix--right-10",
+                        ? "-erix-left-10"
+                        : "-erix-right-10",
                     )}
                   >
                     <Tooltip>
@@ -286,7 +286,7 @@ export const MessageItem = memo(
                       msg.type !== "location" &&
                       msg.type !== "contacts"
                       ? "erix-px-0.5 erix-pt-0.5"
-                      : "erix-min-w-[120px] erix-px-1.5 erix-pt-1.5 erix-pb-5",
+                      : "erix-min-w-[120px] erix-px-2 erix-pt-1.5 erix-pb-5",
                   )}
                 >
                   {msg.replyTo && (
@@ -417,7 +417,7 @@ export const MessageItem = memo(
                       </p>
                     )}
                   {msg.type === "template" && msg.templateData && (
-                    <div className="erix-mt-2 erix--mx-1 erix-border-t erix-border-black/5">
+                    <div className="erix-mt-2 -erix-mx-1 erix-border-t erix-border-black/5">
                       {msg.templateData.footer && (
                         <p
                           className="erix-px-2 erix-pt-2 erix-text-[10px] erix-leading-tight erix-opacity-50 erix-whitespace-pre-wrap"
@@ -520,10 +520,7 @@ export const MessageItem = memo(
                         <Check className="erix-h-3.5 erix-w-3.5 erix-opacity-40" />
                       )}
                       {msg.status === "delivered" && (
-                        <div className="erix-relative erix-flex erix-w-4 erix-justify-end">
-                          <Check className="erix-h-3.5 erix-w-3.5 erix-opacity-40" />
-                          <Check className="erix-absolute erix-left-0 erix-h-3.5 erix-w-3.5 erix-opacity-40" />
-                        </div>
+                        <CheckCheck className="erix-h-3.5 erix-w-3.5 erix-opacity-40" />
                       )}
                       {msg.status === "read" && (
                         <div className="erix-relative erix-flex erix-w-4 erix-justify-end">
@@ -550,10 +547,10 @@ export const MessageItem = memo(
                 {msg.reactions && msg.reactions.length > 0 && (
                   <div
                     className={cn(
-                      "erix-animate-in erix-fade-in erix-absolute erix--bottom-2 erix-z-20 erix-flex erix-duration-150",
+                      "erix-animate-in erix-fade-in erix-absolute -erix-bottom-2 erix-z-20 erix-flex erix-duration-150",
                       msg.direction === "outbound"
-                        ? "erix--left-1"
-                        : "erix--right-1",
+                        ? "-erix-left-1"
+                        : "-erix-right-1",
                     )}
                   >
                     <div className="erix-bg-background erix-border-border erix-flex erix-items-center erix-justify-center erix-gap-0.5 erix-rounded-full erix-border erix-px-1 erix-py-0.5 erix-text-[14px] erix-leading-none erix-shadow-sm erix-ring-1 erix-ring-black/5">

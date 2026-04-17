@@ -38,16 +38,16 @@ import { cn } from "../../../../lib/utils";
 import { BroadcastDialog } from "./BroadcastDialog";
 
 const AVATAR_COLORS = [
-  { bg: "erix-bg-red-50 erix-text-red-600 erix-border-red-100" },
-  { bg: "erix-bg-primary/10 erix-text-primary-dark erix-border-primary/20" },
-  { bg: "erix-bg-green-50 erix-text-green-600 erix-border-green-100" },
-  { bg: "erix-bg-yellow-50 erix-text-yellow-600 erix-border-yellow-100" },
-  { bg: "erix-bg-purple-50 erix-text-purple-600 erix-border-purple-100" },
-  { bg: "erix-bg-pink-50 erix-text-pink-600 erix-border-pink-100" },
-  { bg: "erix-bg-indigo-50 erix-text-indigo-600 erix-border-indigo-100" },
-  { bg: "erix-bg-orange-50 erix-text-orange-600 erix-border-orange-100" },
-  { bg: "erix-bg-teal-50 erix-text-teal-600 erix-border-teal-100" },
-  { bg: "erix-bg-emerald-50 erix-text-emerald-600 erix-border-emerald-100" },
+  "erix-bg-red-100 erix-text-red-600",
+  "erix-bg-blue-100 erix-text-blue-600",
+  "erix-bg-green-100 erix-text-green-600",
+  "erix-bg-yellow-100 erix-text-yellow-700",
+  "erix-bg-purple-100 erix-text-purple-600",
+  "erix-bg-pink-100 erix-text-pink-600",
+  "erix-bg-indigo-100 erix-text-indigo-600",
+  "erix-bg-orange-100 erix-text-orange-600",
+  "erix-bg-teal-100 erix-text-teal-600",
+  "erix-bg-emerald-100 erix-text-emerald-600",
 ];
 
 function getAvatarColor(id: string) {
@@ -178,11 +178,11 @@ export function InboxSidebar({
   return (
     <div
       className={cn(
-        "erix-border-border erix-bg-card/50 erix-h-full erix-w-full erix-shrink-0 erix-flex erix-flex-col erix-overflow-hidden erix-border-r erix-transition-[width] erix-duration-300 erix-ease-in-out md:erix-w-56 lg:erix-w-80",
+        "erix-bg-background erix-h-full erix-w-full erix-shrink-0 erix-flex erix-flex-col erix-overflow-hidden erix-border-r erix-border-[#e9edef] erix-transition-[width] erix-duration-300 erix-ease-in-out md:erix-w-56 lg:erix-w-80",
         className,
       )}
     >
-      <div className="erix-border-border erix-flex erix-h-[60px] erix-items-center erix-justify-between erix-border-b erix-p-3">
+      <div className="erix-flex erix-h-[60px] erix-items-center erix-justify-between erix-bg-background erix-px-3 erix-py-2">
         <div className="erix-relative erix-flex-1 erix-flex erix-items-center erix-gap-2">
           <Checkbox
             checked={
@@ -207,7 +207,7 @@ export function InboxSidebar({
             className="data-[state=indeterminate]:erix-bg-primary data-[state=indeterminate]:erix-text-white data-[state=indeterminate]:erix-border-primary"
           />
           <div className="erix-relative erix-flex-1">
-            <Search className="erix-text-muted-foreground erix-absolute erix-left-2 erix-top-1/2 erix--erix-translate-y-1/2 erix-h-4 erix-w-4" />
+            <Search className="erix-text-muted-foreground erix-absolute erix-left-2 erix-top-1/2 -erix-translate-y-1/2 erix-h-4 erix-w-4" />
             <Input
               placeholder="Search chats..."
               className="erix-bg-muted/50 erix-h-8 erix-pl-8 erix-w-full"
@@ -326,13 +326,13 @@ export function InboxSidebar({
                   }
                 }}
                 className={cn(
-                  "hover:erix-bg-muted/50 erix-flex erix-flex-col erix-gap-1 erix-p-3 erix-text-left erix-transition-colors erix-relative erix-group erix-cursor-pointer erix-outline-none focus-visible:erix-bg-muted/50",
-                  !isBulkMode &&
-                    selectedId === (chat.id || chat._id) &&
-                    "erix-bg-muted erix-shadow-sm",
+                  "erix-flex erix-flex-col erix-gap-1 erix-px-3 erix-py-2.5 erix-text-left erix-transition-all erix-duration-150 erix-relative erix-group erix-cursor-pointer erix-outline-none erix-border-l-[3px] erix-border-l-transparent",
+                  !isBulkMode && selectedId === (chat.id || chat._id)
+                    ? "erix-bg-[#f0f2f5] erix-border-l-[#25D366]"
+                    : "hover:erix-bg-[#f5f6f6]",
                   isBulkMode &&
                     selectedIds.includes(String(chat.id || chat._id)) &&
-                    "erix-bg-primary/5",
+                    "erix-bg-[#dcf8c6]/30 erix-border-l-[#25D366]",
                 )}
               >
                 <div className="erix-flex erix-items-center erix-gap-3">
@@ -362,14 +362,7 @@ export function InboxSidebar({
                         String(chat.id || chat._id),
                       );
                       return (
-                        <Avatar
-                          className={cn(
-                            "erix-h-10 erix-w-10 erix-border",
-                            colors.bg
-                              .split(" ")
-                              .find((c) => c.startsWith("erix-border-")),
-                          )}
-                        >
+                        <Avatar className="erix-h-[46px] erix-w-[46px] erix-ring-1 erix-ring-black/[0.06]">
                           <AvatarImage
                             src={chat.profilePicture}
                             alt={chat.name}
@@ -377,7 +370,7 @@ export function InboxSidebar({
                           <AvatarFallback
                             className={cn(
                               "erix-text-xs erix-font-semibold erix-uppercase",
-                              colors.bg,
+                              colors,
                             )}
                           >
                             {chat.name?.slice(0, 2) || (
@@ -387,13 +380,16 @@ export function InboxSidebar({
                         </Avatar>
                       );
                     })()}
+                    {chat.isOnline && (
+                      <span className="erix-absolute erix-bottom-0 erix-right-0 erix-h-2.5 erix-w-2.5 erix-rounded-full erix-bg-[#25D366] erix-ring-2 erix-ring-white" />
+                    )}
                   </div>
                   <div className="erix-flex-1 erix-overflow-hidden">
                     <div className="erix-flex erix-items-center erix-justify-between">
                       <span className="erix-text-sm erix-font-semibold erix-truncate">
                         {chat.name}
                       </span>
-                      <span className="erix-text-muted-foreground erix-text-[10px]">
+                      <span className="erix-text-[11px] erix-text-[#667781] erix-whitespace-nowrap">
                         {chat.time}
                       </span>
                     </div>

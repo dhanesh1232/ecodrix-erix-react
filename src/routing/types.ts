@@ -10,7 +10,8 @@ export type ErixModuleName =
   | "whatsapp"
   | "meetings"
   | "richtext"
-  | "notifications";
+  | "notifications"
+  | "marketing";
 
 /**
  * Route configuration supplied by the consumer.
@@ -31,6 +32,7 @@ export interface ErixRouteConfig {
   meetings?: string;
   richtext?: string;
   notifications?: string;
+  marketing?: string;
   [key: string]: string | undefined;
 }
 

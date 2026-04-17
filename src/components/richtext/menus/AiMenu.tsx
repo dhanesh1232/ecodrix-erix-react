@@ -274,7 +274,7 @@ export const AiMenu: React.FC<AiMenuProps> = ({
                     buttonRadius,
                   )}
                 />
-                <div className="erix-absolute erix-right-2 erix-top-1/2 erix--translate-y-1/2">
+                <div className="erix-absolute erix-right-2 erix-top-1/2 -erix-translate-y-1/2">
                   <Zap
                     size={12}
                     className={cn(

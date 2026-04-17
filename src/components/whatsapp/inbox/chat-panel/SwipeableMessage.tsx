@@ -125,7 +125,7 @@ export function SwipeableMessage({
           opacity: 0,
           transform: "scale(0.5)",
         }}
-        className="erix-bg-primary/15 erix-text-primary erix-border-primary/10 erix-absolute erix-top-1/2 erix-z-0 erix-flex erix-h-9 erix-w-9 erix--erix-translate-y-1/2 erix-items-center erix-justify-center erix-rounded-full erix-border erix-shadow-sm"
+        className="erix-bg-primary/15 erix-text-primary erix-border-primary/10 erix-absolute erix-top-1/2 erix-z-0 erix-flex erix-h-9 erix-w-9 -erix-translate-y-1/2 erix-items-center erix-justify-center erix-rounded-full erix-border erix-shadow-sm"
       >
         <Reply className="erix-h-4 erix-w-4" />
       </div>

@@ -29,7 +29,10 @@ export {
   ToolbarWrapper,
   type ToolbarWrapperProps,
 } from "./components/richtext/toolbar/Toolbar";
-export { ToolbarChain, type ToolbarChainConfig } from "./components/richtext/toolbar/ToolbarChain";
+export {
+  ToolbarChain,
+  type ToolbarChainConfig,
+} from "./components/richtext/toolbar/ToolbarChain";
 export type { ErixEditorProviderProps } from "./context/editor";
 export { useErixEditor } from "./context/editor";
 export { ErixChain } from "./core/chain";
@@ -40,7 +43,10 @@ export { ErixDashboard } from "./components/dashboard/ErixDashboard";
 export type { ErixDashboardProps } from "./components/dashboard/ErixDashboard";
 
 // ─── CRM Components ───────────────────────────────────────────────────────────
-export { KanbanBoard, type KanbanBoardProps } from "./components/crm/KanbanBoard";
+export {
+  KanbanBoard,
+  type KanbanBoardProps,
+} from "./components/crm/KanbanBoard";
 export { LeadCard, type LeadCardProps } from "./components/crm/LeadCard";
 
 // ─── Analytics Components ─────────────────────────────────────────────────────
@@ -51,9 +57,57 @@ export type { ActiveView } from "./components/dashboard/ErixDashboard";
 // ─── WhatsApp Components ──────────────────────────────────────────────────────
 export { WhatsappInbox as WhatsAppInbox } from "./components/whatsapp/inbox/WhatsappInbox";
 export { MessageBubble } from "./components/whatsapp/MessageBubble";
-export { TemplateSelector, type TemplateSelectorProps } from "./components/whatsapp/TemplateSelector";
+export {
+  TemplateSelector,
+  type TemplateSelectorProps,
+} from "./components/whatsapp/TemplateSelector";
 export { WhatsAppBroadcast } from "./components/whatsapp/WhatsAppBroadcast";
 export type { WhatsAppBroadcastProps } from "./components/whatsapp/WhatsAppBroadcast";
+
+// ─── Email Template Builder ────────────────────────────────────────────────────
+export {
+  TemplateBuilder,
+  type TemplateBuilderProps,
+} from "./components/email/TemplateBuilder";
+export {
+  TemplateList,
+  type TemplateListProps,
+} from "./components/email/TemplateList";
+export {
+  TemplateEditor,
+  type TemplateEditorProps,
+} from "./components/email/TemplateEditor";
+export {
+  VariablePalette,
+  type VariablePaletteProps,
+} from "./components/email/VariablePalette";
+export {
+  TemplatePreview,
+  type TemplatePreviewProps,
+} from "./components/email/TemplatePreview";
+export {
+  SyncStatus,
+  type SyncStatusProps,
+} from "./components/email/SyncStatus";
+export {
+  useEmailTemplates,
+  useEmailTemplate,
+} from "./hooks/email/useEmailTemplates";
+export { useEmailTemplateSync } from "./hooks/email/useEmailTemplateSync";
+export { useEmailVariables } from "./hooks/email/useEmailVariables";
+export type {
+  IEmailTemplate,
+  VariableMapping,
+  EmailTemplatePayload,
+  EmailTemplateFilters,
+  EmailTemplateCategory,
+  EmailTemplateStatus,
+  EmailTemplateType,
+  VariableSource,
+  SyncStatusValue,
+  EmailPreviewResult,
+  CuratedMappingConfig,
+} from "./types/email";
 
 // ─── Meetings Components ──────────────────────────────────────────────────────
 export { MeetingList } from "./components/meet/MeetingList";
@@ -61,7 +115,10 @@ export { MeetingList } from "./components/meet/MeetingList";
 // ─── Shared UI ────────────────────────────────────────────────────────────────
 export { ErixBadge, type ErixBadgeProps } from "./components/ui/erix-badge";
 export { ErixSpinner, ErixLoadingOverlay } from "./components/ui/erix-spinner";
-export { ImagePickerNative, type ImagePickerNativeProps } from "./components/ui/ImagePickerNative";
+export {
+  ImagePickerNative,
+  type ImagePickerNativeProps,
+} from "./components/ui/ImagePickerNative";
 export type { ImageFormat } from "./components/ui/ImagePickerNative";
 
 // ─── CRM Hooks ───────────────────────────────────────────────────────────────
@@ -135,7 +192,10 @@ export { makeReactRouterAdapter } from "./routing/adapters/react-router";
 export type { RouterAdapter } from "./routing/adapters/types";
 
 // ─── Error Boundary ──────────────────────────────────────────────────────────
-export { ErixErrorBoundary, type ErixErrorBoundaryProps } from "./components/ErixErrorBoundary";
+export {
+  ErixErrorBoundary,
+  type ErixErrorBoundaryProps,
+} from "./components/ErixErrorBoundary";
 
 // ─── Toast ────────────────────────────────────────────────────────────────────
 export { ErixToastProvider, useToastContext } from "./toast/ToastContext";
@@ -195,12 +255,10 @@ export type { QueuedOp, UseErixQueueReturn } from "./offline/useErixQueue";
 export {
   ErixCommandPalette,
   ErixCommandPaletteTrigger,
-} from "./command-palette/ErixCommandPalette";
-export type {
-  CommandItem,
-  ErixCommandPaletteProps,
-  ErixCommandPaletteTriggerProps,
-} from "./command-palette/ErixCommandPalette";
+  type CommandItem,
+  type ErixCommandPaletteProps,
+  type ErixCommandPaletteTriggerProps,
+} from "./components/command-palette/ErixCommandPalette";
 
 // ─── Export / Download ────────────────────────────────────────────────────────
 export { useLeadsExport } from "./export/useLeadsExport";
@@ -223,4 +281,7 @@ export {
 } from "./ai/useErixAi";
 export type { SmartReplySuggestion } from "./ai/useErixAi";
 export { LeadScoreBadge, type LeadScoreBadgeProps } from "./ai/LeadScoreBadge";
-export { SmartReplySuggestions, type SmartReplySuggestionsProps } from "./ai/SmartReplySuggestions";
+export {
+  SmartReplySuggestions,
+  type SmartReplySuggestionsProps,
+} from "./ai/SmartReplySuggestions";

@@ -73,12 +73,9 @@ export const ErixRouterProvider: React.FC<ErixRouterProviderProps> = ({
 
   const [pathname, setPathname] = React.useState<string>(getPathname);
 
-  // Sync internal state with prop changes (crucial for Next.js navigation)
-  React.useEffect(() => {
-    if (initialPathname) {
-      setPathname(initialPathname);
-    }
-  }, [initialPathname]);
+  // NOTE: initialPathname is intentionally NOT synced via useEffect.
+  // It is used ONLY for the initial render (SSR hydration match).
+  // All subsequent pathname changes come from pushState + popstate listeners.
 
   // ── Listen to all navigation events ────────────────────────────────────
   React.useEffect(() => {

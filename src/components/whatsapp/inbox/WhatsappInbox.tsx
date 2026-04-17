@@ -1,7 +1,6 @@
 "use client";
 
 import { format } from "date-fns";
-import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import { useErixClient } from "../../../context/ErixProvider";
 import { useWhatsAppSocket } from "../../../hooks/whatsapp/useWhatsAppSocket";
@@ -34,24 +33,29 @@ const formatSidebarDate = (dateString: string) => {
     return "Yesterday";
   } else {
     return date.toLocaleDateString("en-GB", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
+      day: "numeric",
+      month: "short",
     });
   }
 };
 
 export function WhatsappInbox() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const initialContactId = searchParams.get("conversation");
+  // Pure CSR: read initial conversation from URL without useSearchParams().
+  // useSearchParams() hooks into Next.js Suspense/RSC and causes full-page
+  // server re-renders on every history.pushState — exactly what we want to avoid.
   const sdk = useErixClient();
   const toast = useErixToast();
 
+  // CSR-safe: read from URL on mount without useSearchParams() (which triggers
+  // Next.js RSC re-renders/full reloads on every history change).
   const [selectedContactId, setSelectedContactId] = useState<string | null>(
-    initialContactId,
+    () => {
+      if (typeof window === "undefined") return null;
+      return new URLSearchParams(window.location.search).get("conversation");
+    },
   );
-  // Dedicated chat metadata state — set instantly on click or fetched by ID on URL load.
+
+  // Dedicated chat metadata state — set instantly on click, no flash.
   const [selectedChatData, setSelectedChatData] = useState<any | null>(null);
   const [conversations, setConversations] = useState<any[]>([]);
   const [messages, setMessages] = useState<any[]>([]);
@@ -59,6 +63,7 @@ export function WhatsappInbox() {
   const [isLoading, setIsLoading] = useState(false);
   const [isNewChatOpen, setIsNewChatOpen] = useState(false);
   const [isConversationsLoading, setIsConversationsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [hasMore, setHasMore] = useState(false);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
   const [hasMoreCache, setHasMoreCache] = useState<Record<string, boolean>>({});
@@ -191,23 +196,30 @@ export function WhatsappInbox() {
     loadConversations();
   }, [sdk, mapConversation]);
 
-  // Synchronize URL with state
+  // Sync state when browser back/forward is used (popstate).
+  // This is the CSR-safe alternative to useSearchParams() watching.
   useEffect(() => {
-    const paramsId = searchParams.get("conversation");
-    if (paramsId !== selectedContactId) {
-      setSelectedContactId(paramsId);
-      if (paramsId) {
-        const chat = conversations.find(
-          (c) =>
-            String(c.id) === String(paramsId) ||
-            String(c._id) === String(paramsId),
-        );
-        setSelectedChatData(chat ?? null);
-      } else {
-        setSelectedChatData(null);
+    const onPopState = () => {
+      const paramsId = new URLSearchParams(window.location.search).get(
+        "conversation",
+      );
+      if (paramsId !== selectedContactId) {
+        setSelectedContactId(paramsId);
+        if (paramsId) {
+          const chat = conversations.find(
+            (c) =>
+              String(c.id) === String(paramsId) ||
+              String(c._id) === String(paramsId),
+          );
+          setSelectedChatData(chat ?? null);
+        } else {
+          setSelectedChatData(null);
+        }
       }
-    }
-  }, [searchParams, conversations, selectedContactId]);
+    };
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, [conversations, selectedContactId]);
 
   // Keyboard Shortcuts
   useEffect(() => {
@@ -364,15 +376,19 @@ export function WhatsappInbox() {
   useEffect(() => {
     if (conversations.length === 0) return;
     const topChats = conversations.slice(0, 5);
+    let isCancelled = false;
+    const timers: ReturnType<typeof setTimeout>[] = [];
 
     topChats.forEach((chat, index) => {
       const chatId = String(chat.id || chat._id);
       if (messagesCacheRef.current[chatId]) return;
 
-      setTimeout(() => {
+      const timer = setTimeout(() => {
+        if (isCancelled) return;
         sdk.whatsapp.conversations
           .messages<any>(chatId, { limit: 25 })
           .then((result) => {
+            if (isCancelled) return;
             if (result.success && result.data) {
               const data = result.data?.data || result.data || [];
               if (Array.isArray(data)) {
@@ -388,9 +404,15 @@ export function WhatsappInbox() {
               }
             }
           })
-          .catch(() => {});
+          .catch(() => {}); // Silently ignore abort / network errors during prefetch
       }, index * 300);
+      timers.push(timer);
     });
+
+    return () => {
+      isCancelled = true;
+      timers.forEach(clearTimeout);
+    };
   }, [conversations.length, sdk, mapMessage]);
 
   // Load Messages for Selected Chat — with Cache-First "Zero-Flash" logic
@@ -429,8 +451,18 @@ export function WhatsappInbox() {
             }));
           }
         }
-      } catch (err) {
-        if (isMounted) console.error("Failed to load messages", err);
+      } catch (err: any) {
+        // Silently ignore request-aborted errors caused by React
+        // re-rendering and cleanup — they are not real failures.
+        const msg = String(err?.message || err || "").toLowerCase();
+        const isAbort =
+          err?.name === "AbortError" ||
+          msg.includes("aborted") ||
+          msg.includes("abort") ||
+          msg.includes("cancel");
+        if (isMounted && !isAbort) {
+          console.error("Failed to load messages", err);
+        }
       } finally {
         if (isMounted) setIsLoading(false);
       }
@@ -603,21 +635,24 @@ export function WhatsappInbox() {
 
   const handleRefresh = async () => {
     if (!selectedContactId) return;
+    setIsRefreshing(true);
     toast.info("Refreshing...");
     try {
       const convResult = await sdk.whatsapp.conversations.list<any>({
         limit: 10,
       });
-      if (convResult.success)
-        setConversations((convResult.data?.data || []).map(mapConversation));
+      if (convResult.success) {
+        const data = convResult.data?.data || convResult.data || [];
+        setConversations(data.map(mapConversation));
+      }
 
-      setIsLoading(true);
       const msgResult = await sdk.whatsapp.conversations.messages<any>(
         selectedContactId,
         { limit: 25 },
       );
       if (msgResult.success) {
-        const mapped = (msgResult.data?.data || []).map(mapMessage);
+        const data = msgResult.data?.data || msgResult.data || [];
+        const mapped = data.map(mapMessage);
         setMessages(mapped);
         setHasMore(msgResult.data?.hasMore || false);
         setMessagesCache((prev) => ({ ...prev, [selectedContactId]: mapped }));
@@ -626,7 +661,7 @@ export function WhatsappInbox() {
     } catch (error) {
       toast.error("Failed to refresh");
     } finally {
-      setIsLoading(false);
+      setIsRefreshing(false);
     }
   };
 
@@ -640,15 +675,18 @@ export function WhatsappInbox() {
     setHasMore(hasMoreCacheRef.current[id] ?? false);
     setIsLoading(!cachedMessages?.length);
 
-    router.push(`/admin/communication/whatsapp?conversation=${id}`, {
-      scroll: false,
-    });
+    // Update URL using replaceState — pure CSR, no Next.js router involved,
+    // no server re-render, no Suspense boundary triggered.
+    const currentPath = window.location.pathname;
+    window.history.replaceState({}, "", `${currentPath}?conversation=${id}`);
   };
 
   const handleBack = () => {
     setSelectedContactId(null);
     setSelectedChatData(null);
-    router.push("/admin/communication/whatsapp", { scroll: false });
+    // Strip query on back — pure CSR replaceState
+    window.history.replaceState({}, "", window.location.pathname);
+    window.dispatchEvent(new PopStateEvent("popstate", { state: {} }));
   };
 
   return (
@@ -712,7 +750,7 @@ export function WhatsappInbox() {
               hasMore={hasMore}
               isFetchingMore={isFetchingMore}
               onLoadMore={handleLoadMoreMessages}
-              isLoading={isLoading}
+              isLoading={isRefreshing}
               onRefresh={handleRefresh}
             />
           )

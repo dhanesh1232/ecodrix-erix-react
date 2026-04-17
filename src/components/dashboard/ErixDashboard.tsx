@@ -29,25 +29,44 @@ import { cn } from "@/lib/utils";
 
 // ─── Lazy-loaded module panels ─────────────────────────────────────────────────
 const KanbanBoard = React.lazy(() =>
-  import("@/components/crm/KanbanBoard").then((m) => ({ default: m.KanbanBoard })),
+  import("@/components/crm/KanbanBoard").then((m) => ({
+    default: m.KanbanBoard,
+  })),
 );
 const AnalyticsDashboard = React.lazy(() =>
-  import("@/components/analytics/AnalyticsDashboard").then((m) => ({ default: m.AnalyticsDashboard })),
+  import("@/components/analytics/AnalyticsDashboard").then((m) => ({
+    default: m.AnalyticsDashboard,
+  })),
 );
 const WhatsAppInbox = React.lazy(() =>
-  import("@/components/whatsapp/WhatsAppInbox").then((m) => ({ default: m.WhatsAppInbox })),
+  import("@/components/whatsapp/WhatsAppInbox").then((m) => ({
+    default: m.WhatsAppInbox,
+  })),
 );
 const MeetingList = React.lazy(() =>
-  import("@/components/meet/MeetingList").then((m) => ({ default: m.MeetingList })),
+  import("@/components/meet/MeetingList").then((m) => ({
+    default: m.MeetingList,
+  })),
 );
 const WhatsAppBroadcast = React.lazy(() =>
-  import("@/components/whatsapp/WhatsAppBroadcast").then((m) => ({ default: m.WhatsAppBroadcast })),
+  import("@/components/whatsapp/WhatsAppBroadcast").then((m) => ({
+    default: m.WhatsAppBroadcast,
+  })),
 );
 const ErixCommandPalette = React.lazy(() =>
-  import("@/command-palette/ErixCommandPalette").then((m) => ({ default: m.ErixCommandPalette })),
+  import("@/components/command-palette/ErixCommandPalette").then((m) => ({
+    default: m.ErixCommandPalette,
+  })),
 );
 
-export type ActiveView = "overview" | "crm" | "analytics" | "whatsapp" | "marketing" | "meetings" | "editor";
+export type ActiveView =
+  | "overview"
+  | "crm"
+  | "analytics"
+  | "whatsapp"
+  | "marketing"
+  | "meetings"
+  | "editor";
 
 interface NavItem {
   id: ActiveView;
@@ -58,24 +77,36 @@ interface NavItem {
 }
 
 const ALL_NAV_ITEMS: NavItem[] = [
-  { id: "overview",   label: "Overview",   icon: LayoutDashboard },
-  { id: "crm",        label: "CRM",        icon: Users,         module: "crm" },
-  { id: "analytics",  label: "Analytics",  icon: BarChart3,     module: "analytics" },
-  { id: "whatsapp",   label: "WhatsApp",   icon: MessageSquare, module: "whatsapp" },
-  { id: "marketing",  label: "Marketing",  icon: Mail,          module: "marketing" },
-  { id: "meetings",   label: "Meetings",   icon: Calendar,      module: "meetings" },
-  { id: "editor",     label: "Editor",     icon: FileText,      module: "editor" },
+  { id: "overview", label: "Overview", icon: LayoutDashboard },
+  { id: "crm", label: "CRM", icon: Users, module: "crm" },
+  { id: "analytics", label: "Analytics", icon: BarChart3, module: "analytics" },
+  {
+    id: "whatsapp",
+    label: "WhatsApp",
+    icon: MessageSquare,
+    module: "whatsapp",
+  },
+  { id: "marketing", label: "Marketing", icon: Mail, module: "marketing" },
+  { id: "meetings", label: "Meetings", icon: Calendar, module: "meetings" },
+  { id: "editor", label: "Editor", icon: FileText, module: "editor" },
 ];
 
 // ─── Health dot ───────────────────────────────────────────────────────────────
 function HealthDot() {
   const { health, healthLoading } = useErix();
-  if (healthLoading) return <Circle className="erix-size-3 erix-animate-pulse erix-text-muted-foreground" />;
+  if (healthLoading)
+    return (
+      <Circle className="erix-size-3 erix-animate-pulse erix-text-muted-foreground" />
+    );
   if (!health) return <AlertCircle className="erix-size-3 erix-text-red-400" />;
-  const allOk = Object.values(health.services).every((s) => s !== "not_configured");
-  return allOk
-    ? <CheckCircle2 className="erix-size-3 erix-text-emerald-400" />
-    : <AlertCircle className="erix-size-3 erix-text-amber-400" />;
+  const allOk = Object.values(health.services).every(
+    (s) => s !== "not_configured",
+  );
+  return allOk ? (
+    <CheckCircle2 className="erix-size-3 erix-text-emerald-400" />
+  ) : (
+    <AlertCircle className="erix-size-3 erix-text-amber-400" />
+  );
 }
 
 // ─── Header ───────────────────────────────────────────────────────────────────
@@ -109,12 +140,20 @@ function DashboardHeader({
         className="erix-rounded-lg erix-p-2 erix-text-muted-foreground hover:erix-bg-muted hover:erix-text-foreground transition-colors"
         title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
       >
-        {collapsed ? <ChevronRight className="erix-size-4" /> : <ChevronLeft className="erix-size-4" />}
+        {collapsed ? (
+          <ChevronRight className="erix-size-4" />
+        ) : (
+          <ChevronLeft className="erix-size-4" />
+        )}
       </button>
 
       <div className="min-w-0 erix-flex-1">
-        <h1 className="erix-truncate erix-text-sm font-semibold erix-text-foreground">{activeLabel}</h1>
-        <p className="erix-text-xs erix-text-muted-foreground">{config.clientCode}</p>
+        <h1 className="erix-truncate erix-text-sm font-semibold erix-text-foreground">
+          {activeLabel}
+        </h1>
+        <p className="erix-text-xs erix-text-muted-foreground">
+          {config.clientCode}
+        </p>
       </div>
 
       {/* Search trigger */}
@@ -126,7 +165,9 @@ function DashboardHeader({
       >
         <Search className="erix-size-3.5" />
         <span className="erix-hidden sm:erix-inline">Search</span>
-        <kbd className="erix-hidden sm:erix-inline erix-rounded erix-bg-muted px-1 font-mono erix-text-[10px]">⌘K</kbd>
+        <kbd className="erix-hidden sm:erix-inline erix-rounded erix-bg-muted px-1 font-mono erix-text-[10px]">
+          ⌘K
+        </kbd>
       </button>
 
       {/* Health badge */}
@@ -135,8 +176,20 @@ function DashboardHeader({
           <HealthDot />
           <div className="erix-flex erix-items-center erix-gap-1.5 erix-text-xs">
             {Object.entries(health.services).map(([svc, status]) => (
-              <span key={svc} className={cn("erix-capitalize", status === "not_configured" ? "erix-text-amber-400" : "erix-text-emerald-400")}>
-                {svc === "whatsapp" ? "WA" : svc === "googleMeet" ? "GCal" : svc}
+              <span
+                key={svc}
+                className={cn(
+                  "erix-capitalize",
+                  status === "not_configured"
+                    ? "erix-text-amber-400"
+                    : "erix-text-emerald-400",
+                )}
+              >
+                {svc === "whatsapp"
+                  ? "WA"
+                  : svc === "googleMeet"
+                    ? "GCal"
+                    : svc}
               </span>
             ))}
           </div>
@@ -191,16 +244,27 @@ function Sidebar({
       )}
     >
       {/* Logo */}
-      <div className={cn("erix-flex erix-h-14 erix-items-center erix-border-b erix-border-border px-4 erix-gap-2", collapsed && "erix-justify-center")}>
+      <div
+        className={cn(
+          "erix-flex erix-h-14 erix-items-center erix-border-b erix-border-border px-4 erix-gap-2",
+          collapsed && "erix-justify-center",
+        )}
+      >
         {logoUrl ? (
-          <img src={logoUrl} alt={appName} className="erix-size-7 erix-rounded-lg erix-object-contain" />
+          <img
+            src={logoUrl}
+            alt={appName}
+            className="erix-size-7 erix-rounded-lg erix-object-contain"
+          />
         ) : (
           <div className="erix-flex erix-size-7 erix-items-center erix-justify-center erix-rounded-lg erix-bg-gradient-to-br erix-from-primary erix-to-violet-500 erix-text-xs font-bold erix-text-white">
             {appName[0]?.toUpperCase()}
           </div>
         )}
         {!collapsed && (
-          <span className="erix-truncate erix-text-sm font-bold erix-tracking-tight erix-text-foreground">{appName}</span>
+          <span className="erix-truncate erix-text-sm font-bold erix-tracking-tight erix-text-foreground">
+            {appName}
+          </span>
         )}
       </div>
 
@@ -224,7 +288,9 @@ function Sidebar({
               )}
             >
               <Icon className="erix-size-4 erix-shrink-0" />
-              {!collapsed && <span className="erix-truncate">{item.label}</span>}
+              {!collapsed && (
+                <span className="erix-truncate">{item.label}</span>
+              )}
               {!collapsed && item.badge !== undefined && (
                 <span className="ml-auto erix-rounded-full erix-bg-primary px-1.5 py-0.5 erix-text-[10px] font-bold erix-text-primary-foreground">
                   {item.badge}
@@ -240,7 +306,12 @@ function Sidebar({
         <div className="erix-border-t erix-border-border erix-p-3">
           <p className="erix-text-[10px] erix-text-muted-foreground erix-text-center">
             Powered by{" "}
-            <a href="https://ecodrix.com" target="_blank" rel="noopener noreferrer" className="hover:erix-underline">
+            <a
+              href="https://ecodrix.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:erix-underline"
+            >
               Ecodrix
             </a>
           </p>
@@ -265,12 +336,31 @@ function Overview({ onNavigate }: { onNavigate: (v: ActiveView) => void }) {
       {health && (
         <div className="erix-grid erix-gap-4 sm:erix-grid-cols-3">
           {Object.entries(health.services).map(([svc, status]) => (
-            <div key={svc} className="erix-rounded-2xl erix-border erix-border-border erix-bg-card erix-p-4">
+            <div
+              key={svc}
+              className="erix-rounded-2xl erix-border erix-border-border erix-bg-card erix-p-4"
+            >
               <div className="erix-flex erix-items-center erix-gap-2">
-                <div className={cn("erix-size-2 erix-rounded-full", status === "connected" || status === "configured" ? "erix-bg-emerald-400" : "erix-bg-amber-400")} />
-                <p className="erix-text-sm font-medium erix-capitalize">{svc === "googleMeet" ? "Google Meet" : svc}</p>
+                <div
+                  className={cn(
+                    "erix-size-2 erix-rounded-full",
+                    status === "connected" || status === "configured"
+                      ? "erix-bg-emerald-400"
+                      : "erix-bg-amber-400",
+                  )}
+                />
+                <p className="erix-text-sm font-medium erix-capitalize">
+                  {svc === "googleMeet" ? "Google Meet" : svc}
+                </p>
               </div>
-              <p className={cn("mt-1 erix-text-xs erix-capitalize", status === "not_configured" ? "erix-text-amber-400" : "erix-text-emerald-400")}>
+              <p
+                className={cn(
+                  "mt-1 erix-text-xs erix-capitalize",
+                  status === "not_configured"
+                    ? "erix-text-amber-400"
+                    : "erix-text-emerald-400",
+                )}
+              >
                 {status.replace(/_/g, " ")}
               </p>
             </div>
@@ -280,26 +370,32 @@ function Overview({ onNavigate }: { onNavigate: (v: ActiveView) => void }) {
 
       {/* Quick actions */}
       <div className="erix-grid erix-gap-3 sm:erix-grid-cols-2 lg:erix-grid-cols-4">
-        {(["crm", "analytics", "whatsapp", "meetings"] as ActiveView[]).map((view) => {
-          const item = ALL_NAV_ITEMS.find((n) => n.id === view)!;
-          const Icon = item.icon;
-          return (
-            <button
-              key={view}
-              type="button"
-              onClick={() => onNavigate(view)}
-              className="erix-flex erix-flex-col erix-gap-3 erix-rounded-2xl erix-border erix-border-border erix-bg-card erix-p-4 erix-text-left hover:erix-bg-muted/30 hover:erix-border-primary/20 transition-all erix-group"
-            >
-              <div className="erix-flex erix-size-9 erix-items-center erix-justify-center erix-rounded-xl erix-bg-primary/10 erix-text-primary group-hover:erix-bg-primary/20 transition-colors">
-                <Icon className="erix-size-4" />
-              </div>
-              <div>
-                <p className="erix-text-sm font-semibold erix-text-foreground">{item.label}</p>
-                <p className="erix-text-xs erix-text-muted-foreground mt-0.5">Open module →</p>
-              </div>
-            </button>
-          );
-        })}
+        {(["crm", "analytics", "whatsapp", "meetings"] as ActiveView[]).map(
+          (view) => {
+            const item = ALL_NAV_ITEMS.find((n) => n.id === view)!;
+            const Icon = item.icon;
+            return (
+              <button
+                key={view}
+                type="button"
+                onClick={() => onNavigate(view)}
+                className="erix-flex erix-flex-col erix-gap-3 erix-rounded-2xl erix-border erix-border-border erix-bg-card erix-p-4 erix-text-left hover:erix-bg-muted/30 hover:erix-border-primary/20 transition-all erix-group"
+              >
+                <div className="erix-flex erix-size-9 erix-items-center erix-justify-center erix-rounded-xl erix-bg-primary/10 erix-text-primary group-hover:erix-bg-primary/20 transition-colors">
+                  <Icon className="erix-size-4" />
+                </div>
+                <div>
+                  <p className="erix-text-sm font-semibold erix-text-foreground">
+                    {item.label}
+                  </p>
+                  <p className="erix-text-xs erix-text-muted-foreground mt-0.5">
+                    Open module →
+                  </p>
+                </div>
+              </button>
+            );
+          },
+        )}
       </div>
 
       <div className="erix-rounded-2xl erix-border erix-border-border erix-bg-gradient-to-br erix-from-primary/10 erix-to-violet-500/10 erix-p-6">
@@ -308,7 +404,8 @@ function Overview({ onNavigate }: { onNavigate: (v: ActiveView) => void }) {
           <div>
             <p className="erix-text-sm font-semibold">Platform Active</p>
             <p className="erix-text-xs erix-text-muted-foreground">
-              {health?.activeAutomations ?? 0} automations · {health?.queueDepth ?? 0} pending jobs
+              {health?.activeAutomations ?? 0} automations ·{" "}
+              {health?.queueDepth ?? 0} pending jobs
             </p>
           </div>
         </div>
@@ -356,7 +453,7 @@ export function ErixDashboard({
 }: ErixDashboardProps) {
   const { hasModule } = useErix();
   const [collapsed, setCollapsed] = React.useState(false);
-  const [active, setActive]       = React.useState<ActiveView>(defaultView);
+  const [active, setActive] = React.useState<ActiveView>(defaultView);
   const [paletteOpen, setPaletteOpen] = React.useState(false);
 
   // ⌘K global shortcut
@@ -378,23 +475,23 @@ export function ErixDashboard({
     return hasModule(item.module);
   });
 
-  const activeItem = visibleItems.find((i) => i.id === active) ?? visibleItems[0];
+  const activeItem =
+    visibleItems.find((i) => i.id === active) ?? visibleItems[0];
 
   const renderPanel = () => (
     <React.Suspense fallback={<ModuleLoader />}>
       {active === "overview" && <Overview onNavigate={setActive} />}
       {active === "crm" && (
-        <KanbanBoard
-          pipelineId={pipelineId ?? ""}
-          onLeadOpen={onLeadOpen}
-        />
+        <KanbanBoard pipelineId={pipelineId ?? ""} onLeadOpen={onLeadOpen} />
       )}
       {active === "analytics" && <AnalyticsDashboard pipelineId={pipelineId} />}
       {active === "whatsapp" && <WhatsAppInbox onLeadOpen={onLeadOpen} />}
       {active === "marketing" && (
         <div className="erix-flex erix-flex-col erix-gap-6 erix-p-6">
           <div>
-            <h2 className="erix-text-2xl font-bold erix-tracking-tight">Marketing</h2>
+            <h2 className="erix-text-2xl font-bold erix-tracking-tight">
+              Marketing
+            </h2>
             <p className="erix-text-sm erix-text-muted-foreground mt-1">
               Send WhatsApp broadcast campaigns to your lead segments
             </p>
@@ -409,7 +506,11 @@ export function ErixDashboard({
             <FileText className="mx-auto erix-size-10 mb-3 erix-opacity-30" />
             <p className="erix-text-sm font-medium">Rich Text Editor</p>
             <p className="erix-text-xs erix-opacity-60 mt-1">
-              Use <code className="erix-rounded erix-bg-muted px-1 erix-text-xs">&lt;ErixEditor /&gt;</code> directly in your layout
+              Use{" "}
+              <code className="erix-rounded erix-bg-muted px-1 erix-text-xs">
+                &lt;ErixEditor /&gt;
+              </code>{" "}
+              directly in your layout
             </p>
           </div>
         </div>
@@ -446,10 +547,7 @@ export function ErixDashboard({
 
       {/* ⌘K Command Palette */}
       <React.Suspense fallback={null}>
-        <ErixCommandPalette
-          open={paletteOpen}
-          onOpenChange={setPaletteOpen}
-        />
+        <ErixCommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} />
       </React.Suspense>
     </div>
   );

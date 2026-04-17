@@ -76,7 +76,7 @@ export default function AudioMessage({ src }: { src: string }) {
 
       <div className="erix-relative erix-shrink-0">
         <AudioLines className="erix-h-5 erix-w-5 erix-text-[#34B7F1]" />
-        <div className="erix-absolute erix--erix-bottom-1 erix--erix-right-1 erix-flex erix-h-3 erix-w-3 erix-items-center erix-justify-center erix-rounded-full erix-bg-white erix-shadow-sm erix-ring-1 erix-ring-black/5">
+        <div className="erix-absolute -erix-bottom-1 -erix-right-1 erix-flex erix-h-3 erix-w-3 erix-items-center erix-justify-center erix-rounded-full erix-bg-white erix-shadow-sm erix-ring-1 erix-ring-black/5">
           <svg
             className="erix-h-2 erix-w-2 erix-text-[#25D366]"
             viewBox="0 0 24 24"

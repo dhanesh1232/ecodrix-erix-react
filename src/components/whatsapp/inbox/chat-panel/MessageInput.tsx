@@ -68,6 +68,16 @@ interface MessageInputProps {
   setIsSending: (val: boolean) => void;
 }
 
+/**
+ *
+ * @param chat
+ * @param onSendMessage
+ * @param replyingTo
+ * @param setReplyingTo
+ * @param isSending
+ * @param setIsSending
+ * @returns
+ */
 export function MessageInput({
   chat,
   onSendMessage,
@@ -489,7 +499,7 @@ export function MessageInput({
   }, [messageInput]);
 
   return (
-    <div className="erix-border-border erix-bg-[#f0f2f5] erix-relative erix-z-40 erix-border-t erix-p-3">
+    <div className="erix-bg-[#f0f2f5] erix-relative erix-z-40 erix-px-3 erix-py-2.5 erix-shadow-[0_-1px_3px_rgba(0,0,0,0.06)]">
       <input
         type="file"
         multiple
@@ -742,7 +752,7 @@ export function MessageInput({
                 )}
                 <button
                   onClick={() => removeMedia(idx)}
-                  className="erix-bg-destructive erix-absolute erix--erix-right-1 erix--erix-top-1 erix-flex erix-h-4 erix-w-4 erix-items-center erix-justify-center erix-rounded-full erix-text-white"
+                  className="erix-bg-destructive erix-absolute -erix-right-1 -erix-top-1 erix-flex erix-h-4 erix-w-4 erix-items-center erix-justify-center erix-rounded-full erix-text-white"
                 >
                   <X className="erix-h-2 erix-w-2" />
                 </button>
@@ -791,48 +801,44 @@ export function MessageInput({
             <PopoverContent
               side="top"
               align="start"
-              className="erix-w-48 erix-p-1"
+              className="erix-w-[220px] erix-p-3"
             >
-              <div className="erix-grid erix-grid-cols-1 erix-gap-1">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="erix-justify-start erix-gap-2 erix-text-xs"
+              <div className="erix-grid erix-grid-cols-2 erix-gap-2">
+                <button
+                  type="button"
                   onClick={() => handleFileClick("image/*")}
+                  className="erix-flex erix-flex-col erix-items-center erix-gap-2 erix-rounded-xl erix-bg-[#f0f7ff] erix-p-4 erix-text-[11px] erix-font-medium erix-text-[#0074d9] hover:erix-brightness-95 erix-transition-all"
                 >
-                  <ImageIcon className="erix-h-4 erix-w-4 erix-text-primary" />{" "}
+                  <ImageIcon className="erix-h-6 erix-w-6" />
                   Image
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="erix-justify-start erix-gap-2 erix-text-xs"
+                </button>
+                <button
+                  type="button"
                   onClick={() => handleFileClick("video/*")}
+                  className="erix-flex erix-flex-col erix-items-center erix-gap-2 erix-rounded-xl erix-bg-[#f3edff] erix-p-4 erix-text-[11px] erix-font-medium erix-text-[#843dff] hover:erix-brightness-95 erix-transition-all"
                 >
-                  <Video className="erix-h-4 erix-w-4 erix-text-purple-500" />{" "}
+                  <Video className="erix-h-6 erix-w-6" />
                   Video
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="erix-justify-start erix-gap-2 erix-text-xs"
+                </button>
+                <button
+                  type="button"
                   onClick={() => handleFileClick(".pdf,.doc,.docx,.xls,.xlsx")}
+                  className="erix-flex erix-flex-col erix-items-center erix-gap-2 erix-rounded-xl erix-bg-[#fff4e6] erix-p-4 erix-text-[11px] erix-font-medium erix-text-[#f97316] hover:erix-brightness-95 erix-transition-all"
                 >
-                  <FileText className="erix-h-4 erix-w-4 erix-text-orange-500" />{" "}
+                  <FileText className="erix-h-6 erix-w-6" />
                   Document
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="erix-justify-start erix-gap-2 erix-text-xs"
+                </button>
+                <button
+                  type="button"
                   onClick={() => {
                     setIsTemplateOpen(true);
                     fetchTemplates();
                   }}
+                  className="erix-flex erix-flex-col erix-items-center erix-gap-2 erix-rounded-xl erix-bg-[#eaf7ff] erix-p-4 erix-text-[11px] erix-font-medium erix-text-[#06b6d4] hover:erix-brightness-95 erix-transition-all"
                 >
-                  <Layout className="erix-h-4 erix-w-4 erix-text-blue-500" />{" "}
+                  <Layout className="erix-h-6 erix-w-6" />
                   Template
-                </Button>
+                </button>
               </div>
             </PopoverContent>
           </Popover>
@@ -842,12 +848,27 @@ export function MessageInput({
           onSubmit={handleSendMessage}
           className="erix-flex erix-1 erix-min-w-0 erix-items-center erix-gap-2 erix-w-full"
         >
-          <div className="erix-bg-background erix-relative erix-flex erix-flex-1 erix-items-center erix-rounded-lg erix-px-3 erix-py-1">
-            <Input
+          <div className="erix-bg-background erix-relative erix-flex erix-flex-1 erix-items-end erix-rounded-lg erix-px-3 erix-py-1.5 erix-min-h-[40px] erix-shadow-sm">
+            <textarea
               value={messageInput}
-              onChange={(e) => setMessageInput(e.target.value)}
-              placeholder="Type a message or use / for templates"
-              className="erix-h-9 erix-border-none erix-bg-transparent erix-p-0 erix-shadow-none focus-visible:erix-ring-0"
+              onChange={(e) => {
+                setMessageInput(e.target.value);
+                // Auto-grow
+                e.target.style.height = "auto";
+                e.target.style.height = `${Math.min(e.target.scrollHeight, 120)}px`;
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  if (messageInput.trim() || media.length > 0) {
+                    handleSendMessage(e as any);
+                  }
+                }
+              }}
+              placeholder="Message"
+              rows={1}
+              className="erix-w-full erix-resize-none erix-bg-transparent erix-text-sm erix-outline-none erix-border-none focus:erix-ring-0 erix-placeholder-[#8696a0] erix-leading-snug erix-py-1 disabled:erix-opacity-50"
+              style={{ maxHeight: "120px" }}
               disabled={isRecording}
             />
           </div>
@@ -878,10 +899,14 @@ export function MessageInput({
               >
                 {isRecording ? (
                   <div className="erix-flex erix-items-center erix-gap-2">
-                    <span className="erix-text-destructive erix-animate-pulse erix-text-xs erix-font-bold">
-                      {formatTime(recordingTime)}
-                    </span>
+                    <div className="erix-flex erix-items-center erix-gap-2 erix-rounded-full erix-bg-destructive/10 erix-px-3 erix-py-1.5">
+                      <span className="erix-h-2 erix-w-2 erix-animate-pulse erix-rounded-full erix-bg-destructive" />
+                      <span className="erix-text-destructive erix-text-xs erix-font-bold erix-tabular-nums">
+                        {formatTime(recordingTime)}
+                      </span>
+                    </div>
                     <Button
+                      type="button"
                       variant="ghost"
                       size="icon"
                       className="erix-text-destructive erix-h-9 erix-w-9"
@@ -890,6 +915,7 @@ export function MessageInput({
                       <Trash2 className="erix-h-5 erix-w-5" />
                     </Button>
                     <Button
+                      type="button"
                       variant="ghost"
                       size="icon"
                       className="erix-bg-primary erix-text-primary-foreground erix-h-9 erix-w-9 erix-rounded-full"

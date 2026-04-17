@@ -175,7 +175,7 @@ export const ColorPickerNative: React.FC<{ children?: React.ReactNode }> = ({
           ))}
         </div>
 
-        <div className="erix-h-px erix-bg-border/60 erix--mx-4" />
+        <div className="erix-h-px erix-bg-border/60 -erix-mx-4" />
 
         {/* Custom Picker */}
         <div className="erix-flex erix-justify-center erix-py-1">

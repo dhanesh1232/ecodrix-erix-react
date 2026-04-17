@@ -133,7 +133,7 @@ function CommandSeparator({
   return (
     <CommandPrimitive.Separator
       data-slot="command-separator"
-      className={cn("erix--mx-1 erix-h-px erix-bg-border", className)}
+      className={cn("-erix-mx-1 erix-h-px erix-bg-border", className)}
       {...props}
     />
   );

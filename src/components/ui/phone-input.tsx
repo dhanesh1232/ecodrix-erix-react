@@ -36,8 +36,8 @@ const CustomPhoneInputField = React.forwardRef<
       {...inputProps}
       data-slot="input"
       className={cn(
-        "erix-text-foreground placeholder:erix-erix-text-muted-foreground selection:erix-erix-bg-primary selection:erix-erix-text-primary-foreground erix-w-full erix-bg-transparent erix-text-sm",
-        "focus-visible:erix-erix-ring-0 focus-visible:erix-erix-outline-none erix-border-none erix-h-full",
+        "erix-text-foreground placeholder:erix-text-muted-foreground selection:erix-bg-primary selection:erix-text-primary-foreground erix-w-full erix-bg-transparent erix-text-sm",
+        "focus-visible:erix-ring-0 focus-visible:erix-outline-none erix-border-none erix-h-full",
         className,
       )}
     />
@@ -79,9 +79,9 @@ export const StyledPhoneInput = React.forwardRef<any, StyledPhoneProps>(
 
     const stateClasses = (opts: { error?: boolean; success?: boolean }) =>
       opts.error
-        ? "erix-border-destructive aria-invalid:erix-erix-border-destructive aria-invalid:erix-erix-ring-destructive/20"
+        ? "erix-border-destructive aria-invalid:erix-border-destructive aria-invalid:erix-ring-destructive/20"
         : opts.success
-          ? "erix-border-blue-500 focus-visible:erix-erix-border-blue-500 focus-visible:erix-erix-ring-blue-500/40"
+          ? "erix-border-blue-500 focus-visible:erix-border-blue-500 focus-visible:erix-ring-blue-500/40"
           : "";
 
     const iconPadding =
@@ -95,7 +95,7 @@ export const StyledPhoneInput = React.forwardRef<any, StyledPhoneProps>(
       <div className="erix-w-full erix-space-y-1.5">
         <div className="erix-relative erix-w-full">
           {icon && iconPosition === "left" && (
-            <div className="erix-text-muted-foreground erix-pointer-events-none erix-absolute erix-top-1/2 erix-left-2.5 erix--erix-translate-y-1/2">
+            <div className="erix-text-muted-foreground erix-pointer-events-none erix-absolute erix-top-1/2 erix-left-2.5 -erix-translate-y-1/2">
               {icon}
             </div>
           )}
@@ -111,9 +111,9 @@ export const StyledPhoneInput = React.forwardRef<any, StyledPhoneProps>(
             countrySelectProps={{ tabIndex: -1 }}
             className={cn(
               "erix-PhoneInput erix-flex erix-w-full erix-items-center erix-gap-2 erix-rounded-md erix-border erix-bg-background erix-pl-3 erix-py-0",
-              "file:erix-erix-text-foreground placeholder:erix-erix-text-muted-foreground selection:erix-erix-bg-primary selection:erix-erix-text-primary-foreground",
+              "file:erix-text-foreground placeholder:erix-text-muted-foreground selection:erix-bg-primary selection:erix-text-primary-foreground",
               "erix-shadow-sm erix-transition-[color,box-shadow] erix-outline-none erix-text-base md:erix-text-sm",
-              "focus-within:erix-erix-border-ring focus-within:erix-erix-ring-ring/50 focus-within:erix-erix-ring-2",
+              "focus-within:erix-border-ring focus-within:erix-ring-ring/50 focus-within:erix-ring-2",
               "disabled:erix-pointer-events-none disabled:erix-cursor-not-allowed disabled:erix-opacity-50",
               sizeClasses[size as Size],
               variantClasses[variant as Variant],
@@ -123,7 +123,7 @@ export const StyledPhoneInput = React.forwardRef<any, StyledPhoneProps>(
             )}
           />
           {icon && iconPosition === "right" && (
-            <div className="erix-text-muted-foreground erix-pointer-events-none erix-absolute erix-top-1/2 erix-right-2.5 erix--erix-translate-y-1/2">
+            <div className="erix-text-muted-foreground erix-pointer-events-none erix-absolute erix-top-1/2 erix-right-2.5 -erix-translate-y-1/2">
               {icon}
             </div>
           )}

@@ -22,7 +22,7 @@ const SelectTrigger = React.forwardRef<
     ref={ref}
     data-size={size}
     className={cn(
-      "erix-flex erix-h-10 data-[size=default]:erix-h-9 data-[size=sm]:erix-h-8 data-[size=lg]:erix-h-11 erix-w-full erix-items-center erix-justify-between erix-rounded-md erix-border erix-border-input erix-bg-background erix-px-3 erix-py-2 erix-text-sm erix-ring-offset-background placeholder:erix-text-muted-foreground focus:erix-outline-none focus:erix-ring-2 focus:erix-ring-ring focus:erix-ring-offset-2 disabled:erix-cursor-not-allowed disabled:erix-opacity-50 [&>span]:erix-line-clamp-1",
+      "erix-flex erix-h-10 data-[size=default]:erix-h-9 data-[size=sm]:erix-h-8 data-[size=lg]:erix-h-11 erix-w-full erix-items-center erix-justify-between erix-rounded-md erix-border erix-border-input erix-bg-background erix-px-3 erix-py-2 erix-text-sm erix-ring-offset-background placeholder:erix-text-muted-foreground focus:erix-outline-none focus:erix-ring-2 focus:erix-ring-ring disabled:erix-cursor-not-allowed disabled:erix-opacity-50 [&>span]:erix-line-clamp-1",
       className,
     )}
     {...props}
@@ -80,7 +80,7 @@ const SelectContent = React.forwardRef<
       className={cn(
         "erix-relative erix-z-50 erix-max-h-96 erix-min-w-[8rem] erix-overflow-hidden erix-rounded-md erix-border erix-bg-popover erix-text-popover-foreground erix-shadow-md data-[state=open]:erix-animate-in data-[state=closed]:erix-animate-out data-[state=closed]:erix-fade-out-0 data-[state=open]:erix-fade-in-0 data-[state=closed]:erix-zoom-out-95 data-[state=open]:erix-zoom-in-95 data-[side=bottom]:erix-slide-in-from-top-2 data-[side=left]:erix-slide-in-from-right-2 data-[side=right]:erix-slide-in-from-left-2 data-[side=top]:erix-slide-in-from-bottom-2",
         position === "popper" &&
-          "data-[side=bottom]:erix-translate-y-1 data-[side=left]:erix--erix-translate-x-1 data-[side=right]:erix-translate-x-1 data-[side=top]:erix--erix-translate-y-1",
+          "data-[side=bottom]:erix-translate-y-1 data-[side=left]:-erix-translate-x-1 data-[side=right]:erix-translate-x-1 data-[side=top]:-erix-translate-y-1",
         className,
       )}
       position={position}
@@ -147,7 +147,7 @@ const SelectSeparator = React.forwardRef<
   <SelectPrimitive.Separator
     ref={ref}
     className={cn(
-      "erix--erix-mx-1 erix-my-1 erix-h-px erix-bg-muted",
+      "-erix-mx-1 erix-my-1 erix-h-px erix-bg-muted",
       className,
     )}
     {...props}
