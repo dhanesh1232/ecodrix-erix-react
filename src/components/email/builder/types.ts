@@ -15,7 +15,13 @@ export type BlockType =
   | "threeColumns"
   | "html"
   | "variable"
-  | "social";
+  | "social"
+  // ─── New blocks ───────────────────────────────────────────────
+  | "productCard"   // image + title + price + CTA
+  | "footer"        // copyright + links
+  | "video"         // video thumbnail with play button
+  | "list"          // bullet / numbered list
+  | "menu";         // horizontal nav links
 
 // ─── Block Style ──────────────────────────────────────────────────────────────
 
@@ -83,6 +89,7 @@ export interface EmailBlock {
   href?: string;         // button / image link
   height?: number;       // spacer height (px)
   variableName?: string; // variable block token key
+  price?: string;        // productCard displayed price
 
   // Style
   style: BlockStyle;

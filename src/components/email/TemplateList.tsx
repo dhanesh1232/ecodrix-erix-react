@@ -36,10 +36,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import {
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -47,6 +44,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { STARTER_TEMPLATES, type StarterTemplate } from "./builder/templates";
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
@@ -89,6 +87,8 @@ export interface TemplateListProps {
   onNew?: () => void;
   onDelete?: (id: string) => void;
   onPreview?: (template: IEmailTemplate) => void;
+  /** Called when user clicks "Use" on a starter template. */
+  onUseStarter?: (template: StarterTemplate) => void;
   className?: string;
 }
 
@@ -238,6 +238,69 @@ function TemplateCard({
   );
 }
 
+// ─── Starter Template Card ───────────────────────────────────────────────────
+
+function StarterCard({
+  template,
+  onUse,
+}: {
+  template: StarterTemplate;
+  onUse?: () => void;
+}) {
+  const CATEGORY_COLORS: Record<string, string> = {
+    Marketing: "erix-text-violet-600 erix-bg-violet-500/10",
+    Transactional: "erix-text-emerald-600 erix-bg-emerald-500/10",
+    Newsletter: "erix-text-sky-600 erix-bg-sky-500/10",
+  };
+  const catCls =
+    CATEGORY_COLORS[template.category] ??
+    "erix-text-primary erix-bg-primary/10";
+
+  return (
+    <Card className="erix-group erix-relative erix-flex erix-flex-col erix-overflow-hidden erix-transition-all erix-duration-200 hover:erix-border-primary/40 hover:erix-shadow-md">
+      {/* Colour swatch thumbnail */}
+      <div
+        className="erix-flex erix-h-32 erix-items-center erix-justify-center"
+        style={{ background: template.thumbnail }}
+      >
+        <Mail
+          className="erix-h-10 erix-w-10"
+          style={{ color: "rgba(255,255,255,0.6)" }}
+          aria-hidden="true"
+        />
+      </div>
+
+      <CardContent className="erix-flex-1 erix-p-4 erix-pb-3">
+        <h3 className="erix-truncate erix-text-sm erix-font-semibold erix-text-foreground erix-leading-tight">
+          {template.name}
+        </h3>
+        <p className="erix-mt-1 erix-text-xs erix-text-muted-foreground erix-line-clamp-2">
+          {template.description}
+        </p>
+        <div className="erix-flex erix-flex-wrap erix-gap-1.5 erix-pt-3">
+          <Badge variant="secondary" className={cn("erix-font-medium", catCls)}>
+            {template.category}
+          </Badge>
+          <Badge variant="outline" className="erix-text-[10px]">
+            {template.document.blocks.length} blocks
+          </Badge>
+        </div>
+      </CardContent>
+
+      <CardFooter className="erix-flex erix-items-center erix-justify-end erix-border-t erix-border-border/50 erix-p-4 erix-py-3">
+        <Button
+          size="sm"
+          variant="default"
+          className="erix-h-7 erix-text-xs erix-px-3"
+          onClick={onUse}
+        >
+          Use Template
+        </Button>
+      </CardFooter>
+    </Card>
+  );
+}
+
 // ─── Filter bar ───────────────────────────────────────────────────────────────
 
 function FilterSelect<T extends string>({
@@ -288,9 +351,11 @@ export function TemplateList({
   onNew,
   onDelete,
   onPreview,
+  onUseStarter,
   className = "",
 }: TemplateListProps) {
   const [search, setSearch] = React.useState("");
+  const [activeTab, setActiveTab] = React.useState<"mine" | "starters">("mine");
 
   const filtered = React.useMemo(() => {
     if (!search.trim()) return templates;
@@ -311,141 +376,203 @@ export function TemplateList({
       ].join(" ")}
       aria-label="Email templates"
     >
-      {/* ── Toolbar ─────────────────────────────────────────────────────── */}
-      <div className="erix-flex erix-flex-col sm:erix-flex-row erix-items-stretch sm:erix-items-center erix-gap-3">
-        {/* Search */}
-        <div className="erix-relative erix-flex-1 erix-min-w-48 sm:erix-max-w-xs">
-          <Search
-            className="erix-pointer-events-none erix-absolute erix-left-3 erix-top-1/2 erix-h-4 erix-w-4 -erix-translate-y-1/2 erix-text-muted-foreground erix-z-10"
-            aria-hidden="true"
-          />
-          <Input
-            id="email-template-search"
-            type="search"
-            placeholder="Search templates…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="erix-h-9 erix-pl-9"
-            aria-label="Search email templates"
-          />
-        </div>
-
-        {/* Status filter */}
-        <FilterSelect<EmailTemplateStatus>
-          id="email-template-status-filter"
-          label="All Statuses"
-          value={filters.status}
-          options={[
-            { value: "draft", label: "Draft" },
-            { value: "published", label: "Published" },
-            { value: "archived", label: "Archived" },
-          ]}
-          onChange={(v) => onFiltersChange?.({ ...filters, status: v })}
-        />
-
-        {/* Category filter */}
-        <FilterSelect<EmailTemplateCategory>
-          id="email-template-category-filter"
-          label="All Categories"
-          value={filters.category}
-          options={[
-            { value: "marketing", label: "Marketing" },
-            { value: "transactional", label: "Transactional" },
-            { value: "sequence", label: "Sequence" },
-          ]}
-          onChange={(v) => onFiltersChange?.({ ...filters, category: v })}
-        />
-
-        {/* Type filter */}
-        <FilterSelect<EmailTemplateType>
-          id="email-template-type-filter"
-          label="All Types"
-          value={filters.type}
-          options={[
-            { value: "standard", label: "Standard" },
-            { value: "layout", label: "Layout" },
-          ]}
-          onChange={(v) => onFiltersChange?.({ ...filters, type: v })}
-        />
-
-        {/* New button */}
-        {onNew && (
-          <Button
-            id="email-template-new-btn"
-            onClick={onNew}
-            className="erix-w-full sm:erix-w-auto sm:erix-ml-auto erix-shadow-sm"
-            size="sm"
+      {/* ── Tab switcher ─────────────────────────────────────────────────── */}
+      <div
+        style={{
+          display: "flex",
+          gap: "4px",
+          padding: "4px",
+          background: "hsl(var(--erix-muted) / 0.5)",
+          borderRadius: "10px",
+          width: "fit-content",
+        }}
+      >
+        {(["mine", "starters"] as const).map((tab) => (
+          <button
+            key={tab}
+            type="button"
+            onClick={() => setActiveTab(tab)}
+            style={{
+              padding: "6px 14px",
+              borderRadius: "7px",
+              border: "none",
+              fontSize: "12px",
+              fontWeight: 600,
+              fontFamily: "sans-serif",
+              cursor: "pointer",
+              background:
+                activeTab === tab ? "hsl(var(--erix-card))" : "transparent",
+              color:
+                activeTab === tab
+                  ? "hsl(var(--erix-foreground))"
+                  : "hsl(var(--erix-muted-foreground))",
+              boxShadow:
+                activeTab === tab ? "0 1px 4px rgba(0,0,0,0.12)" : "none",
+              transition: "all 0.15s",
+            }}
           >
-            <Plus className="erix-h-4 erix-w-4" aria-hidden="true" />
-            New Template
-          </Button>
-        )}
+            {tab === "mine"
+              ? `My Templates (${templates.length})`
+              : `Starter Templates (${STARTER_TEMPLATES.length})`}
+          </button>
+        ))}
       </div>
 
-      {/* ── Grid ────────────────────────────────────────────────────────── */}
-      {error && (
-        <p
-          role="alert"
-          className="erix-rounded-lg erix-bg-destructive/10 erix-p-4 erix-text-sm erix-text-destructive"
-        >
-          {error}
-        </p>
-      )}
-
-      {loading && !templates.length ? (
-        /* Skeleton grid */
-        <div
-          className="erix-grid erix-grid-cols-1 erix-gap-4 sm:erix-grid-cols-2 lg:erix-grid-cols-3 xl:erix-grid-cols-4"
-          aria-busy="true"
-          aria-label="Loading templates"
-        >
-          {Array.from({ length: 6 }).map((_, i) => (
-            // biome-ignore lint/suspicious/noArrayIndexKey: skeleton only
-            <Skeleton key={i} className="erix-h-64 erix-rounded-xl" />
-          ))}
-        </div>
-      ) : filtered.length === 0 ? (
-        <div className="erix-flex erix-flex-1 erix-flex-col erix-items-center erix-justify-center erix-gap-3 erix-py-20 erix-text-muted-foreground">
-          <FileEdit
-            className="erix-h-10 erix-w-10 erix-opacity-30"
-            aria-hidden="true"
-          />
-          <p className="erix-text-sm">
-            {search ? "No templates match your search." : "No templates yet."}
-          </p>
-          {!search && onNew && (
-            <Button
-              variant="link"
-              onClick={onNew}
-              className="erix-text-primary"
-            >
-              Create your first template
-            </Button>
-          )}
-        </div>
-      ) : (
+      {/* ── Starter Templates grid ───────────────────────────────────────── */}
+      {activeTab === "starters" && (
         <div className="erix-grid erix-grid-cols-1 erix-gap-4 sm:erix-grid-cols-2 lg:erix-grid-cols-3 xl:erix-grid-cols-4 erix-overflow-y-auto">
-          {filtered.map((t) => (
-            <TemplateCard
-              key={t._id}
+          {STARTER_TEMPLATES.map((t) => (
+            <StarterCard
+              key={t.id}
               template={t}
-              onSelect={onSelect ? () => onSelect(t) : undefined}
-              onDelete={onDelete ? () => onDelete(t._id) : undefined}
-              onPreview={onPreview ? () => onPreview(t) : undefined}
+              onUse={onUseStarter ? () => onUseStarter(t) : undefined}
             />
           ))}
         </div>
       )}
 
-      {/* Count */}
-      {!loading && filtered.length > 0 && (
-        <p
-          className="erix-text-xs erix-text-muted-foreground"
-          aria-live="polite"
-        >
-          {filtered.length} of {templates.length} template
-          {templates.length !== 1 ? "s" : ""}
-        </p>
+      {/* ── My Templates section ─────────────────────────────────────────── */}
+      {activeTab === "mine" && (
+        <>
+          {/* Toolbar */}
+          <div className="erix-flex erix-flex-col sm:erix-flex-row erix-items-stretch sm:erix-items-center erix-gap-3">
+            {/* Search */}
+            <div className="erix-relative erix-flex-1 erix-min-w-48 sm:erix-max-w-xs">
+              <Search
+                className="erix-pointer-events-none erix-absolute erix-left-3 erix-top-1/2 erix-h-4 erix-w-4 -erix-translate-y-1/2 erix-text-muted-foreground erix-z-10"
+                aria-hidden="true"
+              />
+              <Input
+                id="email-template-search"
+                type="search"
+                placeholder="Search templates…"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="erix-h-9 erix-pl-9"
+                aria-label="Search email templates"
+              />
+            </div>
+
+            {/* Status filter */}
+            <FilterSelect<EmailTemplateStatus>
+              id="email-template-status-filter"
+              label="All Statuses"
+              value={filters.status}
+              options={[
+                { value: "draft", label: "Draft" },
+                { value: "published", label: "Published" },
+                { value: "archived", label: "Archived" },
+              ]}
+              onChange={(v) => onFiltersChange?.({ ...filters, status: v })}
+            />
+
+            {/* Category filter */}
+            <FilterSelect<EmailTemplateCategory>
+              id="email-template-category-filter"
+              label="All Categories"
+              value={filters.category}
+              options={[
+                { value: "marketing", label: "Marketing" },
+                { value: "transactional", label: "Transactional" },
+                { value: "sequence", label: "Sequence" },
+              ]}
+              onChange={(v) => onFiltersChange?.({ ...filters, category: v })}
+            />
+
+            {/* Type filter */}
+            <FilterSelect<EmailTemplateType>
+              id="email-template-type-filter"
+              label="All Types"
+              value={filters.type}
+              options={[
+                { value: "standard", label: "Standard" },
+                { value: "layout", label: "Layout" },
+              ]}
+              onChange={(v) => onFiltersChange?.({ ...filters, type: v })}
+            />
+
+            {/* New button */}
+            {onNew && (
+              <Button
+                id="email-template-new-btn"
+                onClick={onNew}
+                className="erix-w-full sm:erix-w-auto sm:erix-ml-auto erix-shadow-sm"
+                size="sm"
+              >
+                <Plus className="erix-h-4 erix-w-4" aria-hidden="true" />
+                New Template
+              </Button>
+            )}
+          </div>
+
+          {/* Error */}
+          {error && (
+            <p
+              role="alert"
+              className="erix-rounded-lg erix-bg-destructive/10 erix-p-4 erix-text-sm erix-text-destructive"
+            >
+              {error}
+            </p>
+          )}
+
+          {/* Grid */}
+          {loading && !templates.length ? (
+            <div
+              className="erix-grid erix-grid-cols-1 erix-gap-4 sm:erix-grid-cols-2 lg:erix-grid-cols-3 xl:erix-grid-cols-4"
+              aria-busy="true"
+              aria-label="Loading templates"
+            >
+              {Array.from({ length: 6 }).map((_, i) => (
+                // biome-ignore lint/suspicious/noArrayIndexKey: skeleton only
+                <Skeleton key={i} className="erix-h-64 erix-rounded-xl" />
+              ))}
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="erix-flex erix-flex-1 erix-flex-col erix-items-center erix-justify-center erix-gap-3 erix-py-20 erix-text-muted-foreground">
+              <FileEdit
+                className="erix-h-10 erix-w-10 erix-opacity-30"
+                aria-hidden="true"
+              />
+              <p className="erix-text-sm">
+                {search
+                  ? "No templates match your search."
+                  : "No templates yet."}
+              </p>
+              {!search && onNew && (
+                <Button
+                  variant="link"
+                  onClick={onNew}
+                  className="erix-text-primary"
+                >
+                  Create your first template
+                </Button>
+              )}
+            </div>
+          ) : (
+            <div className="erix-grid erix-grid-cols-1 erix-gap-4 sm:erix-grid-cols-2 lg:erix-grid-cols-3 xl:erix-grid-cols-4 erix-overflow-y-auto">
+              {filtered.map((t) => (
+                <TemplateCard
+                  key={t._id}
+                  template={t}
+                  onSelect={onSelect ? () => onSelect(t) : undefined}
+                  onDelete={onDelete ? () => onDelete(t._id) : undefined}
+                  onPreview={onPreview ? () => onPreview(t) : undefined}
+                />
+              ))}
+            </div>
+          )}
+
+          {/* Count */}
+          {!loading && filtered.length > 0 && (
+            <p
+              className="erix-text-xs erix-text-muted-foreground"
+              aria-live="polite"
+            >
+              {filtered.length} of {templates.length} template
+              {templates.length !== 1 ? "s" : ""}
+            </p>
+          )}
+        </>
       )}
     </section>
   );

@@ -19,7 +19,13 @@ export interface BlockDef {
 
 // ─── SVG Icons (inline, no dep) ───────────────────────────────────────────────
 
-function Icon({ d, viewBox = "0 0 24 24" }: { d: string | string[]; viewBox?: string }) {
+function Icon({
+  d,
+  viewBox = "0 0 24 24",
+}: {
+  d: string | string[];
+  viewBox?: string;
+}) {
   const paths = Array.isArray(d) ? d : [d];
   return (
     <svg
@@ -69,13 +75,23 @@ export const BLOCK_DEFS: BlockDef[] = [
           id: uid(),
           type: "text",
           content: "Column 1 — click to edit",
-          style: { fontSize: "14px", color: "#4a5568", lineHeight: "1.7", padding: "8px" },
+          style: {
+            fontSize: "14px",
+            color: "#4a5568",
+            lineHeight: "1.7",
+            padding: "8px",
+          },
         },
         {
           id: uid(),
           type: "text",
           content: "Column 2 — click to edit",
-          style: { fontSize: "14px", color: "#4a5568", lineHeight: "1.7", padding: "8px" },
+          style: {
+            fontSize: "14px",
+            color: "#4a5568",
+            lineHeight: "1.7",
+            padding: "8px",
+          },
         },
       ],
     }),
@@ -90,9 +106,24 @@ export const BLOCK_DEFS: BlockDef[] = [
       type: "threeColumns",
       style: { backgroundColor: "#ffffff", padding: "16px 20px", gap: "12px" },
       children: [
-        { id: uid(), type: "text", content: "Col 1", style: { fontSize: "13px", color: "#4a5568", padding: "8px" } },
-        { id: uid(), type: "text", content: "Col 2", style: { fontSize: "13px", color: "#4a5568", padding: "8px" } },
-        { id: uid(), type: "text", content: "Col 3", style: { fontSize: "13px", color: "#4a5568", padding: "8px" } },
+        {
+          id: uid(),
+          type: "text",
+          content: "Col 1",
+          style: { fontSize: "13px", color: "#4a5568", padding: "8px" },
+        },
+        {
+          id: uid(),
+          type: "text",
+          content: "Col 2",
+          style: { fontSize: "13px", color: "#4a5568", padding: "8px" },
+        },
+        {
+          id: uid(),
+          type: "text",
+          content: "Col 3",
+          style: { fontSize: "13px", color: "#4a5568", padding: "8px" },
+        },
       ],
     }),
   },
@@ -128,7 +159,7 @@ export const BLOCK_DEFS: BlockDef[] = [
       id: uid(),
       type: "text",
       content:
-        "Write your message here. You can style text, add <a href=\"#\">links</a>, and use <strong>bold</strong> or <em>italic</em> formatting.",
+        'Write your message here. You can style text, add <a href="#">links</a>, and use <strong>bold</strong> or <em>italic</em> formatting.',
       style: {
         fontSize: "15px",
         color: "#4a5568",
@@ -143,7 +174,9 @@ export const BLOCK_DEFS: BlockDef[] = [
     type: "button",
     label: "Button",
     category: "Content",
-    icon: <Icon d="M4 8h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2z" />,
+    icon: (
+      <Icon d="M4 8h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2z" />
+    ),
     create: () => ({
       id: uid(),
       type: "button",
@@ -169,7 +202,15 @@ export const BLOCK_DEFS: BlockDef[] = [
     type: "image",
     label: "Image",
     category: "Content",
-    icon: <Icon d={["M21 15l-5-5L5 21", "M3 3h18v18H3z", "M8.5 8.5a.5.5 0 1 0 1 0 .5.5 0 0 0-1 0"]} />,
+    icon: (
+      <Icon
+        d={[
+          "M21 15l-5-5L5 21",
+          "M3 3h18v18H3z",
+          "M8.5 8.5a.5.5 0 1 0 1 0 .5.5 0 0 0-1 0",
+        ]}
+      />
+    ),
     create: () => ({
       id: uid(),
       type: "image",
@@ -225,7 +266,8 @@ export const BLOCK_DEFS: BlockDef[] = [
     create: () => ({
       id: uid(),
       type: "html",
-      content: "<div style=\"padding:20px;text-align:center;color:#64748b;border:1px dashed #cbd5e1;\"><!-- Custom HTML --></div>",
+      content:
+        '<div style="padding:20px;text-align:center;color:#64748b;border:1px dashed #cbd5e1;"><!-- Custom HTML --></div>',
       style: { padding: "0 20px", backgroundColor: "#ffffff" },
     }),
   },
@@ -253,7 +295,9 @@ export const BLOCK_DEFS: BlockDef[] = [
     type: "social",
     label: "Social Links",
     category: "Advanced",
-    icon: <Icon d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />,
+    icon: (
+      <Icon d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+    ),
     create: () => ({
       id: uid(),
       type: "social",
@@ -267,6 +311,138 @@ export const BLOCK_DEFS: BlockDef[] = [
         padding: "20px",
         backgroundColor: "#ffffff",
         gap: "12px",
+      },
+    }),
+  },
+
+  // ─── New Blocks ───────────────────────────────────────────────────────────
+  {
+    type: "productCard",
+    label: "Product Card",
+    category: "Content",
+    icon: (
+      <Icon d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0" />
+    ),
+    create: () => ({
+      id: uid(),
+      type: "productCard",
+      src: "",
+      alt: "Product image",
+      href: "https://example.com",
+      price: "$29.99",
+      content: JSON.stringify({
+        title: "Product Name",
+        description:
+          "A brief description that explains why this product is worth buying.",
+        buttonLabel: "Shop Now",
+      }),
+      style: {
+        backgroundColor: "#ffffff",
+        padding: "32px 24px",
+        textAlign: "center",
+        borderRadius: "0",
+      },
+    }),
+  },
+  {
+    type: "footer",
+    label: "Footer",
+    category: "Content",
+    icon: <Icon d={["M3 20h18", "M3 16h18", "M9 12h6", "M3 4h18v8H3z"]} />,
+    create: () => ({
+      id: uid(),
+      type: "footer",
+      content: JSON.stringify({
+        copyright: "© 2025 Your Company. All rights reserved.",
+        links: [
+          { label: "Unsubscribe", href: "#" },
+          { label: "Privacy Policy", href: "#" },
+          { label: "Terms", href: "#" },
+        ],
+      }),
+      style: {
+        backgroundColor: "#f8fafc",
+        padding: "24px 20px",
+        textAlign: "center",
+        borderTop: "1px solid #e2e8f0",
+      },
+    }),
+  },
+  {
+    type: "video",
+    label: "Video",
+    category: "Content",
+    icon: (
+      <Icon d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 0 0-1.95 1.96A29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58A2.78 2.78 0 0 0 3.41 19.54C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.96A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z" />
+    ),
+    create: () => ({
+      id: uid(),
+      type: "video",
+      src: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      content: "", // thumbnail image URL
+      alt: "Watch our video",
+      style: {
+        backgroundColor: "#ffffff",
+        padding: "16px 24px",
+        borderRadius: "0",
+      },
+    }),
+  },
+  {
+    type: "list",
+    label: "List",
+    category: "Content",
+    icon: (
+      <Icon
+        d={[
+          "M9 6h11",
+          "M9 12h11",
+          "M9 18h11",
+          "M5 6h.01",
+          "M5 12h.01",
+          "M5 18h.01",
+        ]}
+      />
+    ),
+    create: () => ({
+      id: uid(),
+      type: "list",
+      content: JSON.stringify({
+        style: "bullet",
+        items: [
+          "First benefit or talking point",
+          "Second benefit or talking point",
+          "Third benefit or talking point",
+        ],
+      }),
+      style: {
+        backgroundColor: "#ffffff",
+        padding: "12px 24px",
+        fontSize: "15px",
+        color: "#374151",
+        lineHeight: "1.75",
+      },
+    }),
+  },
+  {
+    type: "menu",
+    label: "Menu",
+    category: "Layout",
+    icon: <Icon d={["M3 6h18", "M3 12h18", "M3 18h18"]} />,
+    create: () => ({
+      id: uid(),
+      type: "menu",
+      content: JSON.stringify([
+        { label: "Home", href: "#" },
+        { label: "Products", href: "#" },
+        { label: "About", href: "#" },
+        { label: "Contact", href: "#" },
+      ]),
+      style: {
+        backgroundColor: "#1e1b4b",
+        padding: "14px 24px",
+        textAlign: "center",
+        color: "#ffffff",
       },
     }),
   },

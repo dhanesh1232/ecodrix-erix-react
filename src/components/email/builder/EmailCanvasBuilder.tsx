@@ -14,11 +14,13 @@ import {
   Code2,
   Eye,
   Loader2,
+  Mail,
   Monitor,
   PanelLeft,
   PanelRight,
   Redo2,
   Save,
+  Send,
   Settings2,
   Smartphone,
   Tablet,
@@ -75,19 +77,18 @@ export function DropZone({
   onDropMove,
 }: DropZoneProps) {
   const [over, setOver] = React.useState(false);
-  const active = isActive || over;
 
   return (
     <div
       style={{
-        height: active ? "40px" : "10px",
-        transition: "height .15s ease",
+        // Expands hit area when dragging is active, stays invisible at rest
+        height: over ? "36px" : isActive ? "12px" : "6px",
+        transition: "height .1s ease",
         display: "flex",
         alignItems: "center",
-        padding: "0",
         position: "relative",
         zIndex: 5,
-        cursor: active ? "copy" : "default",
+        cursor: over ? "copy" : "default",
       }}
       onDragOver={(e) => {
         e.preventDefault();
@@ -96,7 +97,6 @@ export function DropZone({
         setOver(true);
       }}
       onDragLeave={(e) => {
-        // Only clear if leaving the drop zone element itself
         if (!e.currentTarget.contains(e.relatedTarget as Node)) {
           setOver(false);
         }
@@ -111,20 +111,53 @@ export function DropZone({
         else if (moveId) onDropMove(moveId, insertAtIndex, parentId);
       }}
     >
-      {/* Visual indicator */}
-      <div
-        style={{
-          width: "100%",
-          height: active ? "3px" : "0px",
-          borderRadius: "2px",
-          background:
-            "linear-gradient(90deg, transparent, hsl(var(--erix-primary)), hsl(var(--erix-primary) / 0.5), hsl(var(--erix-primary)), transparent)",
-          boxShadow: active
-            ? "0 0 12px hsl(var(--erix-primary) / 0.5)"
-            : "none",
-          transition: "height .12s, box-shadow .12s",
-        }}
-      />
+      {/* Insertion line — only visible when this specific zone is hovered */}
+      {over && (
+        <div
+          style={{
+            position: "absolute",
+            left: 0,
+            right: 0,
+            top: "50%",
+            transform: "translateY(-50%)",
+            display: "flex",
+            alignItems: "center",
+            gap: 0,
+            pointerEvents: "none",
+          }}
+        >
+          {/* Left line */}
+          <div
+            style={{
+              flex: 1,
+              height: "2px",
+              background: "hsl(var(--erix-primary))",
+              borderRadius: "1px",
+            }}
+          />
+          {/* Center diamond dot */}
+          <div
+            style={{
+              width: "8px",
+              height: "8px",
+              borderRadius: "2px",
+              background: "hsl(var(--erix-primary))",
+              transform: "rotate(45deg)",
+              flexShrink: 0,
+              margin: "0 2px",
+            }}
+          />
+          {/* Right line */}
+          <div
+            style={{
+              flex: 1,
+              height: "2px",
+              background: "hsl(var(--erix-primary))",
+              borderRadius: "1px",
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 }
@@ -382,6 +415,8 @@ export interface EmailCanvasBuilderProps {
   onBack?: () => void;
   onSave?: (template: IEmailTemplate) => void;
   onCreated?: (id: string) => void;
+  /** Called when user clicks "Send Test". Receives the full HTML and target email address. */
+  onSendTest?: (html: string, to: string) => void | Promise<void>;
   className?: string;
 }
 
@@ -391,6 +426,7 @@ export function EmailCanvasBuilder({
   templateId: savedIdProp = null,
   onBack,
   onSave,
+  onSendTest,
   className = "",
 }: EmailCanvasBuilderProps) {
   const [savedId] = React.useState<string | null>(savedIdProp ?? null);
@@ -400,6 +436,11 @@ export function EmailCanvasBuilder({
   const [showPreview, setShowPreview] = React.useState(false);
   const [isInCanvasPreview, setIsInCanvasPreview] = React.useState(false);
   const [isDraggingOver, setIsDraggingOver] = React.useState(false);
+  const [showSendTest, setShowSendTest] = React.useState(false);
+  const [sendTestEmail, setSendTestEmail] = React.useState("");
+  const [sendTestStatus, setSendTestStatus] = React.useState<
+    "idle" | "sending" | "sent" | "error"
+  >("idle");
 
   // ── Responsive states ────────────────────────────────────────────────
   const [isMobile, setIsMobile] = React.useState(false);
@@ -413,9 +454,12 @@ export function EmailCanvasBuilder({
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  // Close panels when entering preview
+  // Clear selection + hover state when entering canvas preview so the
+  // floating toolbar never flashes over the read-only preview canvas.
   React.useEffect(() => {
     if (isInCanvasPreview) {
+      selectBlock(null);
+      hoverBlock(null);
       setShowLeftMobile(false);
       setShowRightMobile(false);
     }
@@ -605,6 +649,10 @@ export function EmailCanvasBuilder({
 
   return (
     <div
+      // Toolbar portals into this element so it shares the builder's
+      // stacking context. Radix dialogs portal to document.body and
+      // therefore always sit above the entire builder — no z-index fight.
+      data-erix-builder
       className={cn(
         "erix-flex erix-flex-col erix-h-full erix-overflow-hidden",
         className,
@@ -612,6 +660,7 @@ export function EmailCanvasBuilder({
       style={{
         background: "hsl(var(--erix-background))",
         color: "hsl(var(--erix-foreground))",
+        position: "relative", // establish stacking context
       }}
     >
       {/* ── Top Bar ─────────────────────────────────────────────────── */}
@@ -875,7 +924,278 @@ export function EmailCanvasBuilder({
             Save
           </button>
         )}
+
+        {/* Send Test Email button */}
+        <button
+          type="button"
+          onClick={() => {
+            setShowSendTest(true);
+            setSendTestStatus("idle");
+          }}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "5px",
+            padding: "5px 12px",
+            height: "28px",
+            background: "hsl(var(--erix-muted) / 0.4)",
+            border: "1px solid hsl(var(--erix-border))",
+            borderRadius: "6px",
+            color: "hsl(var(--erix-foreground))",
+            fontSize: "12px",
+            fontWeight: 600,
+            cursor: "pointer",
+            fontFamily: "sans-serif",
+          }}
+        >
+          <Send size={12} />
+          Send Test
+        </button>
       </header>
+
+      {/* ── Send Test Email Modal ────────────────────────────────────── */}
+      {showSendTest && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 9999,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            background: "rgba(0,0,0,0.6)",
+            backdropFilter: "blur(4px)",
+          }}
+          onClick={() => setShowSendTest(false)}
+        >
+          <div
+            style={{
+              background: "hsl(var(--erix-card))",
+              border: "1px solid hsl(var(--erix-border))",
+              borderRadius: "16px",
+              padding: "28px 32px",
+              width: "440px",
+              maxWidth: "90vw",
+              boxShadow: "0 24px 80px rgba(0,0,0,0.5)",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                marginBottom: "20px",
+              }}
+            >
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "10px" }}
+              >
+                <div
+                  style={{
+                    width: "36px",
+                    height: "36px",
+                    borderRadius: "8px",
+                    background: "hsl(var(--erix-primary) / 0.12)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Mail
+                    size={16}
+                    style={{ color: "hsl(var(--erix-primary))" }}
+                  />
+                </div>
+                <div>
+                  <div
+                    style={{
+                      fontSize: "15px",
+                      fontWeight: 700,
+                      color: "hsl(var(--erix-foreground))",
+                      fontFamily: "sans-serif",
+                    }}
+                  >
+                    Send Test Email
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "12px",
+                      color: "hsl(var(--erix-muted-foreground))",
+                      fontFamily: "sans-serif",
+                    }}
+                  >
+                    {emailDoc.blocks.length} block
+                    {emailDoc.blocks.length !== 1 ? "s" : ""} ·{" "}
+                    {documentToHtml(emailDoc).length.toLocaleString()} chars
+                  </div>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowSendTest(false)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  color: "hsl(var(--erix-muted-foreground))",
+                }}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Email input */}
+            <label
+              style={{
+                display: "block",
+                fontSize: "12px",
+                fontWeight: 600,
+                color: "hsl(var(--erix-muted-foreground))",
+                fontFamily: "sans-serif",
+                marginBottom: "6px",
+                textTransform: "uppercase",
+                letterSpacing: "0.5px",
+              }}
+            >
+              Recipient email address
+            </label>
+            <input
+              type="email"
+              placeholder="you@example.com"
+              value={sendTestEmail}
+              onChange={(e) => setSendTestEmail(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter")
+                  document.getElementById("send-test-btn")?.click();
+              }}
+              style={{
+                width: "100%",
+                padding: "10px 14px",
+                borderRadius: "8px",
+                border: "1.5px solid hsl(var(--erix-border))",
+                background: "hsl(var(--erix-background))",
+                color: "hsl(var(--erix-foreground))",
+                fontSize: "14px",
+                fontFamily: "sans-serif",
+                outline: "none",
+                boxSizing: "border-box",
+                marginBottom: "20px",
+              }}
+            />
+
+            {/* Status */}
+            {sendTestStatus === "sent" && (
+              <div
+                style={{
+                  padding: "10px 14px",
+                  borderRadius: "8px",
+                  background: "#dcfce7",
+                  color: "#166534",
+                  fontSize: "13px",
+                  fontFamily: "sans-serif",
+                  marginBottom: "16px",
+                }}
+              >
+                ✓ Sent successfully to {sendTestEmail}
+              </div>
+            )}
+            {sendTestStatus === "error" && (
+              <div
+                style={{
+                  padding: "10px 14px",
+                  borderRadius: "8px",
+                  background: "#fee2e2",
+                  color: "#991b1b",
+                  fontSize: "13px",
+                  fontFamily: "sans-serif",
+                  marginBottom: "16px",
+                }}
+              >
+                ✗ onSendTest callback not configured. Copy the HTML from the
+                &lt;/&gt; panel instead.
+              </div>
+            )}
+
+            {/* Actions */}
+            <div
+              style={{
+                display: "flex",
+                gap: "10px",
+                justifyContent: "flex-end",
+              }}
+            >
+              <button
+                type="button"
+                onClick={() => setShowSendTest(false)}
+                style={{
+                  padding: "9px 18px",
+                  borderRadius: "8px",
+                  border: "1px solid hsl(var(--erix-border))",
+                  background: "transparent",
+                  color: "hsl(var(--erix-foreground))",
+                  fontSize: "13px",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  fontFamily: "sans-serif",
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                id="send-test-btn"
+                type="button"
+                disabled={!sendTestEmail || sendTestStatus === "sending"}
+                onClick={async () => {
+                  if (!sendTestEmail) return;
+                  if (onSendTest) {
+                    setSendTestStatus("sending");
+                    try {
+                      await onSendTest(documentToHtml(emailDoc), sendTestEmail);
+                      setSendTestStatus("sent");
+                    } catch {
+                      setSendTestStatus("error");
+                    }
+                  } else {
+                    setSendTestStatus("error");
+                  }
+                }}
+                style={{
+                  padding: "9px 20px",
+                  borderRadius: "8px",
+                  border: "none",
+                  background:
+                    sendTestStatus === "sending"
+                      ? "hsl(var(--erix-primary) / 0.5)"
+                      : "hsl(var(--erix-primary))",
+                  color: "#fff",
+                  fontSize: "13px",
+                  fontWeight: 600,
+                  cursor:
+                    !sendTestEmail || sendTestStatus === "sending"
+                      ? "not-allowed"
+                      : "pointer",
+                  fontFamily: "sans-serif",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                }}
+              >
+                {sendTestStatus === "sending" ? (
+                  <Loader2
+                    size={13}
+                    style={{ animation: "spin 1s linear infinite" }}
+                  />
+                ) : (
+                  <Send size={13} />
+                )}
+                {sendTestStatus === "sending" ? "Sending…" : "Send Test"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ══════════════════════════════════════════════════════════════════
           MAIN BODY

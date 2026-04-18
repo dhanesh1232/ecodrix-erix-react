@@ -7,6 +7,8 @@ import {
   ClipboardCopy,
   FileText,
   Film,
+  Folder,
+  FolderOpen,
   Grid2X2,
   ImagePlus,
   Link as LinkIcon,
@@ -314,24 +316,35 @@ export const ImagePickerNative: React.FC<ImagePickerNativeProps> = ({
   const [isOverQuota, setIsOverQuota] = React.useState(false);
   const [activeTab, setActiveTab] = React.useState<string>("library");
 
-  // Sync external selection
+  // ── Folder state ─────────────────────────────────────────────────────────
+  /** All folders discovered from getUsage() */
+  const [folders, setFolders] = React.useState<
+    { name: string; fileCount: number }[]
+  >([]);
+  /** "all" = show everything; any other string = filter to that folder */
+  const [activeFolder, setActiveFolder] = React.useState<string>("all");
+
+  // Sync external selection — use isOpen so uncontrolled mode works too
   React.useEffect(() => {
-    if (open) {
+    if (isOpen) {
       setSelectedImage(selected ? [...selected] : []);
     } else {
       setSelectedImage([]);
       setSearchQuery("");
       setFilterType("all");
+      setActiveFolder("all");
     }
-  }, [selected, open]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
 
   React.useEffect(() => {
-    if (open && externalSelectedImages) {
+    if (isOpen && externalSelectedImages) {
       setSelectedImage([...externalSelectedImages]);
     }
-  }, [externalSelectedImages, open]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [externalSelectedImages, isOpen]);
 
-  // Fetch library
+  // Fetch library — calls list("*") for all folders, list(folder) for a specific one.
   const fetchImages = React.useCallback(async () => {
     try {
       setLoadingImages(true);
@@ -340,32 +353,78 @@ export const ImagePickerNative: React.FC<ImagePickerNativeProps> = ({
         setLoadingImages(false);
         return;
       }
+
+      // Prefer the explicit prop; fall back to the SDK's own clientCode
+      // (now a public property on the Ecodrix class).
+      // If neither is available, warn but still attempt the call —
+      // the server will return 401/403 which the catch block surfaces.
       const resolvedClientCode =
-        clientCode && clientCode !== "default" ? clientCode : null;
+        (clientCode && clientCode !== "default"
+          ? clientCode
+          : sdk.clientCode) ?? null;
+
       if (!resolvedClientCode) {
-        console.warn("[MediaPicker] No valid clientCode.");
-        setLoadingImages(false);
-        return;
+        console.warn(
+          "[MediaPicker] No clientCode found — pass the clientCode prop or wrap with ErixProvider.",
+        );
+        // Don't exit early: the SDK headers may still carry the auth.
+        // Let the API call proceed and handle the error naturally.
       }
-      const res = await sdk.media.list(folder, { q: searchQuery });
-      const imgs = (res as any).data?.images ?? [];
-      const overQuota = !!(res as any).data?.isOverQuota;
-      setImages(imgs);
-      setIsOverQuota(overQuota);
+
+      // Step 1 — discover folders for the sidebar pills (getUsage is lightweight)
+      try {
+        const usageRes = await sdk.media.getUsage();
+        const rawFolders: any[] = (usageRes as any).data?.folders ?? [];
+        const folderList = rawFolders
+          .filter((f) => f.name && !f.name.endsWith(".keep"))
+          .map((f) => ({
+            name: f.name as string,
+            fileCount: (f.fileCount as number) ?? 0,
+          }));
+        setFolders(folderList);
+        setIsOverQuota(!!(usageRes as any).data?.isSuspended);
+      } catch (usageErr) {
+        console.warn("[MediaPicker] Could not fetch folder list:", usageErr);
+      }
+
+      // Step 2 — fetch files.
+      // "*" → backend fetches all folders in parallel and merges them.
+      // Specific folder → only that folder's files.
+      const target = activeFolder !== "all" ? activeFolder : "*";
+      const res = await sdk.media.list(target, { q: searchQuery });
+      const files: any[] =
+        (res as any).data?.files ?? (res as any).data?.images ?? [];
+
+      // Ensure each file has a _folder tag for client-side grouping
+      const tagged = files.map((f: any) => ({
+        ...f,
+        _folder: f.folder ?? f._folder ?? target,
+      }));
+      setImages(tagged);
     } catch (err: any) {
       console.error("[MediaPicker] Fetch Error:", err);
     } finally {
       setLoadingImages(false);
     }
-  }, [sdk, folder, searchQuery, clientCode]);
+  }, [sdk, folder, searchQuery, clientCode, activeFolder]);
 
+  // Fetch when the dialog opens, or when search/folder filter changes while open
   React.useEffect(() => {
-    fetchImages();
-  }, [fetchImages]);
+    if (isOpen) {
+      fetchImages();
+    }
+  }, [isOpen, fetchImages]);
 
   // Filter + Sort
   const filteredImages = React.useMemo(() => {
     let list = images.filter((img) => {
+      // folder filter (client-side when "all" is selected and activeFolder is a specific folder)
+      if (
+        activeFolder !== "all" &&
+        (img as any)._folder &&
+        (img as any)._folder !== activeFolder
+      )
+        return false;
       if (searchQuery) {
         const displayName = getDisplayName(img).toLowerCase();
         if (!displayName.includes(searchQuery.toLowerCase())) return false;
@@ -406,6 +465,13 @@ export const ImagePickerNative: React.FC<ImagePickerNativeProps> = ({
     const files = Array.from(e.target.files || []);
     if (files.length === 0 || isOverQuota) return;
 
+    // Upload to the currently active folder, or fall back to the prop
+    // "*" is a list-only wildcard — never a valid upload destination.
+    // If no specific folder is active, use the prop; fall back to "media".
+    const rawUploadFolder = activeFolder !== "all" ? activeFolder : folder;
+    const uploadFolder =
+      !rawUploadFolder || rawUploadFolder === "*" ? "media" : rawUploadFolder;
+
     const validFiles = files.filter((file) => {
       if (file.size > maxSize * 1024 * 1024) {
         alert(`${file.name} exceeds the ${maxSize}MB limit.`);
@@ -432,15 +498,17 @@ export const ImagePickerNative: React.FC<ImagePickerNativeProps> = ({
       for (const file of validFiles) {
         setUploadingCount((prev) => prev + 1);
         const { data: result } = await sdk.media.upload(file, {
-          folder,
+          folder: uploadFolder,
           filename: file.name,
           contentType: file.type,
         });
-        setImages((prev) => [result, ...prev]);
+        // Tag the result with its folder so it shows up in the right filter
+        const tagged = { ...result, _folder: uploadFolder };
+        setImages((prev) => [tagged, ...prev]);
         if (multiple) {
-          setSelectedImage((prev) => [...(prev || []), result]);
+          setSelectedImage((prev) => [...(prev || []), tagged]);
         } else {
-          setSelectedImage([result]);
+          setSelectedImage([tagged]);
         }
         setUploadingCount((prev) => Math.max(0, prev - 1));
       }
@@ -693,7 +761,7 @@ export const ImagePickerNative: React.FC<ImagePickerNativeProps> = ({
               </div>
             </div>
 
-            {/* Search + filter — library only */}
+            {/* Search + filter bar — library tab only */}
             {activeTab === "library" && (
               <div className="erix-flex erix-items-center erix-gap-2 erix-px-5 erix-pb-3">
                 <div className="erix-relative erix-flex-1">
@@ -733,6 +801,60 @@ export const ImagePickerNative: React.FC<ImagePickerNativeProps> = ({
                     </SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+            )}
+
+            {/* Folder pills — library tab only */}
+            {activeTab === "library" && folders.length > 0 && (
+              <div className="erix-flex erix-items-center erix-gap-1.5 erix-overflow-x-auto erix-px-5 erix-pb-3 erix-scrollbar-none">
+                {/* "All" pill */}
+                <button
+                  type="button"
+                  onClick={() => setActiveFolder("all")}
+                  className={cn(
+                    "erix-flex erix-h-6 erix-shrink-0 erix-items-center erix-gap-1 erix-rounded-full erix-border erix-px-2.5 erix-text-[10px] erix-font-semibold erix-transition-all",
+                    activeFolder === "all"
+                      ? "erix-border-primary/40 erix-bg-primary/10 erix-text-primary"
+                      : "erix-border-border/50 erix-text-muted-foreground hover:erix-border-primary/30 hover:erix-text-foreground",
+                  )}
+                >
+                  <FolderOpen className="erix-h-2.5 erix-w-2.5" />
+                  All
+                  <span className="erix-rounded-sm erix-bg-current erix-bg-opacity-10 erix-px-1 erix-text-[9px] erix-tabular-nums">
+                    {images.length}
+                  </span>
+                </button>
+
+                {/* Per-folder pills */}
+                {folders.map((f) => {
+                  const count = images.filter(
+                    (img) => (img as any)._folder === f.name,
+                  ).length;
+                  const isActive = activeFolder === f.name;
+                  return (
+                    <button
+                      key={f.name}
+                      type="button"
+                      onClick={() =>
+                        setActiveFolder((prev) =>
+                          prev === f.name ? "all" : f.name,
+                        )
+                      }
+                      className={cn(
+                        "erix-flex erix-h-6 erix-shrink-0 erix-items-center erix-gap-1 erix-rounded-full erix-border erix-px-2.5 erix-text-[10px] erix-font-semibold erix-transition-all erix-capitalize",
+                        isActive
+                          ? "erix-border-primary/40 erix-bg-primary/10 erix-text-primary"
+                          : "erix-border-border/50 erix-text-muted-foreground hover:erix-border-primary/30 hover:erix-text-foreground",
+                      )}
+                    >
+                      <Folder className="erix-h-2.5 erix-w-2.5" />
+                      {f.name}
+                      <span className="erix-rounded-sm erix-bg-current erix-bg-opacity-10 erix-px-1 erix-text-[9px] erix-tabular-nums">
+                        {count}
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
             )}
           </div>
@@ -835,7 +957,7 @@ export const ImagePickerNative: React.FC<ImagePickerNativeProps> = ({
               {!loadingImages && images.length > 0 && (
                 <div className="erix-flex erix-items-center erix-gap-2">
                   <span className="erix-text-[10px] erix-font-bold erix-uppercase erix-tracking-widest erix-text-muted-foreground/50">
-                    Library
+                    {activeFolder === "all" ? "All Files" : activeFolder}
                   </span>
                   {images.length !== filteredImages.length && (
                     <span className="erix-text-[10px] erix-text-muted-foreground/50">
@@ -1062,7 +1184,7 @@ export const ImagePickerNative: React.FC<ImagePickerNativeProps> = ({
                           </div>
                         )}
 
-                        {/* Filename */}
+                        {/* Filename + folder badge */}
                         <div className="erix-border-t erix-border-border/30 erix-bg-background/95 erix-px-2 erix-py-1">
                           <p
                             className="erix-truncate erix-text-[9px] erix-font-medium erix-text-muted-foreground"
@@ -1070,6 +1192,11 @@ export const ImagePickerNative: React.FC<ImagePickerNativeProps> = ({
                           >
                             {displayName || `Media ${i + 1}`}
                           </p>
+                          {(src as any)._folder && activeFolder === "all" && (
+                            <p className="erix-truncate erix-text-[8px] erix-text-muted-foreground/50 erix-capitalize">
+                              {(src as any)._folder}
+                            </p>
+                          )}
                         </div>
                       </div>
                     );

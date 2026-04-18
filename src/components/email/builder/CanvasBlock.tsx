@@ -51,8 +51,8 @@ export interface CanvasBlockProps {
 }
 
 // ─── Portal toolbar ────────────────────────────────────────────────────────────
-// Rendered at document.body level — never clipped by overflow: auto parents.
-//
+// Portals into [data-erix-builder] root — never clipped by overflow: auto parents,
+// and always below Radix dialogs which portal to document.body.
 // KEY: The portal div has data-block-toolbar={blockId} so the block's
 // onMouseLeave can detect "am I moving into my own toolbar?" and not hide it.
 // Conversely, the toolbar re-fires onBlockHover(blockId) on mouseEnter so the
@@ -113,6 +113,12 @@ function FloatingToolbar({
 
   if (!pos || typeof document === "undefined") return null;
 
+  // Portal into the builder root element, not document.body.
+  // Radix dialogs portal to document.body (above all local stacking contexts),
+  // so they naturally sit above the toolbar without any z-index fighting.
+  const portalTarget =
+    document.querySelector<HTMLElement>("[data-erix-builder]") ?? document.body;
+
   return createPortal(
     <div
       // ← This attribute lets the block's onMouseLeave know we moved into OUR toolbar
@@ -121,7 +127,9 @@ function FloatingToolbar({
         position: "fixed",
         top: pos.top,
         left: pos.left,
-        zIndex: 99999,
+        // 9000: above builder chrome (~50) but below Radix Dialog portals
+        // (Shadcn Dialog renders at a higher stacking context so it stays on top)
+        zIndex: 9000,
         pointerEvents: "all",
       }}
       // Keep block hovered while pointer is in toolbar
@@ -221,7 +229,7 @@ function FloatingToolbar({
         </TBtn>
       </div>
     </div>,
-    document.body,
+    portalTarget,
   );
 }
 
@@ -845,7 +853,517 @@ function BlockVisual({
       );
     }
 
+    // ── Product Card ──────────────────────────────────────────────────────
+    case "productCard": {
+      let data: {
+        title: string;
+        description: string;
+        buttonLabel: string;
+        buttonUrl: string;
+      } = {
+        title: "Product Name",
+        description:
+          "A brief description that explains why this product is worth buying.",
+        buttonLabel: "Shop Now",
+        buttonUrl: "#",
+      };
+      try {
+        data = {
+          ...data,
+          ...(JSON.parse(block.content ?? "{}") as typeof data),
+        };
+      } catch {
+        /* use defaults */
+      }
+
+      const cardBg = block.style.backgroundColor ?? "#ffffff";
+      const accentColor = block.style.color ?? "hsl(var(--erix-primary))";
+
+      return (
+        <div
+          style={{
+            backgroundColor: cardBg,
+            padding: wrapStyle.padding ?? "32px 24px",
+            textAlign: "center",
+            borderRadius: wrapStyle.borderRadius,
+            opacity: wrapStyle.opacity,
+          }}
+        >
+          {/* Product image */}
+          {block.src ? (
+            <img
+              src={block.src}
+              alt={block.alt ?? data.title}
+              style={{
+                width: "100%",
+                maxWidth: "320px",
+                height: "200px",
+                objectFit: "cover",
+                borderRadius: "12px",
+                marginBottom: "20px",
+                display: "block",
+                marginLeft: "auto",
+                marginRight: "auto",
+              }}
+            />
+          ) : (
+            <div
+              style={{
+                width: "100%",
+                maxWidth: "320px",
+                height: "200px",
+                background: "hsl(var(--erix-muted) / 0.3)",
+                borderRadius: "12px",
+                marginBottom: "20px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "hsl(var(--erix-muted-foreground))",
+                fontSize: "13px",
+                marginLeft: "auto",
+                marginRight: "auto",
+              }}
+            >
+              <svg
+                width="40"
+                height="40"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+              >
+                <rect x="3" y="3" width="18" height="18" rx="2" />
+                <circle cx="8.5" cy="8.5" r="1.5" />
+                <polyline points="21 15 16 10 5 21" />
+              </svg>
+            </div>
+          )}
+
+          {/* Title */}
+          <h3
+            contentEditable
+            suppressContentEditableWarning
+            style={{
+              margin: "0 0 10px",
+              fontSize: contentStyle.fontSize ?? "20px",
+              fontWeight: "700",
+              color: contentStyle.color ?? "#1a202c",
+              fontFamily: "inherit",
+              outline: "none",
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") e.currentTarget.blur();
+              e.stopPropagation();
+            }}
+            onBlur={(e) => {
+              try {
+                const current = JSON.parse(block.content ?? "{}");
+                onUpdate(block.id, {
+                  content: JSON.stringify({
+                    ...current,
+                    title: e.currentTarget.textContent ?? "",
+                  }),
+                });
+              } catch {
+                /* ignore */
+              }
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {data.title}
+          </h3>
+
+          {/* Description */}
+          <p
+            contentEditable
+            suppressContentEditableWarning
+            style={{
+              margin: "0 0 16px",
+              fontSize: "14px",
+              color: "#64748b",
+              lineHeight: "1.65",
+              fontFamily: "inherit",
+              outline: "none",
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") e.currentTarget.blur();
+              e.stopPropagation();
+            }}
+            onBlur={(e) => {
+              try {
+                const current = JSON.parse(block.content ?? "{}");
+                onUpdate(block.id, {
+                  content: JSON.stringify({
+                    ...current,
+                    description: e.currentTarget.textContent ?? "",
+                  }),
+                });
+              } catch {
+                /* ignore */
+              }
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {data.description}
+          </p>
+
+          {/* Price */}
+          <div
+            style={{
+              fontSize: "28px",
+              fontWeight: "800",
+              color: accentColor,
+              marginBottom: "20px",
+              letterSpacing: "-0.5px",
+            }}
+          >
+            {block.price ?? "$29.99"}
+          </div>
+
+          {/* CTA Button */}
+          <a
+            href={data.buttonUrl ?? block.href ?? "#"}
+            style={{
+              display: "inline-block",
+              background: `linear-gradient(135deg, hsl(var(--erix-primary)), hsl(var(--erix-primary) / 0.8))`,
+              color: "#ffffff",
+              padding: "13px 36px",
+              borderRadius: block.style.borderRadius ?? "8px",
+              textDecoration: "none",
+              fontSize: "15px",
+              fontWeight: "600",
+              letterSpacing: "0.2px",
+            }}
+            onClick={(e) => e.preventDefault()}
+          >
+            {data.buttonLabel ?? "Shop Now"}
+          </a>
+        </div>
+      );
+    }
+
+    // ── Footer ────────────────────────────────────────────────────────────
+    case "footer": {
+      let data: {
+        copyright: string;
+        links: { label: string; href: string }[];
+      } = {
+        copyright: "© 2025 Your Company. All rights reserved.",
+        links: [
+          { label: "Unsubscribe", href: "#" },
+          { label: "Privacy Policy", href: "#" },
+        ],
+      };
+      try {
+        data = { ...data, ...JSON.parse(block.content ?? "{}") };
+      } catch {
+        /* use defaults */
+      }
+
+      return (
+        <div
+          style={{
+            backgroundColor: wrapStyle.backgroundColor ?? "#f8fafc",
+            padding: wrapStyle.padding ?? "24px 20px",
+            textAlign: "center",
+            borderTop: block.style.borderTop ?? "1px solid #e2e8f0",
+            opacity: wrapStyle.opacity,
+          }}
+        >
+          {/* Footer links */}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              gap: "20px",
+              flexWrap: "wrap",
+              marginBottom: "12px",
+            }}
+          >
+            {data.links.map((l, i) => (
+              <a
+                key={i}
+                href={l.href}
+                style={{
+                  fontSize: "12px",
+                  color: contentStyle.color ?? "#64748b",
+                  textDecoration: "none",
+                  fontFamily: "inherit",
+                }}
+                onClick={(e) => e.preventDefault()}
+              >
+                {l.label}
+              </a>
+            ))}
+          </div>
+
+          {/* Copyright */}
+          <p
+            style={{
+              margin: 0,
+              fontSize: "11px",
+              color: "#94a3b8",
+              fontFamily: "inherit",
+            }}
+          >
+            {data.copyright}
+          </p>
+        </div>
+      );
+    }
+
+    // ── Video thumbnail ───────────────────────────────────────────────────
+    case "video": {
+      let vcData: { thumbnail: string } = { thumbnail: "" };
+      try {
+        vcData = {
+          ...vcData,
+          ...(JSON.parse(block.content ?? "{}") as typeof vcData),
+        };
+      } catch {
+        /* ignore */
+      }
+      const thumbnail = vcData.thumbnail;
+      const videoUrl = block.src ?? "#";
+
+      return (
+        <div
+          style={{
+            padding: wrapStyle.padding ?? "16px 24px",
+            backgroundColor: wrapStyle.backgroundColor ?? "#ffffff",
+            opacity: wrapStyle.opacity,
+          }}
+        >
+          <div
+            style={{
+              position: "relative",
+              width: "100%",
+              borderRadius: block.style.borderRadius ?? "12px",
+              overflow: "hidden",
+              cursor: "pointer",
+            }}
+          >
+            {thumbnail ? (
+              <img
+                src={thumbnail}
+                alt={block.alt ?? "Video thumbnail"}
+                style={{
+                  width: "100%",
+                  display: "block",
+                  aspectRatio: "16/9",
+                  objectFit: "cover",
+                }}
+              />
+            ) : (
+              <div
+                style={{
+                  width: "100%",
+                  aspectRatio: "16/9",
+                  background:
+                    "linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: "13px",
+                    color: "#64748b",
+                    fontFamily: "sans-serif",
+                  }}
+                >
+                  Set thumbnail URL in Style panel →
+                </span>
+              </div>
+            )}
+
+            {/* Play button overlay */}
+            <a
+              href={videoUrl}
+              target="_blank"
+              rel="noreferrer"
+              style={{
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                width: "72px",
+                height: "72px",
+                borderRadius: "50%",
+                background: "rgba(255,255,255,0.95)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                boxShadow: "0 8px 32px rgba(0,0,0,0.35)",
+                backdropFilter: "blur(4px)",
+              }}
+              onClick={(e) => e.preventDefault()}
+            >
+              <svg
+                width="28"
+                height="28"
+                viewBox="0 0 24 24"
+                fill="hsl(var(--erix-primary))"
+              >
+                <polygon points="5 3 19 12 5 21 5 3" />
+              </svg>
+            </a>
+          </div>
+
+          {/* Watch CTA */}
+          <p
+            style={{
+              margin: "10px 0 0",
+              textAlign: "center",
+              fontSize: "13px",
+              color: "#64748b",
+              fontFamily: "inherit",
+            }}
+          >
+            {block.alt ?? "Watch our video"}
+          </p>
+        </div>
+      );
+    }
+
+    // ── List ──────────────────────────────────────────────────────────────
+    case "list": {
+      let data: { style: "bullet" | "numbered" | "check"; items: string[] } = {
+        style: "bullet",
+        items: ["First item", "Second item", "Third item"],
+      };
+      try {
+        data = { ...data, ...JSON.parse(block.content ?? "{}") };
+      } catch {
+        /* use defaults */
+      }
+
+      const ListTag = data.style === "numbered" ? "ol" : "ul";
+
+      return (
+        <div
+          style={{
+            padding: wrapStyle.padding ?? "12px 24px",
+            backgroundColor: wrapStyle.backgroundColor ?? "#ffffff",
+            opacity: wrapStyle.opacity,
+          }}
+        >
+          <ListTag
+            style={{
+              margin: 0,
+              paddingLeft: data.style === "check" ? "0" : "28px",
+              listStyle:
+                data.style === "numbered"
+                  ? "decimal"
+                  : data.style === "bullet"
+                    ? "disc"
+                    : "none",
+            }}
+          >
+            {data.items.map((item, i) => (
+              <li
+                key={i}
+                style={{
+                  marginBottom: "10px",
+                  fontSize: contentStyle.fontSize ?? "15px",
+                  color: contentStyle.color ?? "#374151",
+                  lineHeight: contentStyle.lineHeight ?? "1.75",
+                  fontFamily: "inherit",
+                  display: data.style === "check" ? "flex" : undefined,
+                  alignItems: data.style === "check" ? "flex-start" : undefined,
+                  gap: data.style === "check" ? "10px" : undefined,
+                  listStyle: data.style === "check" ? "none" : undefined,
+                }}
+              >
+                {data.style === "check" && (
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    style={{ flexShrink: 0, marginTop: "2px" }}
+                  >
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      fill="hsl(var(--erix-primary) / 0.1)"
+                      stroke="hsl(var(--erix-primary))"
+                      strokeWidth="1.5"
+                    />
+                    <polyline
+                      points="8 12 11 15 16 9"
+                      stroke="hsl(var(--erix-primary))"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                )}
+                {item}
+              </li>
+            ))}
+          </ListTag>
+        </div>
+      );
+    }
+
+    // ── Menu / Navigation bar ─────────────────────────────────────────────
+    case "menu": {
+      let links: { label: string; href: string }[] = [
+        { label: "Home", href: "#" },
+        { label: "Products", href: "#" },
+        { label: "About", href: "#" },
+        { label: "Contact", href: "#" },
+      ];
+      try {
+        links = JSON.parse(block.content ?? "[]");
+      } catch {
+        /* use defaults */
+      }
+
+      const menuBg = wrapStyle.backgroundColor ?? "#1e1b4b";
+      const linkColor = contentStyle.color ?? "#ffffff";
+
+      return (
+        <div
+          style={{
+            backgroundColor: menuBg,
+            padding: wrapStyle.padding ?? "14px 24px",
+            display: "flex",
+            justifyContent:
+              (wrapStyle.textAlign as "center" | "left" | "right") ?? "center",
+            gap: s.gap ?? "28px",
+            flexWrap: "wrap",
+            alignItems: "center",
+            opacity: wrapStyle.opacity,
+          }}
+        >
+          {links.map((l, i) => (
+            <a
+              key={i}
+              href={l.href}
+              style={{
+                fontSize: contentStyle.fontSize ?? "14px",
+                color: linkColor,
+                fontWeight: contentStyle.fontWeight ?? "500",
+                textDecoration: "none",
+                fontFamily: "inherit",
+                letterSpacing: "0.2px",
+                opacity: 0.9,
+              }}
+              onClick={(e) => e.preventDefault()}
+            >
+              {l.label}
+            </a>
+          ))}
+        </div>
+      );
+    }
+
     // ── Section (editable container) ──────────────────────────────────────
+
     case "section":
       return (
         <div

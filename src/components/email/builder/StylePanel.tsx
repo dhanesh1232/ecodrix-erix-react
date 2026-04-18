@@ -10,13 +10,22 @@ import {
   AlignRight,
   Bold,
   ChevronDown,
+  GripVertical,
   Image,
+  ImagePlus,
   Italic,
   Link,
+  Minus,
+  Plus,
   Settings,
+  Trash2,
   Type,
 } from "lucide-react";
 import type { EmailBlock, EmailDocument } from "./types";
+import {
+  ImagePickerNative,
+  type ImageFormat,
+} from "@/components/ui/ImagePickerNative";
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 
@@ -137,9 +146,98 @@ function Input({
         fontFamily: mono ? "'Fira Code', monospace" : "sans-serif",
         boxSizing: "border-box",
       }}
-      onFocus={(e) => (e.currentTarget.style.borderColor = "hsl(var(--erix-primary))")}
-      onBlur={(e) => (e.currentTarget.style.borderColor = "hsl(var(--erix-border))")}
+      onFocus={(e) =>
+        (e.currentTarget.style.borderColor = "hsl(var(--erix-primary))")
+      }
+      onBlur={(e) =>
+        (e.currentTarget.style.borderColor = "hsl(var(--erix-border))")
+      }
     />
+  );
+}
+
+// ─── ImageFieldInput ──────────────────────────────────────────────────────────
+// URL text input + "pick from library" button that opens ImagePickerNative.
+
+function ImageFieldInput({
+  value,
+  onChange,
+  placeholder = "https://…",
+  folder = "email",
+}: {
+  value: string;
+  onChange: (url: string) => void;
+  placeholder?: string;
+  folder?: string;
+}) {
+  const handleInsert = (images: ImageFormat[]) => {
+    const url = images[0]?.variants?.full ?? images[0]?.url ?? "";
+    if (url) onChange(url);
+  };
+
+  return (
+    <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+      <input
+        type="url"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        style={{
+          flex: 1,
+          background: "hsl(var(--erix-muted) / 0.5)",
+          border: "1px solid hsl(var(--erix-border))",
+          borderRadius: "5px",
+          padding: "6px 8px",
+          color: "hsl(var(--erix-foreground))",
+          fontSize: "12px",
+          outline: "none",
+          fontFamily: "sans-serif",
+          boxSizing: "border-box",
+          minWidth: 0,
+        }}
+        onFocus={(e) =>
+          (e.currentTarget.style.borderColor = "hsl(var(--erix-primary))")
+        }
+        onBlur={(e) =>
+          (e.currentTarget.style.borderColor = "hsl(var(--erix-border))")
+        }
+      />
+      <ImagePickerNative
+        multiple={false}
+        folder="media"
+        onInsert={handleInsert}
+        variant="casual"
+      >
+        <button
+          type="button"
+          title="Pick from media library"
+          style={{
+            flexShrink: 0,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: "30px",
+            height: "30px",
+            background: "hsl(var(--erix-primary) / 0.1)",
+            border: "1px solid hsl(var(--erix-primary) / 0.35)",
+            borderRadius: "6px",
+            color: "hsl(var(--erix-primary))",
+            cursor: "pointer",
+            transition: "background 0.15s",
+          }}
+          onMouseEnter={(e) =>
+            (e.currentTarget.style.background =
+              "hsl(var(--erix-primary) / 0.2)")
+          }
+          onMouseLeave={(e) =>
+            (e.currentTarget.style.background =
+              "hsl(var(--erix-primary) / 0.1)")
+          }
+        >
+          <ImagePlus size={14} />
+        </button>
+      </ImagePickerNative>
+    </div>
   );
 }
 
@@ -178,8 +276,12 @@ function NumberInput({
           fontFamily: "sans-serif",
           boxSizing: "border-box",
         }}
-        onFocus={(e) => (e.currentTarget.style.borderColor = "hsl(var(--erix-primary))")}
-        onBlur={(e) => (e.currentTarget.style.borderColor = "hsl(var(--erix-border))")}
+        onFocus={(e) =>
+          (e.currentTarget.style.borderColor = "hsl(var(--erix-primary))")
+        }
+        onBlur={(e) =>
+          (e.currentTarget.style.borderColor = "hsl(var(--erix-border))")
+        }
       />
       <span
         style={{
@@ -245,8 +347,12 @@ function ColorInput({
           fontFamily: "monospace",
           boxSizing: "border-box",
         }}
-        onFocus={(e) => (e.currentTarget.style.borderColor = "hsl(var(--erix-primary))")}
-        onBlur={(e) => (e.currentTarget.style.borderColor = "hsl(var(--erix-border))")}
+        onFocus={(e) =>
+          (e.currentTarget.style.borderColor = "hsl(var(--erix-primary))")
+        }
+        onBlur={(e) =>
+          (e.currentTarget.style.borderColor = "hsl(var(--erix-border))")
+        }
       />
     </div>
   );
@@ -282,11 +388,19 @@ function Select({
         backgroundPosition: "right 8px center",
         paddingRight: "28px",
       }}
-      onFocus={(e) => (e.currentTarget.style.borderColor = "hsl(var(--erix-primary))")}
-      onBlur={(e) => (e.currentTarget.style.borderColor = "hsl(var(--erix-border))")}
+      onFocus={(e) =>
+        (e.currentTarget.style.borderColor = "hsl(var(--erix-primary))")
+      }
+      onBlur={(e) =>
+        (e.currentTarget.style.borderColor = "hsl(var(--erix-border))")
+      }
     >
       {options.map((o) => (
-        <option key={o.value} value={o.value} style={{ background: "hsl(var(--erix-card))" }}>
+        <option
+          key={o.value}
+          value={o.value}
+          style={{ background: "hsl(var(--erix-card))" }}
+        >
           {o.label}
         </option>
       ))}
@@ -319,10 +433,14 @@ function AlignButtons({
               alignItems: "center",
               justifyContent: "center",
               padding: "6px",
-              background: active ? "hsl(var(--erix-primary) / 0.15)" : "hsl(var(--erix-muted) / 0.5)",
+              background: active
+                ? "hsl(var(--erix-primary) / 0.15)"
+                : "hsl(var(--erix-muted) / 0.5)",
               border: `1px solid ${active ? "hsl(var(--erix-primary))" : "hsl(var(--erix-border))"}`,
               borderRadius: "5px",
-              color: active ? "hsl(var(--erix-primary))" : "hsl(var(--erix-muted-foreground))",
+              color: active
+                ? "hsl(var(--erix-primary))"
+                : "hsl(var(--erix-muted-foreground))",
               cursor: "pointer",
             }}
           >
@@ -442,12 +560,314 @@ function SpacingInput({
                 outline: "none",
                 boxSizing: "border-box",
               }}
-              onFocus={(e) => (e.currentTarget.style.borderColor = "hsl(var(--erix-primary))")}
-              onBlur={(e) => (e.currentTarget.style.borderColor = "hsl(var(--erix-border))")}
+              onFocus={(e) =>
+                (e.currentTarget.style.borderColor = "hsl(var(--erix-primary))")
+              }
+              onBlur={(e) =>
+                (e.currentTarget.style.borderColor = "hsl(var(--erix-border))")
+              }
             />
           </div>
         ))}
       </div>
+    </div>
+  );
+}
+
+// ─── LinkListEditor ───────────────────────────────────────────────────────────
+// Shared editor for menu / footer / social link arrays stored as JSON.
+
+interface LinkItem {
+  label: string;
+  href: string;
+}
+
+function LinkListEditor({
+  value,
+  onChange,
+  labelPlaceholder = "Label",
+  hrefPlaceholder = "https://…",
+}: {
+  value: string; // JSON string: LinkItem[]
+  onChange: (v: string) => void;
+  labelPlaceholder?: string;
+  hrefPlaceholder?: string;
+}) {
+  let items: LinkItem[] = [];
+  try {
+    items = JSON.parse(value) as LinkItem[];
+  } catch {
+    /* ignore */
+  }
+
+  const save = (next: LinkItem[]) => onChange(JSON.stringify(next));
+  const add = () => save([...items, { label: "New Link", href: "#" }]);
+  const remove = (i: number) => save(items.filter((_, idx) => idx !== i));
+  const update = (i: number, patch: Partial<LinkItem>) =>
+    save(items.map((item, idx) => (idx === i ? { ...item, ...patch } : item)));
+  const move = (from: number, dir: -1 | 1) => {
+    const to = from + dir;
+    if (to < 0 || to >= items.length) return;
+    const next = [...items];
+    [next[from], next[to]] = [next[to], next[from]];
+    save(next);
+  };
+
+  const rowStyle: React.CSSProperties = {
+    display: "flex",
+    flexDirection: "column",
+    gap: "4px",
+    padding: "8px",
+    background: "hsl(var(--erix-muted) / 0.3)",
+    border: "1px solid hsl(var(--erix-border))",
+    borderRadius: "6px",
+    marginBottom: "6px",
+  };
+
+  return (
+    <div>
+      {items.map((item, i) => (
+        // biome-ignore lint/suspicious/noArrayIndexKey: controlled list editor
+        <div key={i} style={rowStyle}>
+          <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+            <GripVertical
+              size={12}
+              style={{
+                color: "hsl(var(--erix-muted-foreground))",
+                flexShrink: 0,
+              }}
+            />
+            <input
+              type="text"
+              value={item.label}
+              onChange={(e) => update(i, { label: e.target.value })}
+              placeholder={labelPlaceholder}
+              style={{
+                flex: 1,
+                background: "hsl(var(--erix-muted) / 0.6)",
+                border: "1px solid hsl(var(--erix-border))",
+                borderRadius: "4px",
+                padding: "4px 6px",
+                color: "hsl(var(--erix-foreground))",
+                fontSize: "11px",
+                outline: "none",
+                fontFamily: "sans-serif",
+                boxSizing: "border-box",
+              }}
+            />
+            <button
+              type="button"
+              onClick={() => move(i, -1)}
+              title="Move up"
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                color: "hsl(var(--erix-muted-foreground))",
+                padding: "2px",
+              }}
+            >
+              <Minus size={11} />
+            </button>
+            <button
+              type="button"
+              onClick={() => move(i, 1)}
+              title="Move down"
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                color: "hsl(var(--erix-muted-foreground))",
+                padding: "2px",
+              }}
+            >
+              <Plus size={11} />
+            </button>
+            <button
+              type="button"
+              onClick={() => remove(i)}
+              title="Remove"
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                color: "#ef4444",
+                padding: "2px",
+              }}
+            >
+              <Trash2 size={11} />
+            </button>
+          </div>
+          <input
+            type="url"
+            value={item.href}
+            onChange={(e) => update(i, { href: e.target.value })}
+            placeholder={hrefPlaceholder}
+            style={{
+              width: "100%",
+              background: "hsl(var(--erix-muted) / 0.4)",
+              border: "1px solid hsl(var(--erix-border))",
+              borderRadius: "4px",
+              padding: "4px 6px",
+              color: "hsl(var(--erix-primary))",
+              fontSize: "10px",
+              outline: "none",
+              fontFamily: "monospace",
+              boxSizing: "border-box",
+            }}
+          />
+        </div>
+      ))}
+      <button
+        type="button"
+        onClick={add}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "6px",
+          width: "100%",
+          padding: "7px 10px",
+          background: "hsl(var(--erix-primary) / 0.08)",
+          border: "1px dashed hsl(var(--erix-primary) / 0.4)",
+          borderRadius: "6px",
+          color: "hsl(var(--erix-primary))",
+          fontSize: "11px",
+          fontWeight: 600,
+          cursor: "pointer",
+          fontFamily: "sans-serif",
+        }}
+      >
+        <Plus size={12} /> Add item
+      </button>
+    </div>
+  );
+}
+
+// ─── ListItemsEditor ──────────────────────────────────────────────────────────
+// Plain-text item editor (no href) for list blocks.
+
+function ListItemsEditor({
+  rawItems,
+  onChange,
+}: {
+  rawItems: string[];
+  onChange: (items: string[]) => void;
+}) {
+  const add = () => onChange([...rawItems, "New item"]);
+  const remove = (i: number) =>
+    onChange(rawItems.filter((_, idx) => idx !== i));
+  const update = (i: number, v: string) =>
+    onChange(rawItems.map((x, idx) => (idx === i ? v : x)));
+  const move = (from: number, dir: -1 | 1) => {
+    const to = from + dir;
+    if (to < 0 || to >= rawItems.length) return;
+    const next = [...rawItems];
+    [next[from], next[to]] = [next[to], next[from]];
+    onChange(next);
+  };
+
+  return (
+    <div>
+      {rawItems.map((item, i) => (
+        // biome-ignore lint/suspicious/noArrayIndexKey: controlled list editor
+        <div
+          key={i}
+          style={{
+            display: "flex",
+            gap: "4px",
+            marginBottom: "5px",
+            alignItems: "center",
+          }}
+        >
+          <GripVertical
+            size={12}
+            style={{
+              color: "hsl(var(--erix-muted-foreground))",
+              flexShrink: 0,
+            }}
+          />
+          <input
+            type="text"
+            value={item}
+            onChange={(e) => update(i, e.target.value)}
+            style={{
+              flex: 1,
+              background: "hsl(var(--erix-muted) / 0.5)",
+              border: "1px solid hsl(var(--erix-border))",
+              borderRadius: "4px",
+              padding: "5px 7px",
+              color: "hsl(var(--erix-foreground))",
+              fontSize: "11px",
+              outline: "none",
+              fontFamily: "sans-serif",
+              boxSizing: "border-box",
+            }}
+          />
+          <button
+            type="button"
+            onClick={() => move(i, -1)}
+            title="Up"
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              color: "hsl(var(--erix-muted-foreground))",
+              padding: "2px",
+            }}
+          >
+            <Minus size={11} />
+          </button>
+          <button
+            type="button"
+            onClick={() => move(i, 1)}
+            title="Down"
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              color: "hsl(var(--erix-muted-foreground))",
+              padding: "2px",
+            }}
+          >
+            <Plus size={11} />
+          </button>
+          <button
+            type="button"
+            onClick={() => remove(i)}
+            title="Remove"
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              color: "#ef4444",
+              padding: "2px",
+            }}
+          >
+            <Trash2 size={11} />
+          </button>
+        </div>
+      ))}
+      <button
+        type="button"
+        onClick={add}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "6px",
+          width: "100%",
+          padding: "7px 10px",
+          background: "hsl(var(--erix-primary) / 0.08)",
+          border: "1px dashed hsl(var(--erix-primary) / 0.4)",
+          borderRadius: "6px",
+          color: "hsl(var(--erix-primary))",
+          fontSize: "11px",
+          fontWeight: 600,
+          cursor: "pointer",
+          fontFamily: "sans-serif",
+        }}
+      >
+        <Plus size={12} /> Add item
+      </button>
     </div>
   );
 }
@@ -602,10 +1022,11 @@ export function StylePanel({
         return (
           <Section title="Image">
             <Field label="Image URL">
-              <Input
+              <ImageFieldInput
                 value={block.src ?? ""}
                 onChange={(v) => upd({ src: v })}
                 placeholder="https://…"
+                folder="email"
               />
             </Field>
             <Field label="Alt Text">
@@ -659,7 +1080,10 @@ export function StylePanel({
             >
               This renders as{" "}
               <code
-                style={{ color: "hsl(var(--erix-primary))", fontFamily: "monospace" }}
+                style={{
+                  color: "hsl(var(--erix-primary))",
+                  fontFamily: "monospace",
+                }}
               >{`{{${block.variableName || "variable"}}}`}</code>{" "}
               in the sent email.
             </p>
@@ -687,12 +1111,273 @@ export function StylePanel({
                   resize: "vertical",
                   boxSizing: "border-box",
                 }}
-                onFocus={(e) => (e.currentTarget.style.borderColor = "hsl(var(--erix-primary))")}
-                onBlur={(e) => (e.currentTarget.style.borderColor = "hsl(var(--erix-border))")}
+                onFocus={(e) =>
+                  (e.currentTarget.style.borderColor =
+                    "hsl(var(--erix-primary))")
+                }
+                onBlur={(e) =>
+                  (e.currentTarget.style.borderColor =
+                    "hsl(var(--erix-border))")
+                }
               />
             </Field>
           </Section>
         );
+
+      // ── Product Card ──────────────────────────────────────────────────
+      case "productCard": {
+        let pc = {
+          title: "",
+          description: "",
+          buttonLabel: "Shop Now",
+          buttonUrl: "#",
+        };
+        try {
+          pc = { ...pc, ...(JSON.parse(block.content ?? "{}") as typeof pc) };
+        } catch {
+          /* ignore */
+        }
+        const savePC = (patch: Partial<typeof pc>) =>
+          upd({ content: JSON.stringify({ ...pc, ...patch }) });
+        return (
+          <Section title="Product Card">
+            <Field label="Image URL">
+              <ImageFieldInput
+                value={block.src ?? ""}
+                onChange={(v) => upd({ src: v })}
+                placeholder="https://…"
+                folder="products"
+              />
+            </Field>
+            <Field label="Product Title">
+              <Input
+                value={pc.title}
+                onChange={(v) => savePC({ title: v })}
+                placeholder="Product Name"
+              />
+            </Field>
+            <Field label="Description">
+              <textarea
+                value={pc.description}
+                onChange={(e) => savePC({ description: e.target.value })}
+                rows={3}
+                placeholder="Short description…"
+                style={{
+                  width: "100%",
+                  background: "hsl(var(--erix-muted) / 0.5)",
+                  border: "1px solid hsl(var(--erix-border))",
+                  borderRadius: "5px",
+                  padding: "6px 8px",
+                  color: "hsl(var(--erix-foreground))",
+                  fontSize: "11px",
+                  fontFamily: "sans-serif",
+                  outline: "none",
+                  resize: "vertical",
+                  boxSizing: "border-box",
+                }}
+              />
+            </Field>
+            <Field label="Price">
+              <Input
+                value={block.price ?? ""}
+                onChange={(v) => upd({ price: v })}
+                placeholder="$29.99"
+              />
+            </Field>
+            <Field label="Button Label">
+              <Input
+                value={pc.buttonLabel}
+                onChange={(v) => savePC({ buttonLabel: v })}
+                placeholder="Shop Now"
+              />
+            </Field>
+            <Field label="Button URL">
+              <Input
+                value={pc.buttonUrl}
+                onChange={(v) => savePC({ buttonUrl: v })}
+                placeholder="https://…"
+              />
+            </Field>
+          </Section>
+        );
+      }
+
+      // ── Video ─────────────────────────────────────────────────────────
+      case "video": {
+        let vc = { thumbnail: "" };
+        try {
+          vc = { ...vc, ...(JSON.parse(block.content ?? "{}") as typeof vc) };
+        } catch {
+          /* ignore */
+        }
+        return (
+          <Section title="Video">
+            <Field label="Video URL">
+              <Input
+                value={block.src ?? ""}
+                onChange={(v) => upd({ src: v })}
+                placeholder="https://youtube.com/…"
+              />
+            </Field>
+            <Field label="Poster / Thumbnail URL">
+              <ImageFieldInput
+                value={vc.thumbnail}
+                onChange={(v) =>
+                  upd({ content: JSON.stringify({ ...vc, thumbnail: v }) })
+                }
+                placeholder="https://… (optional)"
+                folder="email"
+              />
+            </Field>
+            <p
+              style={{
+                fontSize: "11px",
+                color: "hsl(var(--erix-muted-foreground))",
+                fontFamily: "sans-serif",
+                margin: "4px 0 0",
+              }}
+            >
+              Tip: paste a YouTube or Vimeo URL. The thumbnail will be shown in
+              emails with a play button overlay.
+            </p>
+          </Section>
+        );
+      }
+
+      // ── List ──────────────────────────────────────────────────────────
+      case "list": {
+        let lc = { style: "bullet", items: ["Item 1", "Item 2"] };
+        try {
+          lc = { ...lc, ...(JSON.parse(block.content ?? "{}") as typeof lc) };
+        } catch {
+          /* ignore */
+        }
+        const saveLC = (patch: Partial<typeof lc>) =>
+          upd({ content: JSON.stringify({ ...lc, ...patch }) });
+        return (
+          <Section title="List">
+            <Field label="List Style">
+              <Select
+                value={lc.style}
+                onChange={(v) => saveLC({ style: v })}
+                options={[
+                  { value: "bullet", label: "• Bullet" },
+                  { value: "numbered", label: "1. Numbered" },
+                  { value: "check", label: "✓ Checklist" },
+                  { value: "arrow", label: "→ Arrow" },
+                  { value: "none", label: "None" },
+                ]}
+              />
+            </Field>
+            <Field label="Items">
+              <ListItemsEditor
+                rawItems={lc.items}
+                onChange={(items) => saveLC({ items })}
+              />
+            </Field>
+          </Section>
+        );
+      }
+
+      // ── Menu / Navbar ─────────────────────────────────────────────────
+      case "menu": {
+        let mc = { align: "center", links: [{ label: "Home", href: "#" }] };
+        try {
+          mc = { ...mc, ...(JSON.parse(block.content ?? "{}") as typeof mc) };
+        } catch {
+          /* ignore */
+        }
+        const saveMC = (patch: Partial<typeof mc>) =>
+          upd({ content: JSON.stringify({ ...mc, ...patch }) });
+        return (
+          <Section title="Navigation Menu">
+            <Field label="Alignment">
+              <Select
+                value={mc.align}
+                onChange={(v) => saveMC({ align: v })}
+                options={[
+                  { value: "left", label: "Left" },
+                  { value: "center", label: "Center" },
+                  { value: "right", label: "Right" },
+                ]}
+              />
+            </Field>
+            <Field label="Links">
+              <LinkListEditor
+                value={JSON.stringify(mc.links)}
+                onChange={(v) =>
+                  saveMC({
+                    links: JSON.parse(v) as { label: string; href: string }[],
+                  })
+                }
+                labelPlaceholder="Link label"
+              />
+            </Field>
+          </Section>
+        );
+      }
+
+      // ── Footer ────────────────────────────────────────────────────────
+      case "footer": {
+        let fc = {
+          copyright: "© 2024 Your Company",
+          links: [{ label: "Unsubscribe", href: "#" }],
+        };
+        try {
+          fc = { ...fc, ...(JSON.parse(block.content ?? "{}") as typeof fc) };
+        } catch {
+          /* ignore */
+        }
+        const saveFC = (patch: Partial<typeof fc>) =>
+          upd({ content: JSON.stringify({ ...fc, ...patch }) });
+        return (
+          <Section title="Footer">
+            <Field label="Copyright text">
+              <Input
+                value={fc.copyright}
+                onChange={(v) => saveFC({ copyright: v })}
+                placeholder="© 2024 Your Company"
+              />
+            </Field>
+            <Field label="Footer links">
+              <LinkListEditor
+                value={JSON.stringify(fc.links)}
+                onChange={(v) =>
+                  saveFC({
+                    links: JSON.parse(v) as { label: string; href: string }[],
+                  })
+                }
+                labelPlaceholder="Link text"
+              />
+            </Field>
+          </Section>
+        );
+      }
+
+      // ── Social ────────────────────────────────────────────────────────
+      case "social": {
+        let sc = { links: [{ label: "Twitter", href: "#" }] };
+        try {
+          sc = { ...sc, ...(JSON.parse(block.content ?? "{}") as typeof sc) };
+        } catch {
+          /* ignore */
+        }
+        return (
+          <Section title="Social Links">
+            <Field label="Accounts">
+              <LinkListEditor
+                value={JSON.stringify(sc.links)}
+                onChange={(v) =>
+                  upd({ content: JSON.stringify({ links: JSON.parse(v) }) })
+                }
+                labelPlaceholder="Platform (e.g. Twitter)"
+                hrefPlaceholder="Profile URL"
+              />
+            </Field>
+          </Section>
+        );
+      }
+
       default:
         return null;
     }
