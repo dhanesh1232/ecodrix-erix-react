@@ -285,3 +285,7 @@ export {
   SmartReplySuggestions,
   type SmartReplySuggestionsProps,
 } from "./ai/SmartReplySuggestions";
+export { ErixCheckoutButton } from "./components/checkout/ErixCheckoutButton";
+export { CheckoutModal } from "./components/checkout/CheckoutModal";
+export { useCheckout } from "./hooks/checkout/useCheckout";
+export type { CheckoutStep } from "./hooks/checkout/useCheckout";
