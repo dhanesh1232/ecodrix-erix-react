@@ -86,7 +86,17 @@ export interface Lead {
   source?: LeadSource;
   pipelineId?: string;
   stageId?: string;
-  score?: number;
+  score?:
+    | number
+    | {
+        total: number;
+        recency?: number;
+        engagement?: number;
+        stageDepth?: number;
+        dealSize?: number;
+        sourceQuality?: number;
+        updatedAt?: string;
+      };
   tags?: string[];
   assignedTo?: string;
   value?: number;
@@ -113,6 +123,7 @@ export interface Pipeline {
   name: string;
   description?: string;
   isDefault?: boolean;
+  isActive?: boolean;
   stages: PipelineStage[];
 }
 
@@ -128,19 +139,16 @@ export interface KanbanBoard {
 }
 
 export interface PipelineForecast {
-  /** Total value of all active leads in the pipeline */
-  revenue: number;
-  /** Probability-weighted expected revenue */
-  expected: number;
-  /** Revenue already won */
-  wonRevenue: number;
-  stages: Array<{
+  rows: Array<{
     stageId: string;
     stageName: string;
-    count: number;
-    value: number;
     probability: number;
+    totalValue: number;
+    expectedRevenue: number;
+    total: number;
   }>;
+  grandTotal: number;
+  totalPipeline: number;
 }
 
 export interface LeadActivity {

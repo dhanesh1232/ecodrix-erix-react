@@ -1,10 +1,22 @@
 "use client";
 import * as React from "react";
 import { formatDistanceToNow } from "date-fns";
-import { Bell, CheckCheck, AlertTriangle, Zap, Info, X, RefreshCw, AlertCircle } from "lucide-react";
+import {
+  Bell,
+  CheckCheck,
+  AlertTriangle,
+  Zap,
+  Info,
+  X,
+  RefreshCw,
+  AlertCircle,
+} from "lucide-react";
 import { useErixNotifications } from "../../notifications/NotificationsContext";
 import { useModuleNavigate } from "../../routing/RouterContext";
-import type { ErixNotification, ErixNotificationType } from "../../notifications/types";
+import type {
+  ErixNotification,
+  ErixNotificationType,
+} from "../../notifications/types";
 
 // Icons for backend types: "action_required" | "alert" | "info"
 const TypeIcon: Record<ErixNotificationType, React.ElementType> = {
@@ -28,10 +40,15 @@ const TypeLabel: Record<ErixNotificationType, string> = {
 // Only show filter tabs that have matching notifications
 function useAvailableFilters(notifications: ErixNotification[]) {
   return React.useMemo(() => {
-    const base: Array<ErixNotificationType | "all" | "unread"> = ["all", "unread"];
+    const base: Array<ErixNotificationType | "all" | "unread"> = [
+      "all",
+      "unread",
+    ];
     const types = new Set(notifications.map((n) => n.type));
     const order: ErixNotificationType[] = ["action_required", "alert", "info"];
-    order.forEach((t) => { if (types.has(t)) base.push(t); });
+    order.forEach((t) => {
+      if (types.has(t)) base.push(t);
+    });
     return base;
   }, [notifications]);
 }
@@ -39,7 +56,9 @@ function useAvailableFilters(notifications: ErixNotification[]) {
 export function NotificationsPage() {
   const { notifications, loading, error, dismiss, dismissAll, retry, refresh } =
     useErixNotifications();
-  const [filter, setFilter] = React.useState<ErixNotificationType | "all" | "unread">("all");
+  const [filter, setFilter] = React.useState<
+    ErixNotificationType | "all" | "unread"
+  >("all");
   const navigateTo = useModuleNavigate();
   const availableFilters = useAvailableFilters(notifications);
 
@@ -49,9 +68,12 @@ export function NotificationsPage() {
 
   const filtered = React.useMemo(() => {
     switch (filter) {
-      case "all":    return notifications;
-      case "unread": return notifications.filter((n) => n.status === "unread");
-      default:       return notifications.filter((n) => n.type === filter);
+      case "all":
+        return notifications;
+      case "unread":
+        return notifications.filter((n) => n.status === "unread");
+      default:
+        return notifications.filter((n) => n.type === filter);
     }
   }, [notifications, filter]);
 
@@ -111,7 +133,11 @@ export function NotificationsPage() {
                 : "erix-bg-muted erix-text-muted-foreground hover:erix-bg-muted/80 hover:erix-text-foreground"
             }`}
           >
-            {f === "action_required" ? "Action Required" : f === "all" ? "All" : f.charAt(0).toUpperCase() + f.slice(1)}
+            {f === "action_required"
+              ? "Action Required"
+              : f === "all"
+                ? "All"
+                : f.charAt(0).toUpperCase() + f.slice(1)}
           </button>
         ))}
       </div>
@@ -126,7 +152,9 @@ export function NotificationsPage() {
           <div className="erix-p-12 erix-flex erix-flex-col erix-items-center erix-text-center">
             <AlertCircle className="erix-w-8 erix-h-8 erix-text-destructive/60 erix-mb-3" />
             <h3 className="erix-font-medium">Failed to load</h3>
-            <p className="erix-text-muted-foreground erix-text-sm erix-mt-1">{error.message}</p>
+            <p className="erix-text-muted-foreground erix-text-sm erix-mt-1">
+              {error.message}
+            </p>
             <button
               onClick={() => void refresh()}
               className="erix-mt-4 erix-px-4 erix-py-2 erix-rounded erix-bg-primary erix-text-primary-foreground erix-text-sm erix-font-medium hover:erix-bg-primary/90 erix-transition-colors"
@@ -141,14 +169,19 @@ export function NotificationsPage() {
             </div>
             <h3 className="erix-font-medium erix-text-lg">All clear!</h3>
             <p className="erix-text-muted-foreground erix-text-sm erix-mt-1">
-              No {filter !== "all" ? TypeLabel[filter as ErixNotificationType] ?? filter : ""} notifications.
+              No{" "}
+              {filter !== "all"
+                ? (TypeLabel[filter as ErixNotificationType] ?? filter)
+                : ""}{" "}
+              notifications.
             </p>
           </div>
         ) : (
           <div className="erix-divide-y">
             {filtered.map((n) => {
               const Icon = TypeIcon[n.type] ?? Bell;
-              const iconColor = TypeColor[n.type] ?? "erix-text-muted-foreground";
+              const iconColor =
+                TypeColor[n.type] ?? "erix-text-muted-foreground";
               const isUnread = n.status === "unread";
 
               return (
@@ -158,24 +191,42 @@ export function NotificationsPage() {
                     isUnread ? "erix-bg-primary/5" : "hover:erix-bg-muted/40"
                   }`}
                 >
-                  <button
+                  <div
+                    role="button"
+                    tabIndex={0}
                     onClick={() => handleClick(n)}
-                    className="erix-flex-1 erix-flex erix-gap-4 erix-p-4 erix-text-left erix-min-w-0"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        handleClick(n);
+                      }
+                    }}
+                    className="erix-flex-1 erix-flex erix-gap-4 erix-p-4 erix-text-left erix-min-w-0 erix-cursor-pointer focus:erix-outline-none focus:erix-ring-2 focus:erix-ring-primary/20 erix-rounded-lg"
                   >
-                    <div className={`erix-mt-1 erix-flex-shrink-0 ${iconColor}`}>
+                    <div
+                      className={`erix-mt-1 erix-flex-shrink-0 ${iconColor}`}
+                    >
                       <Icon className="erix-w-5 erix-h-5" />
                     </div>
                     <div className="erix-flex-1 erix-min-w-0">
                       <div className="erix-flex erix-items-center erix-justify-between erix-gap-2">
-                        <p className={`erix-text-sm erix-font-medium erix-truncate ${isUnread ? "erix-text-foreground" : "erix-text-muted-foreground"}`}>
+                        <p
+                          className={`erix-text-sm erix-font-medium erix-truncate ${isUnread ? "erix-text-foreground" : "erix-text-muted-foreground"}`}
+                        >
                           {n.title}
                         </p>
                         <span className="erix-text-xs erix-text-muted-foreground erix-flex-shrink-0">
-                          {n.createdAt ? formatDistanceToNow(new Date(n.createdAt), { addSuffix: true }) : ""}
+                          {n.createdAt
+                            ? formatDistanceToNow(new Date(n.createdAt), {
+                                addSuffix: true,
+                              })
+                            : ""}
                         </span>
                       </div>
                       {/* Backend field is "message" not "body" */}
-                      <p className={`erix-text-sm erix-mt-0.5 erix-line-clamp-2 ${isUnread ? "erix-text-foreground/80" : "erix-text-muted-foreground"}`}>
+                      <p
+                        className={`erix-text-sm erix-mt-0.5 erix-line-clamp-2 ${isUnread ? "erix-text-foreground/80" : "erix-text-muted-foreground"}`}
+                      >
                         {n.message}
                       </p>
                       {/* Status badge */}
@@ -184,21 +235,27 @@ export function NotificationsPage() {
                           <span className="erix-inline-block erix-w-2 erix-h-2 erix-rounded-full erix-bg-primary" />
                         )}
                         {n.status === "resolved" && (
-                          <span className="erix-text-[10px] erix-text-green-600 erix-font-medium">Resolved</span>
+                          <span className="erix-text-[10px] erix-text-green-600 erix-font-medium">
+                            Resolved
+                          </span>
                         )}
                         {/* Retry for action_required */}
-                        {n.type === "action_required" && n.status === "unread" && (
-                          <button
-                            onClick={(e) => { e.stopPropagation(); void retry(n.id); }}
-                            className="erix-flex erix-items-center erix-gap-1 erix-text-[10px] erix-font-medium erix-text-primary hover:erix-underline"
-                          >
-                            <RefreshCw className="erix-w-3 erix-h-3" />
-                            Retry action
-                          </button>
-                        )}
+                        {n.type === "action_required" &&
+                          n.status === "unread" && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                void retry(n.id);
+                              }}
+                              className="erix-flex erix-items-center erix-gap-1 erix-text-[10px] erix-font-medium erix-text-primary hover:erix-underline"
+                            >
+                              <RefreshCw className="erix-w-3 erix-h-3" />
+                              Retry action
+                            </button>
+                          )}
                       </div>
                     </div>
-                  </button>
+                  </div>
 
                   {/* Dismiss */}
                   <button

@@ -2,7 +2,7 @@
 // src/context/ErixProvider.tsx — Global Ecodrix Platform Provider
 
 import * as React from "react";
-import { Ecodrix } from "@ecodrix/erix-api";
+import { ECODrIxAPI } from "@ecodrix/erix-api";
 import { ErixToastProvider } from "@/toast/ToastContext";
 import { ErixToaster } from "@/toast/ErixToaster";
 import { ErixEventBusProvider } from "@/events/EventBusContext";
@@ -22,7 +22,7 @@ import type {
 interface ErixPlatformContext {
   config: ErixPlatformConfig;
   /** Typed Ecodrix SDK client — use this for all API calls */
-  sdk: Ecodrix;
+  sdk: ECODrIxAPI;
   /** Check if a module is enabled */
   hasModule: (module: ErixModule) => boolean;
   /** Tenant health (lazy-loaded on mount) */
@@ -40,7 +40,7 @@ export function useErix(): ErixPlatformContext {
 }
 
 /** Direct access to the typed Ecodrix SDK client. */
-export function useErixClient(): Ecodrix {
+export function useErixClient(): ECODrIxAPI {
   return useErix().sdk;
 }
 
@@ -68,7 +68,7 @@ export function ErixProvider({ config, children }: ErixProviderProps) {
   // Stable SDK instance — only recreated when credentials change.
   const sdk = React.useMemo(
     () =>
-      new Ecodrix({
+      new ECODrIxAPI({
         apiKey: config.apiKey,
         clientCode: config.clientCode,
         baseUrl: config.baseUrl ?? "https://api.ecodrix.com",

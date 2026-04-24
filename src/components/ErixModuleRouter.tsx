@@ -37,17 +37,17 @@ import {
 import { ErixModuleView, type ErixModuleViewProps } from "./ErixModuleView";
 
 export interface ErixModuleRouterProps
-  extends ErixRouterProviderProps,
-    ErixModuleViewProps {}
+  extends ErixRouterProviderProps, ErixModuleViewProps {}
 
 export const ErixModuleRouter: React.FC<ErixModuleRouterProps> = ({
   routes,
   fallback,
   className,
   children,
+  initialPathname,
 }) => {
   return (
-    <ErixRouterProvider routes={routes}>
+    <ErixRouterProvider routes={routes} initialPathname={initialPathname}>
       <ErixModuleView fallback={fallback} className={className} />
       {/* Allow arbitrary children (e.g. sidebar, header) inside the same provider */}
       {children}

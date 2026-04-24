@@ -43,7 +43,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-import { Ecodrix } from "@ecodrix/erix-api";
+import { ECODrIxAPI } from "@ecodrix/erix-api";
 import { useErixClient } from "@/context/ErixProvider";
 
 export interface ImageVariants {
@@ -278,7 +278,7 @@ export const ImagePickerNative: React.FC<ImagePickerNativeProps> = ({
   const [copyFeedback, setCopyFeedback] = React.useState<string | null>(null);
 
   // SDK init
-  const contextSdk = React.useRef<Ecodrix | null>(null);
+  const contextSdk = React.useRef<ECODrIxAPI | null>(null);
   try {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     contextSdk.current = useErixClient();
@@ -287,7 +287,7 @@ export const ImagePickerNative: React.FC<ImagePickerNativeProps> = ({
   const sdk = React.useMemo(() => {
     if (contextSdk.current && !apiUrl && !apiKey) return contextSdk.current;
     if (!apiUrl || !apiKey) return contextSdk.current || null;
-    return new Ecodrix({
+    return new ECODrIxAPI({
       baseUrl: apiUrl,
       apiKey: apiKey,
       clientCode: clientCode || "default",

@@ -1,7 +1,15 @@
 "use client";
 import * as React from "react";
 import * as Popover from "@radix-ui/react-popover";
-import { Bell, CheckCheck, AlertTriangle, Info, Zap, X, RefreshCw } from "lucide-react";
+import {
+  Bell,
+  CheckCheck,
+  AlertTriangle,
+  Info,
+  Zap,
+  X,
+  RefreshCw,
+} from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useErixNotifications } from "./NotificationsContext";
 import { useErixRouter } from "../routing/RouterContext";
@@ -28,8 +36,11 @@ export interface ErixNotificationsProps {
   notificationsUrl?: string;
 }
 
-export function ErixNotifications({ notificationsUrl }: ErixNotificationsProps) {
-  const { notifications, unreadCount, dismissAll, dismiss, retry } = useErixNotifications();
+export function ErixNotifications({
+  notificationsUrl,
+}: ErixNotificationsProps) {
+  const { notifications, unreadCount, dismissAll, dismiss, retry } =
+    useErixNotifications();
   const { routes, navigateTo } = useErixRouter();
   const [open, setOpen] = React.useState(false);
 
@@ -81,7 +92,10 @@ export function ErixNotifications({ notificationsUrl }: ErixNotificationsProps) 
             </div>
             {unreadCount > 0 && (
               <button
-                onClick={(e) => { e.stopPropagation(); void dismissAll(); }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  void dismissAll();
+                }}
                 className="erix-text-xs erix-text-primary erix-font-medium hover:erix-underline erix-flex erix-items-center erix-gap-1"
               >
                 <CheckCheck className="erix-w-3.5 erix-h-3.5" />
@@ -101,18 +115,29 @@ export function ErixNotifications({ notificationsUrl }: ErixNotificationsProps) 
               <div className="erix-divide-y">
                 {displayNotifications.map((n) => {
                   const Icon = TypeIcon[n.type] ?? Bell;
-                  const iconColor = TypeColor[n.type] ?? "erix-text-muted-foreground";
+                  const iconColor =
+                    TypeColor[n.type] ?? "erix-text-muted-foreground";
 
                   return (
                     <div
                       key={n.id}
                       className="erix-flex erix-items-start erix-bg-primary/5 erix-transition-colors erix-group hover:erix-bg-muted/40"
                     >
-                      <button
+                      <div
+                        role="button"
+                        tabIndex={0}
                         onClick={() => handleNotificationClick(n)}
-                        className="erix-flex-1 erix-flex erix-gap-3 erix-p-3 erix-text-left erix-min-w-0"
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            handleNotificationClick(n);
+                          }
+                        }}
+                        className="erix-flex-1 erix-flex erix-gap-3 erix-p-3 erix-text-left erix-min-w-0 erix-cursor-pointer focus:erix-outline-none focus:erix-ring-2 focus:erix-ring-primary/20 erix-rounded-lg"
                       >
-                        <div className={`erix-mt-0.5 erix-flex-shrink-0 ${iconColor}`}>
+                        <div
+                          className={`erix-mt-0.5 erix-flex-shrink-0 ${iconColor}`}
+                        >
                           <Icon className="erix-w-4 erix-h-4" />
                         </div>
                         <div className="erix-flex-1 erix-min-w-0">
@@ -122,7 +147,9 @@ export function ErixNotifications({ notificationsUrl }: ErixNotificationsProps) 
                             </p>
                             <span className="erix-text-[10px] erix-text-muted-foreground erix-flex-shrink-0 erix-whitespace-nowrap">
                               {n.createdAt
-                                ? formatDistanceToNow(new Date(n.createdAt), { addSuffix: true })
+                                ? formatDistanceToNow(new Date(n.createdAt), {
+                                    addSuffix: true,
+                                  })
                                 : ""}
                             </span>
                           </div>
@@ -132,7 +159,10 @@ export function ErixNotifications({ notificationsUrl }: ErixNotificationsProps) 
                           {/* Show retry only for action_required */}
                           {n.type === "action_required" && (
                             <button
-                              onClick={(e) => { e.stopPropagation(); void retry(n.id); }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                void retry(n.id);
+                              }}
                               className="erix-mt-1.5 erix-flex erix-items-center erix-gap-1 erix-text-[10px] erix-font-medium erix-text-primary hover:erix-underline"
                             >
                               <RefreshCw className="erix-w-3 erix-h-3" />
@@ -141,7 +171,7 @@ export function ErixNotifications({ notificationsUrl }: ErixNotificationsProps) 
                           )}
                         </div>
                         <div className="erix-flex-shrink-0 erix-self-center erix-w-2 erix-h-2 erix-rounded-full erix-bg-primary" />
-                      </button>
+                      </div>
 
                       {/* Dismiss */}
                       <button
