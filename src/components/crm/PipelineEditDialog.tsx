@@ -40,7 +40,6 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { ErixSpinner } from "@/components/ui/erix-spinner";
 import { toast } from "sonner";
 import { usePipelineMutations } from "@/hooks/crm/usePipeline";

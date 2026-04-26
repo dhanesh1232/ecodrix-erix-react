@@ -3,7 +3,12 @@
 import * as React from "react";
 import { useErixClient } from "@/context/ErixProvider";
 import type { ResourceManifest } from "@ecodrix/erix-api";
-import type { Pipeline, KanbanBoard, PipelineForecast } from "@/types/platform";
+import type {
+  Pipeline,
+  KanbanBoard,
+  PipelineForecast,
+  PipelineStage,
+} from "@/types/platform";
 
 export function usePipelines() {
   const sdk = useErixClient();

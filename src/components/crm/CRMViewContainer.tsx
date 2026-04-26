@@ -320,7 +320,7 @@ export function CRMViewContainer() {
                   pipelineId={activePipelineId}
                   onLeadOpen={setSelectedLeadId}
                   onAddLead={handleAddLead}
-                  onConfigureStages={() => navigateTo("crm/pipelines")}
+                  onConfigureStages={() => navigateTo("crm", "pipelines")}
                 />
               </div>
             )
