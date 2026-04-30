@@ -48,6 +48,7 @@ export {
   type KanbanBoardProps,
 } from "./components/crm/KanbanBoard";
 export { LeadCard, type LeadCardProps } from "./components/crm/LeadCard";
+export { CRMViewContainer } from "./components/crm/CRMViewContainer";
 
 // ─── Analytics Components ─────────────────────────────────────────────────────
 export { AnalyticsDashboard } from "./components/analytics/AnalyticsDashboard";
