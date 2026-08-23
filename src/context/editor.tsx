@@ -4,6 +4,12 @@ import * as React from "react";
 import { ErixChain } from "@/core/chain";
 import { ErixEngine } from "@/core/engine";
 import { cn } from "@/lib/utils";
+import {
+  validateEditorApiKey,
+  isDevBypass,
+  clearValidationCache,
+  type ValidationErrorCode,
+} from "@/services/api-validation";
 import type {
   EditorLoader,
   ErixContextState,
@@ -81,6 +87,8 @@ export type ErixEditorContextShape = {
   shortcutsEnabled: boolean;
   isApiValid: boolean;
   isApiValidating: boolean;
+  apiErrorCode: ValidationErrorCode | null;
+  retryValidation: () => void;
   /** Inline style applied to the toolbar wrapper element */
   toolbarStyle?: React.CSSProperties;
 };
@@ -219,21 +227,71 @@ export const ErixEditorProvider: React.FC<ErixEditorProviderProps> = ({
   clientCode = "default",
   children,
 }) => {
-  const [isApiValid, setIsApiValid] = React.useState(true);
+  const [isApiValid, setIsApiValid] = React.useState(false);
   const [isApiValidating, setIsApiValidating] = React.useState(false);
+  const [apiErrorCode, setApiErrorCode] =
+    React.useState<ValidationErrorCode | null>(null);
 
-  // Simple validation logic
+  // Track a validation trigger counter to allow retryValidation to re-run the effect
+  const [validationTrigger, setValidationTrigger] = React.useState(0);
+
+  // Real validation logic
   React.useEffect(() => {
-    if (!apiKey) return;
-    setIsApiValidating(true);
-    const timer = setTimeout(() => {
-      // In dev, we accept ERIX-DEV-KEY or any 32+ char string
-      const isValid = apiKey === "ERIX-DEV-KEY" || apiKey.length >= 32;
-      setIsApiValid(isValid);
+    // Dev bypass: skip backend validation entirely
+    if (apiKey && isDevBypass(apiKey, apiUrl)) {
+      console.warn(
+        "[ErixEditor] API key validation bypassed in development mode",
+      );
+      setIsApiValid(true);
       setIsApiValidating(false);
-    }, 800);
-    return () => clearTimeout(timer);
-  }, [apiKey]);
+      setApiErrorCode(null);
+      return;
+    }
+
+    // Empty credentials: set invalid without network call
+    if (!apiKey || !clientCode) {
+      setIsApiValid(false);
+      setIsApiValidating(false);
+      setApiErrorCode(null);
+      return;
+    }
+
+    // Start validation
+    setIsApiValidating(true);
+    setApiErrorCode(null);
+
+    const abortController = new AbortController();
+
+    validateEditorApiKey({
+      apiKey,
+      clientCode,
+      apiUrl,
+      signal: abortController.signal,
+    }).then((result) => {
+      // Don't update state if aborted
+      if (abortController.signal.aborted) return;
+
+      if (result.valid) {
+        setIsApiValid(true);
+        setIsApiValidating(false);
+        setApiErrorCode(null);
+      } else {
+        setIsApiValid(false);
+        setIsApiValidating(false);
+        setApiErrorCode(result.errorCode ?? "NETWORK_ERROR");
+      }
+    });
+
+    return () => {
+      abortController.abort();
+    };
+  }, [apiKey, clientCode, apiUrl, validationTrigger]);
+
+  // retryValidation: clears cache for current credentials and re-runs validation
+  const retryValidation = React.useCallback(() => {
+    clearValidationCache();
+    setValidationTrigger((prev: number) => prev + 1);
+  }, []);
   const iframeRef = React.useRef<HTMLIFrameElement | null>(null);
   const engineRef = React.useRef<ErixEngine | null>(null);
   const [engine, setEngine] = React.useState<ErixEngine | null>(null);
@@ -258,31 +316,14 @@ export const ErixEditorProvider: React.FC<ErixEditorProviderProps> = ({
 
       // Mapping: Editor Token Key -> [Preferred Host CSS Variable Names]
       const mappings: Record<string, string[]> = {
-        background: [
-          "--background",
-          "--erxi-bg-background",
-          "--editor-bg",
-          "--bg-background",
-        ],
-        foreground: [
-          "--foreground",
-          "--erxi-text-foreground",
-          "--editor-fg",
-          "--text-foreground",
-        ],
-        muted: ["--muted", "--erxi-bg-muted", "--bg-muted"],
-        "muted-foreground": [
-          "--muted-foreground",
-          "--erxi-text-muted-foreground",
-          "--text-muted-foreground",
-        ],
-        popover: ["--popover", "--erxi-bg-popover", "--bg-popover"],
-        border: ["--border", "--erxi-border-color", "--border-input"],
-        primary: ["--primary", "--erxi-color-primary", "--brand-primary"],
-        "primary-foreground": [
-          "--primary-foreground",
-          "--erxi-color-primary-foreground",
-        ],
+        background: ["--erxi-bg-background", "--editor-bg"],
+        foreground: ["--erxi-text-foreground", "--editor-fg"],
+        muted: ["--erxi-bg-muted"],
+        "muted-foreground": ["--erxi-text-muted-foreground"],
+        popover: ["--erxi-bg-popover"],
+        border: ["--erxi-border-color"],
+        primary: ["--erxi-color-primary"],
+        "primary-foreground": ["--erxi-color-primary-foreground"],
       };
 
       const base: Record<string, string> = {};
@@ -630,6 +671,8 @@ export const ErixEditorProvider: React.FC<ErixEditorProviderProps> = ({
         shortcutsEnabled,
         isApiValid,
         isApiValidating,
+        apiErrorCode,
+        retryValidation,
         toolbarStyle,
       }}
     >
@@ -657,7 +700,7 @@ export const ErixEditorProvider: React.FC<ErixEditorProviderProps> = ({
           {/* Iframe & Menu Container */}
           <div
             ref={menuContainerRef}
-            className="erix-relative erix-flex-1 erix-w-full erix-h-full erix-overflow-hidden"
+            className="erix-app erix-relative erix-flex erix-h-full erix-flex-col erix-overflow-hidden"
           >
             <iframe
               ref={iframeRef}

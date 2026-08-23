@@ -1,10 +1,12 @@
 import tailwindAnimate from "tailwindcss-animate";
+import plugin from "tailwindcss/plugin";
 
 /** @type {import('tailwindcss').Config} */
 export default {
   prefix: "erix-",
   content: ["./src/**/*.{js,ts,jsx,tsx}"],
-  darkMode: ["class"],
+  darkMode: ["selector", ".erix-app.dark"],
+  important: ".erix-app", // Increase specificity for all utilities
   theme: {
     extend: {
       colors: {
@@ -63,5 +65,18 @@ export default {
       },
     },
   },
-  plugins: [tailwindAnimate],
+  plugins: [
+    tailwindAnimate,
+    // Scope all Radix UI portal elements to erix-app
+    plugin(function ({ addBase }) {
+      addBase({
+        '[data-radix-popper-content-wrapper], [data-radix-portal]': {
+          '@apply erix-isolate': {},
+        },
+      });
+    }),
+  ],
+  corePlugins: {
+    preflight: false, // Disable global reset
+  },
 };

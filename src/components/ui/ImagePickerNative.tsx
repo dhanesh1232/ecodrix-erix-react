@@ -870,7 +870,7 @@ export const ImagePickerNative: React.FC<ImagePickerNativeProps> = ({
                 className={cn(
                   "erix-relative erix-flex erix-flex-col erix-items-center erix-justify-center erix-gap-3 erix-rounded-xl erix-border-2 erix-border-dashed erix-px-5 erix-py-7 erix-transition-all erix-duration-200",
                   dragActive
-                    ? "erix-border-primary erix-bg-primary/5 erix-scale-[1.005] erix-shadow-[0_0_0_4px_rgba(var(--primary),.08)]"
+                    ? "erix-border-primary erix-bg-primary/5 erix-scale-[1.005] erix-shadow-[0_0_0_4px_rgba(var(--erix-primary),.08)]"
                     : "erix-border-border/50 erix-bg-background/60 hover:erix-border-primary/50 hover:erix-bg-primary/[0.02]",
                   (isUploading || isOverQuota) &&
                     "erix-pointer-events-none erix-opacity-70",

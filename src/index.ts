@@ -4,6 +4,10 @@
 // ─── Styles ────────────────────────────────────────────────────────────────────
 import "./app/globals.css";
 
+// ─── Style Isolation Container ────────────────────────────────────────────────
+export { ErixContainer, useErixContainer } from "./components/ErixContainer";
+export type { ErixContainerProps } from "./components/ErixContainer";
+
 // ─── Platform Provider ─────────────────────────────────────────────────────────
 export { ErixProvider, useErix, useErixClient } from "./context/ErixProvider";
 export type { ErixProviderProps } from "./context/ErixProvider";
@@ -33,6 +37,11 @@ export {
   ToolbarChain,
   type ToolbarChainConfig,
 } from "./components/richtext/toolbar/ToolbarChain";
+export {
+  ResponsiveToolbar,
+  type ResponsiveToolbarProps,
+  type ResponsiveToolbarControl,
+} from "./components/toolbar";
 export type { ErixEditorProviderProps } from "./context/editor";
 export { useErixEditor } from "./context/editor";
 export { ErixChain } from "./core/chain";
@@ -239,6 +248,28 @@ export { ROLE_PERMISSION_MAP } from "./permissions/types";
 
 // ─── Event Bus ────────────────────────────────────────────────────────────────
 export { ErixEventBusProvider } from "./events/EventBusContext";
+
+// ─── Error Handling ───────────────────────────────────────────────────────────
+export {
+  ErrorHandler,
+  getDefaultErrorHandler,
+  resetDefaultErrorHandler,
+  ErrorLogger,
+  ErrorDisplay,
+  RecoveryManager,
+  ErrorType,
+  ErrorSeverity,
+  ErrorDisplayMode,
+  RecoveryStrategy,
+} from "./lib/errors";
+export type {
+  ErixError,
+  ErrorDisplayConfig,
+  ErrorLoggingConfig,
+  RecoveryConfig,
+  RecoveryResult,
+  ErrorHandlerConfig,
+} from "./lib/errors";
 export { useErixEvent } from "./events/useErixEvent";
 export { useErixEmit } from "./events/useErixEmit";
 export type { ErixEventMap, ErixEventName } from "./events/types";
@@ -290,3 +321,93 @@ export { ErixCheckoutButton } from "./components/checkout/ErixCheckoutButton";
 export { CheckoutModal } from "./components/checkout/CheckoutModal";
 export { useCheckout } from "./hooks/checkout/useCheckout";
 export type { CheckoutStep } from "./hooks/checkout/useCheckout";
+
+// ─── Mobile Detection & Optimization ──────────────────────────────────────────
+export {
+  MobileAdapter,
+  createMobileAdapter,
+  isMobile,
+  validateTouchTargetSize,
+  DEFAULT_MOBILE_CONFIG,
+  type MobileAdapterConfig,
+} from "./lib/mobile/MobileAdapter";
+export {
+  useMobileDetection,
+  useIsMobile,
+  useIsTouchDevice,
+  useViewportSize,
+} from "./lib/mobile/useMobileDetection";
+
+// ─── Accessibility Support ────────────────────────────────────────────────────
+export {
+  AccessibilityManager,
+  getAccessibilityManager,
+  resetAccessibilityManager,
+  type AccessibilityConfig,
+  type AnnouncementPriority,
+} from "./lib/accessibility/AccessibilityManager";
+export {
+  KeyboardNavigationHandler,
+  type KeyboardShortcut,
+  type KeyboardModifier,
+} from "./lib/accessibility/KeyboardNavigationHandler";
+export { FocusManager } from "./lib/accessibility/FocusManager";
+export { useAccessibility } from "./lib/accessibility/useAccessibility";
+
+// ─── Performance Monitoring ───────────────────────────────────────────────────
+export {
+  PerformanceMonitor,
+  getPerformanceMonitor,
+  resetPerformanceMonitor,
+  type PerformanceMetrics,
+  type PerformanceConfig,
+} from "./lib/performance/PerformanceMonitor";
+export {
+  usePerformance,
+  useMeasure,
+  useTypingLatency,
+  usePerformanceThresholds,
+  type UsePerformanceOptions,
+  type UsePerformanceReturn,
+} from "./lib/performance/usePerformance";
+
+// ─── Content Validation ───────────────────────────────────────────────────────
+export {
+  ValidationEngine,
+  type ValidationRule,
+  type ValidationRuleType,
+  type ValidationResult,
+  type ValidationError,
+  type ValidationContext,
+  type ValidationEngineConfig,
+  type ValidationEvent,
+  type ValidationEventType,
+  type ValidationListener,
+} from "./lib/validation";
+export {
+  createMaxLengthRule,
+  createMinLengthRule,
+  createRequiredRule,
+  createPatternRule,
+  createAllowedFormatsRule,
+  createCustomRule,
+  emailValidator,
+  urlValidator,
+  noHtmlValidator,
+  createWordCountValidator,
+  createProfanityValidator,
+  createUniqueValidator,
+  countWords,
+  countCharacters,
+  extractPlainText,
+  formatValidationErrors,
+} from "./lib/validation/validators";
+
+// ─── Content Processing ───────────────────────────────────────────────────────
+export {
+  PasteHandler,
+  type PasteHandlerConfig,
+  type LinkPreview,
+  type CodeBlock,
+  type ParsedContent,
+} from "./lib/content";

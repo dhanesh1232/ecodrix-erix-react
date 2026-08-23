@@ -437,7 +437,7 @@ export function KanbanBoard({
   if (!board) return null;
 
   return (
-    <div className="erix-flex erix-flex-col erix-flex-1 erix-min-h-0 erix-min-w-0">
+    <div className="erix-app erix-flex erix-flex-col erix-flex-1 erix-min-h-0 erix-min-w-0">
       {/* Board Toolbar */}
       <div className="erix-flex erix-items-center erix-justify-between erix-mb-3 erix-px-2">
         {/* Stats */}

@@ -274,8 +274,15 @@ const EditorContent: React.FC<EditorContentProps> = ({
   loader,
   onEngineReady,
 }) => {
-  const { aiVisible, setAiVisible, isApiValid, isApiValidating, engine } =
-    useErixEditor();
+  const {
+    aiVisible,
+    setAiVisible,
+    isApiValid,
+    isApiValidating,
+    apiErrorCode,
+    retryValidation,
+    engine,
+  } = useErixEditor();
 
   React.useEffect(() => {
     if (engine) {
@@ -283,8 +290,47 @@ const EditorContent: React.FC<EditorContentProps> = ({
     }
   }, [engine, onEngineReady]);
 
-  // API key is invalid — hard block with a clear error state
+  // API key is invalid — hard block with error-code-specific messages
   if (!isApiValidating && !isApiValid) {
+    const errorMessages: Record<
+      string,
+      { title: string; description: string }
+    > = {
+      INVALID_CREDENTIALS: {
+        title: "Invalid Credentials",
+        description:
+          "Your API key or client code is invalid. Check your credentials at console.ecodrix.com.",
+      },
+      ORG_INACTIVE: {
+        title: "Account Suspended",
+        description:
+          "Your organization account is suspended or terminated. Contact support.",
+      },
+      FEATURE_NOT_AVAILABLE: {
+        title: "Feature Unavailable",
+        description:
+          "Your current plan does not include editor access. Upgrade at console.ecodrix.com.",
+      },
+      KEY_EXPIRED: {
+        title: "API Key Expired",
+        description:
+          "Your API key has expired. Generate a new key at console.ecodrix.com.",
+      },
+      NETWORK_ERROR: {
+        title: "Connection Error",
+        description:
+          "Unable to connect to the validation service. Check your network connection.",
+      },
+    };
+
+    const errorInfo = apiErrorCode
+      ? (errorMessages[apiErrorCode] ?? errorMessages.INVALID_CREDENTIALS)
+      : {
+          title: "Invalid API Key",
+          description:
+            "Your Erix API key is invalid or has expired. Check your credentials at console.ecodrix.com.",
+        };
+
     return (
       <div className="erix-flex-1 erix-flex erix-flex-col erix-items-center erix-justify-center erix-gap-2 erix-bg-destructive/5 erix-text-destructive erix-p-8 erix-text-center">
         <svg
@@ -304,12 +350,20 @@ const EditorContent: React.FC<EditorContentProps> = ({
           <line x1="12" y1="16" x2="12.01" y2="16" />
         </svg>
         <h3 className="erix-font-bold erix-text-base erix-mt-1">
-          Invalid API Key
+          {errorInfo.title}
         </h3>
         <p className="erix-text-sm erix-opacity-80 erix-max-w-xs">
-          Your Erix API key is invalid or has expired. Check your credentials at{" "}
-          <span className="erix-font-medium">console.ecodrix.com</span>.
+          {errorInfo.description}
         </p>
+        {apiErrorCode === "NETWORK_ERROR" && (
+          <button
+            type="button"
+            onClick={retryValidation}
+            className="erix-mt-2 erix-px-4 erix-py-1.5 erix-text-sm erix-font-medium erix-rounded-md erix-bg-primary erix-text-primary-foreground hover:erix-opacity-90 erix-transition-opacity"
+          >
+            Retry
+          </button>
+        )}
       </div>
     );
   }

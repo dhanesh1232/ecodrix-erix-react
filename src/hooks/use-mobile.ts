@@ -2,6 +2,10 @@
 
 import * as React from "react";
 
+/**
+ * @deprecated Use `useIsMobile` from '@ecodrix/erix-react/lib/mobile' instead
+ * This hook is kept for backward compatibility
+ */
 export function useIsMobile(breakpoint = 768) {
   const [isMobile, setIsMobile] = React.useState<boolean | undefined>(
     undefined,

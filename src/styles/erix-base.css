@@ -1,0 +1,305 @@
+/* Scoped Base Styles - Only applied within .erix-app container */
+/* This replaces Tailwind's preflight but scoped to our components */
+
+.erix-app {
+  /* Base typography and layout */
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+  -moz-tab-size: 4;
+  tab-size: 4;
+  font-family:
+    ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
+    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  
+  /* Isolation context */
+  isolation: isolate;
+  position: relative;
+}
+
+.erix-app *,
+.erix-app ::before,
+.erix-app ::after {
+  box-sizing: border-box;
+  border-width: 0;
+  border-style: solid;
+  border-color: hsl(var(--erix-border));
+}
+
+/* Typography resets - scoped */
+.erix-app hr {
+  height: 0;
+  color: inherit;
+  border-top-width: 1px;
+}
+
+.erix-app abbr:where([title]) {
+  text-decoration: underline dotted;
+}
+
+.erix-app h1,
+.erix-app h2,
+.erix-app h3,
+.erix-app h4,
+.erix-app h5,
+.erix-app h6 {
+  font-size: inherit;
+  font-weight: inherit;
+  margin: 0;
+}
+
+.erix-app a {
+  color: inherit;
+  text-decoration: inherit;
+}
+
+.erix-app b,
+.erix-app strong {
+  font-weight: bolder;
+}
+
+.erix-app code,
+.erix-app kbd,
+.erix-app samp,
+.erix-app pre {
+  font-family:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
+  font-size: 1em;
+}
+
+.erix-app small {
+  font-size: 80%;
+}
+
+.erix-app sub,
+.erix-app sup {
+  font-size: 75%;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+
+.erix-app sub {
+  bottom: -0.25em;
+}
+
+.erix-app sup {
+  top: -0.5em;
+}
+
+.erix-app table {
+  text-indent: 0;
+  border-color: inherit;
+  border-collapse: collapse;
+}
+
+/* Form elements - scoped */
+.erix-app button,
+.erix-app input,
+.erix-app optgroup,
+.erix-app select,
+.erix-app textarea {
+  font-family: inherit;
+  font-size: 100%;
+  font-weight: inherit;
+  line-height: inherit;
+  color: inherit;
+  margin: 0;
+  padding: 0;
+}
+
+.erix-app button,
+.erix-app select {
+  text-transform: none;
+}
+
+.erix-app button,
+.erix-app [type="button"],
+.erix-app [type="reset"],
+.erix-app [type="submit"] {
+  -webkit-appearance: button;
+  background-color: transparent;
+  background-image: none;
+}
+
+.erix-app :-moz-focusring {
+  outline: auto;
+}
+
+.erix-app :-moz-ui-invalid {
+  box-shadow: none;
+}
+
+.erix-app progress {
+  vertical-align: baseline;
+}
+
+.erix-app ::-webkit-inner-spin-button,
+.erix-app ::-webkit-outer-spin-button {
+  height: auto;
+}
+
+.erix-app [type="search"] {
+  -webkit-appearance: textfield;
+  outline-offset: -2px;
+}
+
+.erix-app ::-webkit-search-decoration {
+  -webkit-appearance: none;
+}
+
+.erix-app ::-webkit-file-upload-button {
+  -webkit-appearance: button;
+  font: inherit;
+}
+
+.erix-app summary {
+  display: list-item;
+}
+
+/* Spacing resets - scoped */
+.erix-app blockquote,
+.erix-app dl,
+.erix-app dd,
+.erix-app h1,
+.erix-app h2,
+.erix-app h3,
+.erix-app h4,
+.erix-app h5,
+.erix-app h6,
+.erix-app hr,
+.erix-app figure,
+.erix-app p,
+.erix-app pre {
+  margin: 0;
+}
+
+.erix-app fieldset {
+  margin: 0;
+  padding: 0;
+}
+
+.erix-app legend {
+  padding: 0;
+}
+
+.erix-app ol,
+.erix-app ul,
+.erix-app menu {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.erix-app textarea {
+  resize: vertical;
+}
+
+.erix-app input::placeholder,
+.erix-app textarea::placeholder {
+  opacity: 1;
+  color: hsl(var(--erix-muted-foreground));
+}
+
+.erix-app button,
+.erix-app [role="button"] {
+  cursor: pointer;
+}
+
+.erix-app :disabled {
+  cursor: default;
+}
+
+/* Media elements - scoped */
+.erix-app img,
+.erix-app svg,
+.erix-app video,
+.erix-app canvas,
+.erix-app audio,
+.erix-app iframe,
+.erix-app embed,
+.erix-app object {
+  display: block;
+  vertical-align: middle;
+}
+
+.erix-app img,
+.erix-app video {
+  max-width: 100%;
+  height: auto;
+}
+
+.erix-app [hidden] {
+  display: none;
+}
+
+/* Scrollbar styling - scoped to .erix-app */
+.erix-app,
+.erix-app * {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--erix-muted-foreground) / 0.2) transparent;
+}
+
+.erix-app *::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.erix-app *::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 4px;
+}
+
+.erix-app *::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--erix-muted-foreground) / 0.2);
+  border-radius: 4px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+.erix-app *::-webkit-scrollbar-thumb:hover {
+  background-color: hsl(var(--erix-muted-foreground) / 0.4);
+}
+
+/* Custom Scrollbar Utilities */
+.erix-app .erix-scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--erix-muted-foreground) / 0.3) transparent;
+}
+
+.erix-app .erix-scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.erix-app .erix-scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.erix-app .erix-scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--erix-muted-foreground) / 0.3);
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background-clip: content-box;
+}
+
+.erix-app .erix-scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background-color: hsl(var(--erix-muted-foreground) / 0.5);
+}
+
+/* Animations - scoped */
+@keyframes erix-shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.erix-app .erix-shimmer {
+  animation: erix-shimmer 2s infinite;
+}
+
+/* Radix UI Portal isolation */
+[data-radix-portal] .erix-portal-content {
+  isolation: isolate;
+  z-index: 9999;
+}

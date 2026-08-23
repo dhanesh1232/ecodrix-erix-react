@@ -1,0 +1,391 @@
+/**
+ * Error Display Styles for ErixEditor
+ * Provides styling for toast notifications, inline errors, and modal dialogs
+ */
+
+/* Toast Container */
+.erix-error-toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 400px;
+  pointer-events: none;
+}
+
+/* Toast */
+.erix-error-toast {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 16px;
+  pointer-events: auto;
+  animation: erix-toast-enter 0.3s ease-out;
+  border-left: 4px solid #ef4444;
+}
+
+.erix-error-toast-content {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.erix-error-toast-icon {
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.erix-error-toast-message {
+  flex: 1;
+  min-width: 0;
+}
+
+.erix-error-toast-message strong {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: #1f2937;
+}
+
+.erix-error-toast-message p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.erix-error-toast-message small {
+  display: block;
+  margin-top: 4px;
+  color: #9ca3af;
+  font-size: 12px;
+}
+
+.erix-error-toast-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  line-height: 1;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  transition: color 0.2s;
+}
+
+.erix-error-toast-close:hover {
+  color: #6b7280;
+}
+
+.erix-error-toast-exit {
+  animation: erix-toast-exit 0.3s ease-in forwards;
+}
+
+/* Toast Animations */
+@keyframes erix-toast-enter {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes erix-toast-exit {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+}
+
+/* Modal Overlay */
+.erix-error-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10001;
+  padding: 20px;
+  animation: erix-modal-overlay-enter 0.2s ease-out;
+}
+
+.erix-error-modal-overlay.erix-error-modal-exit {
+  animation: erix-modal-overlay-exit 0.2s ease-in forwards;
+}
+
+/* Modal */
+.erix-error-modal {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  max-width: 500px;
+  width: 100%;
+  max-height: 90vh;
+  overflow: auto;
+  animation: erix-modal-enter 0.3s ease-out;
+}
+
+.erix-error-modal-overlay.erix-error-modal-exit .erix-error-modal {
+  animation: erix-modal-exit 0.2s ease-in forwards;
+}
+
+.erix-error-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.erix-error-modal-header h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.erix-error-modal-close {
+  background: none;
+  border: none;
+  font-size: 28px;
+  line-height: 1;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 0;
+  width: 28px;
+  height: 28px;
+  transition: color 0.2s;
+}
+
+.erix-error-modal-close:hover {
+  color: #6b7280;
+}
+
+.erix-error-modal-body {
+  padding: 24px;
+}
+
+.erix-error-modal-icon {
+  font-size: 48px;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.erix-error-modal-body p {
+  margin: 0 0 16px 0;
+  color: #6b7280;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.erix-error-modal-body p:last-child {
+  margin-bottom: 0;
+}
+
+.erix-error-details {
+  background: #f9fafb;
+  border-radius: 6px;
+  padding: 12px;
+  margin: 16px 0;
+  list-style: none;
+}
+
+.erix-error-details li {
+  padding: 4px 0;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.erix-error-details li strong {
+  color: #1f2937;
+}
+
+.erix-error-modal-footer {
+  padding: 16px 24px;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.erix-error-modal-button {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.erix-error-modal-button:hover {
+  background: #2563eb;
+}
+
+.erix-error-modal-button:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Modal Animations */
+@keyframes erix-modal-overlay-enter {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes erix-modal-overlay-exit {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes erix-modal-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes erix-modal-exit {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.95) translateY(-20px);
+  }
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .erix-error-toast-container {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+    max-width: none;
+  }
+
+  .erix-error-modal {
+    margin: 0;
+    border-radius: 12px 12px 0 0;
+    max-height: 80vh;
+  }
+
+  .erix-error-modal-overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .erix-error-toast {
+    background: #1f2937;
+    border-left-color: #ef4444;
+  }
+
+  .erix-error-toast-message strong {
+    color: #f9fafb;
+  }
+
+  .erix-error-toast-message p {
+    color: #d1d5db;
+  }
+
+  .erix-error-toast-message small {
+    color: #9ca3af;
+  }
+
+  .erix-error-modal {
+    background: #1f2937;
+  }
+
+  .erix-error-modal-header {
+    border-bottom-color: #374151;
+  }
+
+  .erix-error-modal-header h2 {
+    color: #f9fafb;
+  }
+
+  .erix-error-modal-body p {
+    color: #d1d5db;
+  }
+
+  .erix-error-details {
+    background: #111827;
+  }
+
+  .erix-error-details li {
+    color: #d1d5db;
+  }
+
+  .erix-error-details li strong {
+    color: #f9fafb;
+  }
+
+  .erix-error-modal-footer {
+    border-top-color: #374151;
+  }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+  .erix-error-toast {
+    border: 2px solid #ef4444;
+  }
+
+  .erix-error-modal {
+    border: 2px solid #3b82f6;
+  }
+
+  .erix-error-modal-button:focus {
+    outline-width: 3px;
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .erix-error-toast,
+  .erix-error-modal-overlay,
+  .erix-error-modal {
+    animation: none;
+  }
+
+  .erix-error-toast-exit,
+  .erix-error-modal-overlay.erix-error-modal-exit,
+  .erix-error-modal-overlay.erix-error-modal-exit .erix-error-modal {
+    animation: none;
+    opacity: 0;
+  }
+}

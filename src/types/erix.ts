@@ -179,7 +179,11 @@ export interface ErixEngineConfig {
   apiKey?: string;
   format?: ErixOutputFormat;
   onReady?: () => void;
-  onUpdate?: (value: string, format: ErixOutputFormat, raw: ErixEvents["update"]) => void;
+  onUpdate?: (
+    value: string,
+    format: ErixOutputFormat,
+    raw: ErixEvents["update"],
+  ) => void;
   onContext?: (ctx: ErixContextState) => void;
   /**
    * Raw CSS string injected into the iframe document as a `<style>` block.

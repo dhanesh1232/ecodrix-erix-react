@@ -692,7 +692,7 @@ export function WhatsappInbox() {
   return (
     <div
       style={{ height: `calc(100dvh - ${headerHeight}px)` }}
-      className="erix-border-border erix-bg-card erix-flex erix-w-full erix-overflow-hidden erix-border erix-transition-all erix-duration-200"
+      className="erix-app erix-border-border erix-bg-card erix-flex erix-w-full erix-overflow-hidden erix-border erix-transition-all erix-duration-200"
     >
       <InboxSidebar
         conversations={conversations}

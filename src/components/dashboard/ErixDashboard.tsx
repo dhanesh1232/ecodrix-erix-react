@@ -501,7 +501,7 @@ export function ErixDashboard({
       )}
       {active === "meetings" && <MeetingList />}
       {active === "editor" && (
-        <div className="erix-flex erix-h-full erix-items-center erix-justify-center erix-text-muted-foreground">
+        <div className="erix-app erix-flex erix-h-full erix-w-full erix-flex-col erix-bg-background erix-text-foreground">
           <div className="erix-text-center">
             <FileText className="mx-auto erix-size-10 mb-3 erix-opacity-30" />
             <p className="erix-text-sm font-medium">Rich Text Editor</p>
