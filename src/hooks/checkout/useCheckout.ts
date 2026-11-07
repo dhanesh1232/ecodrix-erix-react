@@ -1,5 +1,13 @@
 "use client";
 
+// ponytail: targets the pre-v1 tenant-key buyer routes (/commerce/checkout/
+// session|coupon|verify|order), removed in checkout v1 (29 Oct 2026); this
+// package builds against the PUBLISHED @ecodrix/erix-api 1.3.x, which still
+// has those methods. The "Buy now" embed for shops with their own website is
+// "Later" in docs/modules/checkout.md — then move this hook + CheckoutModal to
+// `checkout.buyer.*` (public routes, client code, paise, consent, paymentUrl
+// redirect instead of a Razorpay order) after the next SDK publish.
+
 import * as React from "react";
 import { useErixClient } from "@/context/ErixProvider";
 import type {
