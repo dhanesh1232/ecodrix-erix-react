@@ -1,10 +1,9 @@
 name: CI
 
+# Manual only (14 Nov 2026): stopped running on every push/PR to save Actions minutes.
+# Run it from the Actions tab before a risky release; tests also run locally before each commit.
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+  workflow_dispatch:
 
 jobs:
   build:
